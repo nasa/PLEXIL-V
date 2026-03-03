@@ -1,0 +1,289 @@
+***( Unit Tests for Variable-Based LookupOnChange
+
+  Tests the complete implementation of lookupOnChange with variable-based
+  lookup names (where the lookup name is stored in a variable that can
+  change at runtime).
+
+  KEY FEATURES TESTED:
+    1. Cache creation for variable-based lookupOnChange
+    2. Cache ID counting and assignment
+    3. Cache ID embedding in expressions
+    4. Variable name qualification in stateName
+    5. stateName evaluation and change detection
+    6. Cache reset when lookup name changes
+
+  Related to lookup6 acceptance test fix.
+)***
+
+mod TEST--COMPILER--VARIABLE-LOOKUP is
+
+pr TEST-BASE .
+
+op test--compiler--variable-lookup : -> TestResults .
+eq test--compiler--variable-lookup =
+    test--variable-lookup--cache-creation
+    + test--variable-lookup--cache-counting
+    + test--variable-lookup--cache-id-embedding
+    + test--variable-lookup--stateName-sanitization
+    .
+
+---( Cache Creation Tests )---
+
+op test--variable-lookup--cache-creation : -> TestResults .
+eq test--variable-lookup--cache-creation =
+begin tests
+
+    assert "collectLookupCaches creates cache for variable-based lookupOnChange" from
+        testConfiguration(
+            collectLookupCaches(
+                assignment('Child, nilocdecl, none,
+                    var('X) := lookupOnChange(var('stateName), nilpar, val(1))),
+                'Root,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: var('stateName),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches handles variable lookup with parameters" from
+        testConfiguration(
+            collectLookupCaches(
+                assignment('Child, nilocdecl, none,
+                    var('X) := lookupOnChange(var('stateName), var('Y), val(1))),
+                'Root,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: var('stateName),
+                prevStateName: unknown,
+                args: var('Y),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches handles both constant and variable lookup forms" from
+        testConfiguration(
+            collectLookupCaches(
+                list('Root, nilocdecl, none,
+                    assignment('Child1, nilocdecl,
+                        startc: lookupOnChange('state1, nilpar, val(1)),
+                        var('X) := const(val(0)))
+                    assignment('Child2, nilocdecl,
+                        startc: lookupOnChange(var('dynamicState), nilpar, val(2)),
+                        var('Y) := const(val(0)))),
+                nilq,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state1")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child1 . 'Root >
+            < cache(1) : lookup-cache |
+                stateName: var('dynamicState),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(2),
+                cachedValue: unknown,
+                nodeContext: 'Child2 . 'Root >
+        )
+    end
+
+end tests
+.
+
+---( Cache Counting Tests )---
+
+op test--variable-lookup--cache-counting : -> TestResults .
+eq test--variable-lookup--cache-counting =
+begin tests
+
+    assert "countCachesInExpr counts variable-based lookupOnChange" from
+        testNat(
+            countCachesInExpr(lookupOnChange(var('stateName), nilpar, val(1)))
+        )
+    reaches
+        testNat(1)
+    end
+
+    assert "countCachesInExpr counts both forms in complex expression" from
+        testNat(
+            countCachesInExpr(
+                lookupOnChange('state1, nilpar, val(1)) +
+                lookupOnChange(var('stateName), nilpar, val(2))
+            )
+        )
+    reaches
+        testNat(2)
+    end
+
+    assert "countCachesInExpr counts multiple variable lookups" from
+        testNat(
+            countCachesInExpr(
+                lookupOnChange(var('state1), nilpar, val(1)) +
+                lookupOnChange(var('state2), var('X), val(2))
+            )
+        )
+    reaches
+        testNat(2)
+    end
+
+end tests
+.
+
+---( Cache ID Embedding Tests )---
+
+op test--variable-lookup--cache-id-embedding : -> TestResults .
+eq test--variable-lookup--cache-id-embedding =
+begin tests
+
+    assert "embedCacheIdsInExpr adds cache ID to variable-based lookupOnChange" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange(var('stateName), nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, var('stateName), nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr adds cache ID with parameters" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange(var('stateName), var('X), val(1)),
+                5
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(5, var('stateName), var('X), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr adds IDs to both forms in expression" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('state1, nilpar, val(1)) +
+                lookupOnChange(var('state2), nilpar, val(2)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'state1, nilpar, val(1)) +
+            lookupOnChange(1, var('state2), nilpar, val(2))
+        )
+    end
+
+    assert "embedCacheIdsInExpr works in nested expressions" from
+        testExpression(
+            embedCacheIdsInExpr(
+                not isKnown(lookupOnChange(var('stateName), nilpar, val(0))),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            not isKnown(lookupOnChange(0, var('stateName), nilpar, val(0)))
+        )
+    end
+
+end tests
+.
+
+---( stateName Sanitization Tests )---
+
+op test--variable-lookup--stateName-sanitization : -> TestResults .
+eq test--variable-lookup--stateName-sanitization =
+begin tests
+
+    assert "sanitizeIdsInCacheAttrs qualifies variable in stateName" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: lookup(var('stateName), nilpar),
+                prevStateName: unknown,
+                args: nilpar,
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'stateName . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: lookup(var('stateName . 'Child . 'Root), nilpar),
+            prevStateName: unknown,
+            args: nilpar
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs handles both stateName and args" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: lookup(var('lookupName), nilpar),
+                prevStateName: unknown,
+                args: var('param),
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'lookupName . 'Child . 'Root : memory | none >
+                < 'param . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: lookup(var('lookupName . 'Child . 'Root), nilpar),
+            prevStateName: unknown,
+            args: var('param . 'Child . 'Root)
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs preserves constant stateName" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: lookup('constantName, nilpar),
+                prevStateName: unknown,
+                args: nilpar,
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: lookup('constantName, nilpar),
+            prevStateName: unknown,
+            args: nilpar
+        )
+    end
+
+end tests
+.
+
+endm

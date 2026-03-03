@@ -7,6 +7,9 @@ eq test--compiler--id-sanitizer =
     test--id-sanitizer--on-expressions
     + test--id-sanitizer--on-pairs
     + test--id-sanitizer--on-attributes
+    + test--id-sanitizer--on-memory
+    + test--id-sanitizer--on-cache-attrs
+    + test--collectLookupCaches--with-context
     + test--getFullyQualifiedVariableId
     + test--getFullyQualifiedNodeId
     .
@@ -610,6 +613,34 @@ begin tests
         )
     end
 
+    assert "A `lookupOnChange` with embedded cache ID sanitizes args but preserves cache ID" from
+        testExpression(
+            sanitizeIds(
+                lookupOnChange(5, 'state, var(V), val(1)),
+                Q,
+                Cfg
+            )
+        )
+        reaches
+        testExpression(
+            lookupOnChange(5, 'state, var(QV), val(1))
+        )
+    end
+
+    assert "A `lookupOnChange` with variable stateName and embedded cache ID sanitizes both" from
+        testExpression(
+            sanitizeIds(
+                lookupOnChange(10, var(V), var(W), val(2)),
+                Q,
+                Cfg
+            )
+        )
+        reaches
+        testExpression(
+            lookupOnChange(10, var(QV), var(QW), val(2))
+        )
+    end
+
     assert "A `hasPostconditionFailed?` expression with qualified id computes its fully qualified node id" from
         testExpression(
             sanitizeIds(
@@ -724,6 +755,507 @@ if
     /\ QW  := 'W . 'B . 'A
 .
 
+
+op test--id-sanitizer--on-memory : -> TestResults .
+eq test--id-sanitizer--on-memory =
+begin tests
+
+    assert "sanitizeIdsInMemory preserves regular memory objects unchanged" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < 'X . 'A : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >,
+                < 'A : list | none >
+                < 'X . 'A : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >
+            )
+        )
+    reaches
+        testConfiguration(
+            < 'X . 'A : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >
+        )
+    end
+
+    assert "sanitizeIdsInMemory sanitizes cache args with simple variable reference" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < cache(0) : lookup-cache |
+                    stateName: const(val("time")), prevStateName: unknown,
+                    args: var('X),
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child . 'Root >,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("time")), prevStateName: unknown,
+                args: var('X . 'Child . 'Root),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "sanitizeIdsInMemory sanitizes cache args with nilpar" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < cache(0) : lookup-cache |
+                    stateName: const(val("time")), prevStateName: unknown,
+                    args: nilpar,
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child . 'Root >,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("time")), prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "sanitizeIdsInMemory sanitizes cache args with multiple parameters" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < cache(0) : lookup-cache |
+                    stateName: const(val("state")), prevStateName: unknown,
+                    args: var('X) var('Y),
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child . 'Root >,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+                < 'Y . 'Root : memory | none >
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state")), prevStateName: unknown,
+                args: var('X . 'Child . 'Root) var('Y . 'Root),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "sanitizeIdsInMemory handles multiple cache objects" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < cache(0) : lookup-cache |
+                    stateName: const(val("time")), prevStateName: unknown,
+                    args: var('X),
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child1 . 'Root >
+                < cache(1) : lookup-cache |
+                    stateName: const(val("time")), prevStateName: unknown,
+                    args: var('Y),
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child2 . 'Root >,
+                < 'Root : list | none >
+                < 'Child1 . 'Root : command | none >
+                < 'Child2 . 'Root : command | none >
+                < 'X . 'Child1 . 'Root : memory | none >
+                < 'Y . 'Child2 . 'Root : memory | none >
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("time")), prevStateName: unknown,
+                args: var('X . 'Child1 . 'Root),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child1 . 'Root >
+            < cache(1) : lookup-cache |
+                stateName: const(val("time")), prevStateName: unknown,
+                args: var('Y . 'Child2 . 'Root),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child2 . 'Root >
+        )
+    end
+
+    assert "sanitizeIdsInMemory handles cache objects mixed with memory objects" from
+        testConfiguration(
+            sanitizeIdsInMemory(
+                < 'Z . 'Root : memory | initVal: val(0), actVal: val(0), prevVal: val(0) >
+                < cache(0) : lookup-cache |
+                    stateName: const(val("time")), prevStateName: unknown,
+                    args: var('X),
+                    prevArgs: nilarg,
+                    tolerance: val(1),
+                    cachedValue: unknown,
+                    nodeContext: 'Child . 'Root >
+                < 'W . 'Child . 'Root : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+                < 'Z . 'Root : memory | initVal: val(0), actVal: val(0), prevVal: val(0) >
+                < 'W . 'Child . 'Root : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >
+            )
+        )
+    reaches
+        testConfiguration(
+            < 'Z . 'Root : memory | initVal: val(0), actVal: val(0), prevVal: val(0) >
+            < cache(0) : lookup-cache |
+                stateName: const(val("time")), prevStateName: unknown,
+                args: var('X . 'Child . 'Root),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+            < 'W . 'Child . 'Root : memory | initVal: val(1), actVal: val(1), prevVal: val(1) >
+        )
+    end
+
+end tests
+.
+
+op test--id-sanitizer--on-cache-attrs : -> TestResults .
+eq test--id-sanitizer--on-cache-attrs =
+begin tests
+
+    assert "sanitizeIdsInCacheAttrs sanitizes args attribute" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                args: var('X),
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            args: var('X . 'Child . 'Root)
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs preserves non-args attributes" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: const(val("time")), prevStateName: unknown,
+                prevArgs: val(1),
+                tolerance: val(1),
+                cachedValue: unknown,
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: const(val("time")), prevStateName: unknown,
+            prevArgs: val(1),
+            tolerance: val(1),
+            cachedValue: unknown
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs sanitizes args with multiple variables" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                args: var('X) var('Y),
+                stateName: const(val("state")), prevStateName: unknown,
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+                < 'Y . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            args: var('X . 'Child . 'Root) var('Y . 'Root),
+            stateName: const(val("state")), prevStateName: unknown
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs handles complex expressions in args" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                args: var('X) + const(val(1)),
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            args: var('X . 'Child . 'Root) + const(val(1))
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs sanitizes stateName when it's a variable expression" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: var('lookupName),
+                args: nilpar,
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'lookupName . 'Child . 'Root : memory | actVal: val("sensor") >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: var('lookupName . 'Child . 'Root),
+            args: nilpar
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs sanitizes both stateName and args" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                stateName: var('nameVar),
+                args: var('argVar),
+                'Node . 'Root,
+                < 'Root : list | none >
+                < 'Node . 'Root : command | none >
+                < 'nameVar . 'Node . 'Root : memory | actVal: val("state") >
+                < 'argVar . 'Node . 'Root : memory | actVal: val(10) >
+            )
+        )
+    reaches
+        testAttributes(
+            stateName: var('nameVar . 'Node . 'Root),
+            args: var('argVar . 'Node . 'Root)
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs handles nested lookupOnChange in args" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                args: lookupOnChange(0, 'time, nilpar, val(1)),
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+            )
+        )
+    reaches
+        testAttributes(
+            args: lookupOnChange(0, 'time, nilpar, val(1))
+        )
+    end
+
+    assert "sanitizeIdsInCacheAttrs preserves cache ID (Nat) in nested lookupOnChange" from
+        testAttributes(
+            sanitizeIdsInCacheAttrs(
+                args: lookupOnChange(5, 'state, var('X), val(1)),
+                'Child . 'Root,
+                < 'Root : list | none >
+                < 'Child . 'Root : command | none >
+                < 'X . 'Child . 'Root : memory | none >
+            )
+        )
+    reaches
+        testAttributes(
+            args: lookupOnChange(5, 'state, var('X . 'Child . 'Root), val(1))
+        )
+    end
+
+end tests
+.
+
+op test--collectLookupCaches--with-context : -> TestResults .
+eq test--collectLookupCaches--with-context =
+begin tests
+
+    assert "collectLookupCaches stores nodeContext in cache object" from
+        testConfiguration(
+            collectLookupCaches(
+                assignment('Child, nilocdecl, none,
+                    var('X) := lookupOnChange('state, var('Y), val(1))),
+                'Root,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state")),
+                prevStateName: unknown,
+                args: var('Y),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches assigns sequential cache IDs with correct contexts" from
+        testConfiguration(
+            collectLookupCaches(
+                list('Root, nilocdecl, none,
+                    assignment('Child1, nilocdecl,
+                        startc: lookupOnChange('state1, nilpar, val(1)),
+                        var('X) := const(val(0)))
+                    assignment('Child2, nilocdecl,
+                        startc: lookupOnChange('state2, nilpar, val(2)),
+                        var('Y) := const(val(0)))),
+                nilq,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state1")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child1 . 'Root >
+            < cache(1) : lookup-cache |
+                stateName: const(val("state2")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(2),
+                cachedValue: unknown,
+                nodeContext: 'Child2 . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches handles nested nodes with correct contexts" from
+        testConfiguration(
+            collectLookupCaches(
+                list('Root, nilocdecl, none,
+                    list('Parent, nilocdecl, none,
+                        assignment('Child, nilocdecl,
+                            startc: lookupOnChange('state, var('Z), val(1)),
+                            var('X) := const(val(0))))),
+                nilq,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state")),
+                prevStateName: unknown,
+                args: var('Z),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Parent . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches handles lookupOnChange in multiple conditions" from
+        testConfiguration(
+            collectLookupCaches(
+                assignment('Child, nilocdecl,
+                    ( startc: lookupOnChange('state1, nilpar, val(1)),
+                      endc: lookupOnChange('state2, nilpar, val(2))),
+                    var('X) := const(val(0))),
+                'Root,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state1")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+            < cache(1) : lookup-cache |
+                stateName: const(val("state2")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(2),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches handles lookupOnChange in update node pairs" from
+        testConfiguration(
+            collectLookupCaches(
+                update('Child, nilocdecl, none,
+                    < 'field1 ; lookupOnChange('state, var('X), val(1)) >
+                    < 'field2 ; const(val(0)) >),
+                'Root,
+                0
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(0) : lookup-cache |
+                stateName: const(val("state")),
+                prevStateName: unknown,
+                args: var('X),
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'Child . 'Root >
+        )
+    end
+
+    assert "collectLookupCaches correctly counts and assigns cache IDs" from
+        testConfiguration(
+            collectLookupCaches(
+                list('Root, nilocdecl, none,
+                    assignment('A, nilocdecl,
+                        startc: lookupOnChange('s1, nilpar, val(1)),
+                        var('X) := lookupOnChange('s2, nilpar, val(2)))),
+                nilq,
+                5
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(5) : lookup-cache |
+                stateName: const(val("s1")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(1),
+                cachedValue: unknown,
+                nodeContext: 'A . 'Root >
+            < cache(6) : lookup-cache |
+                stateName: const(val("s2")),
+                prevStateName: unknown,
+                args: nilpar,
+                prevArgs: nilarg,
+                tolerance: val(2),
+                cachedValue: unknown,
+                nodeContext: 'A . 'Root >
+        )
+    end
+
+end tests
+.
 
 op test--getFullyQualifiedVariableId : -> TestResults .
 ceq test--getFullyQualifiedVariableId =

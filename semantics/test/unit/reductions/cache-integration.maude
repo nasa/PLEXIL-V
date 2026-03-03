@@ -1,0 +1,193 @@
+***( Unit Tests for Cache Update Integration
+
+  Tests the cache update helper functions that support forward iteration:
+    1. Cache helper functions (hasCacheId, extractCacheFromMem, replaceCacheInMem)
+    2. Query environment function
+
+  Note: Full forward iteration and updateLookupCaches are tested via acceptance tests
+  (lookup1-lookup8) which verify the complete update cycle end-to-end, including
+  nested caches and dependency satisfaction.
+)***
+
+mod TEST--REDUCTIONS--CACHE-INTEGRATION is
+
+pr TEST-BASE .
+pr CACHE .
+
+op test--reductions--cache-integration : -> TestResults .
+eq test--reductions--cache-integration =
+    test--cache-helpers
+    + test--query-environment
+    .
+
+---( Cache Helper Function Tests )---
+
+op test--cache-helpers : -> TestResults .
+eq test--cache-helpers =
+begin tests
+
+    assert "hasCacheId returns true when cache exists" from
+        testBool(
+            hasCacheId(
+                < cache(0) : lookup-cache | stateName: const(val("time")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                0
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "hasCacheId returns false when cache does not exist" from
+        testBool(
+            hasCacheId(
+                < cache(0) : lookup-cache | stateName: const(val("time")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                5
+            )
+        )
+    reaches
+        testBool(false)
+    end
+
+    assert "extractCacheFromMem extracts correct cache object" from
+        testConfiguration(
+            extractCacheFromMem(
+                < cache(0) : lookup-cache | stateName: const(val("time")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                1
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+        )
+    end
+
+    assert "replaceCacheInMem replaces correct cache object" from
+        testConfiguration(
+            replaceCacheInMem(
+                < cache(0) : lookup-cache | stateName: const(val("time")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: val(0), nodeContext: 'Root >,
+                1,
+                < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: val(42), nodeContext: 'Root >
+            )
+        )
+    reaches
+        testConfiguration(
+            < cache(1) : lookup-cache | stateName: const(val("pos")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: val(42), nodeContext: 'Root >
+            < cache(0) : lookup-cache | stateName: const(val("time")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+        )
+    end
+
+    assert "hasCacheId with multiple caches - finds first" from
+        testBool(
+            hasCacheId(
+                < cache(0) : lookup-cache | stateName: const(val("a")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("b")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(2) : lookup-cache | stateName: const(val("c")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                0
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "hasCacheId with multiple caches - finds middle" from
+        testBool(
+            hasCacheId(
+                < cache(0) : lookup-cache | stateName: const(val("a")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("b")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(2) : lookup-cache | stateName: const(val("c")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                1
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "hasCacheId with multiple caches - finds last" from
+        testBool(
+            hasCacheId(
+                < cache(0) : lookup-cache | stateName: const(val("a")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(1) : lookup-cache | stateName: const(val("b")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >
+                < cache(2) : lookup-cache | stateName: const(val("c")), prevStateName: unknown, args: nilpar, prevArgs: nilarg, tolerance: val(1), cachedValue: unknown, nodeContext: 'Root >,
+                2
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+end tests
+.
+
+---( Query Environment Tests )---
+
+op test--query-environment : -> TestResults .
+eq test--query-environment =
+begin tests
+
+    assert "queryEnvironment finds lookup value with no arguments" from
+        testValue(
+            queryEnvironment(
+                ('time(nilarg) : val(100), 'pos(nilarg) : val(200)),
+                'time,
+                nilarg
+            )
+        )
+    reaches
+        testValue(val(100))
+    end
+
+    assert "queryEnvironment finds lookup value with arguments" from
+        testValue(
+            queryEnvironment(
+                ('sensor(nilarg) : val(50), 'data(val(10) val(20)) : val(999)),
+                'data,
+                val(10) val(20)
+            )
+        )
+    reaches
+        testValue(val(999))
+    end
+
+    assert "queryEnvironment returns unknown when not found" from
+        testValue(
+            queryEnvironment(
+                ('time(nilarg) : val(100)),
+                'missing,
+                nilarg
+            )
+        )
+    reaches
+        testValue(unknown)
+    end
+
+    assert "queryEnvironment returns unknown when arguments don't match" from
+        testValue(
+            queryEnvironment(
+                ('data(val(10) val(20)) : val(999)),
+                'data,
+                val(30) val(40)
+            )
+        )
+    reaches
+        testValue(unknown)
+    end
+
+    assert "queryEnvironment matches exact arguments" from
+        testValue(
+            queryEnvironment(
+                ('data(val(1)) : val(10), 'data(val(2)) : val(20), 'data(val(3)) : val(30)),
+                'data,
+                val(2)
+            )
+        )
+    reaches
+        testValue(val(20))
+    end
+
+end tests
+.
+
+endm

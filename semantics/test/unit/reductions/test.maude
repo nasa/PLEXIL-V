@@ -1,3 +1,6 @@
+in cache.maude
+in cache-update.maude
+in cache-integration.maude
 in micro.maude
 in macro.maude
 in reductions.maude
@@ -6,6 +9,9 @@ in values.maude
 
 mod TEST--REDUCTIONS is
 
+  pr TEST--REDUCTIONS--CACHE .
+  pr TEST--REDUCTIONS--CACHE-UPDATE .
+  pr TEST--REDUCTIONS--CACHE-INTEGRATION .
   pr TEST--REDUCTIONS--MICRO .
   pr TEST--REDUCTIONS--MACRO .
   pr TEST--REDUCTIONS--REDUCTIONS .
@@ -15,7 +21,10 @@ mod TEST--REDUCTIONS is
   op reductions--tests : -> TestResults .
 
   eq reductions--tests =
-    micro--reductions--tests
+    test--reductions--cache
+    + test--reductions--cache-update
+    + test--reductions--cache-integration
+    + micro--reductions--tests
     + test--reductions--macro
     + test--reductions--reductions
     + test--reductions--syncred

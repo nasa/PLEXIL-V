@@ -1,0 +1,163 @@
+***( Unit Tests for collectLookupCaches
+
+  Tests the collectLookupCaches function to ensure:
+  - Cache objects are created for lookupOnChange expressions
+  - No duplicate caches are generated for list nodes with multiple children
+  - Cache numbering is sequential and correct
+  - Caches in nested expressions are collected properly
+)***
+
+mod TEST--COMPILER--COLLECT-CACHES is
+  pr TEST-BASE .
+  pr COMPILER .
+
+  ---( Helper to count cache objects in configuration )---
+
+  op countCaches : Configuration -> Nat .
+  eq countCaches(none) = 0 .
+  eq countCaches(< cache(N) : lookup-cache | AS > Conf) = 1 + countCaches(Conf) .
+  eq countCaches(Conf) = 0 [owise] .
+
+  ---( Helper to check if cache with ID exists )---
+
+  op hasCacheId : Configuration Nat -> Bool .
+  eq hasCacheId(< cache(N:Nat) : lookup-cache | AS > Conf, N:Nat) = true .
+  eq hasCacheId(Conf, N:Nat) = false [owise] .
+
+  vars N : Nat .
+  vars AS : AttributeSet .
+  vars Conf : Configuration .
+
+  ---( Test Fixtures )---
+
+  --- Simple list node with lookupOnChange in repeat condition
+  op simpleListWithLookupOnChange : -> PlexilList .
+  eq simpleListWithLookupOnChange
+   = list('Parent,
+       nilocdecl,
+       repeatc: lookupOnChange('sensor, nilpar, val(0.5)),
+       empty('Child1, nilocdecl, none)
+       empty('Child2, nilocdecl, none)
+       empty('Child3, nilocdecl, none)
+     ) .
+
+  --- List node with multiple conditions containing lookupOnChange
+  op listWithMultipleLookups : -> PlexilList .
+  eq listWithMultipleLookups
+   = list('Parent,
+       nilocdecl,
+       repeatc: lookupOnChange('sensor1, nilpar, val(0.5)),
+       inv: lookupOnChange('sensor2, nilpar, val(1.0)),
+       empty('Child1, nilocdecl, none)
+       empty('Child2, nilocdecl, none)
+     ) .
+
+  --- Nested list nodes with lookupOnChange
+  op nestedListWithLookups : -> PlexilList .
+  eq nestedListWithLookups
+   = list('Outer,
+       nilocdecl,
+       repeatc: lookupOnChange('outerSensor, nilpar, val(1.0)),
+       list('Inner,
+         nilocdecl,
+         repeatc: lookupOnChange('innerSensor, nilpar, val(2.0)),
+         empty('Child1, nilocdecl, none)
+       )
+       empty('Child2, nilocdecl, none)
+     ) .
+
+  --- Assignment node with lookupOnChange in expression
+  op assignmentWithLookup : -> PlexilAssignment .
+  eq assignmentWithLookup
+   = assignment('AssignNode,
+       nilocdecl,
+       none,
+       var('x) := lookupOnChange('value, nilpar, val(5))
+     ) .
+
+  ---( Main Test Suite )---
+
+  op test--compiler--collect-caches : -> TestResults .
+  eq test--compiler--collect-caches =
+  begin tests
+
+    assert "Single lookupOnChange in list with 3 children - creates exactly 1 cache" from
+      aNat(countCaches(collectLookupCaches(simpleListWithLookupOnChange, nilq, 0)))
+    reaches
+      aNat(1)
+    end
+
+    assert "Single lookupOnChange - cache ID is 0" from
+      aBool(hasCacheId(collectLookupCaches(simpleListWithLookupOnChange, nilq, 0), 0))
+    reaches
+      aBool(true)
+    end
+
+    assert "List with 2 lookupOnChange expressions - creates exactly 2 caches" from
+      aNat(countCaches(collectLookupCaches(listWithMultipleLookups, nilq, 0)))
+    reaches
+      aNat(2)
+    end
+
+    assert "List with 2 lookupOnChange - has cache ID 0" from
+      aBool(hasCacheId(collectLookupCaches(listWithMultipleLookups, nilq, 0), 0))
+    reaches
+      aBool(true)
+    end
+
+    assert "List with 2 lookupOnChange - has cache ID 1" from
+      aBool(hasCacheId(collectLookupCaches(listWithMultipleLookups, nilq, 0), 1))
+    reaches
+      aBool(true)
+    end
+
+    assert "Nested lists with lookupOnChange - creates exactly 2 caches" from
+      aNat(countCaches(collectLookupCaches(nestedListWithLookups, nilq, 0)))
+    reaches
+      aNat(2)
+    end
+
+    assert "Nested lists - has cache ID 0" from
+      aBool(hasCacheId(collectLookupCaches(nestedListWithLookups, nilq, 0), 0))
+    reaches
+      aBool(true)
+    end
+
+    assert "Nested lists - has cache ID 1" from
+      aBool(hasCacheId(collectLookupCaches(nestedListWithLookups, nilq, 0), 1))
+    reaches
+      aBool(true)
+    end
+
+    assert "Assignment with lookupOnChange - creates exactly 1 cache" from
+      aNat(countCaches(collectLookupCaches(assignmentWithLookup, nilq, 0)))
+    reaches
+      aNat(1)
+    end
+
+    assert "Starting with N=5 - cache ID is 5" from
+      aBool(hasCacheId(collectLookupCaches(simpleListWithLookupOnChange, nilq, 5), 5))
+    reaches
+      aBool(true)
+    end
+
+    assert "Empty list - no caches created" from
+      aNat(countCaches(collectLookupCaches(list('Empty, nilocdecl, none, nil), nilq, 0)))
+    reaches
+      aNat(0)
+    end
+
+    assert "List without lookupOnChange - no caches created" from
+      aNat(countCaches(collectLookupCaches(
+        list('Parent, nilocdecl, none,
+          empty('Child1, nilocdecl, none)
+          empty('Child2, nilocdecl, none)
+        ), nilq, 0)))
+    reaches
+      aNat(0)
+    end
+
+  end tests
+  .
+
+endm

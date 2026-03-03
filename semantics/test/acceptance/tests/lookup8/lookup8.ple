@@ -1,0 +1,23 @@
+/*
+  Check that arguments of a LookupOnChange reset the cache to unknown.
+ */
+      Command pprint(...);
+Real  Lookup  externalVar(Real);
+Real  Lookup  time;
+
+lookup8: Sequence
+{
+  Exit node3.state == FINISHED && !isKnown(Lookup(externalVar(Lookup(time))));
+
+  node1: {
+  }
+
+  node2: {
+    Start Lookup(externalVar(Lookup(time))) == 0;
+    pprint("");
+  }
+
+  node3: {
+    pprint("");
+  }
+}

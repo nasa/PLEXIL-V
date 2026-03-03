@@ -1,0 +1,225 @@
+***( Unit Tests for Cache Update Logic
+
+  Tests the runtime cache update behavior, including:
+    1. stateName evaluation from Expression to NeQualified
+    2. stateName change detection
+    3. Cache reset when lookup name changes
+    4. Tolerance comparison (>= semantics)
+
+  Related to lookup6 acceptance test fix.
+)***
+
+mod TEST--REDUCTIONS--CACHE-UPDATE is
+
+pr TEST-BASE .
+pr CACHE .
+
+op test--reductions--cache-update : -> TestResults .
+eq test--reductions--cache-update =
+    test--cache--stateName-evaluation
+    + test--cache--stateName-change-detection
+    + test--cache--tolerance-comparison
+    .
+
+---( stateName Evaluation Tests )---
+
+op test--cache--stateName-evaluation : -> TestResults .
+eq test--cache--stateName-evaluation =
+begin tests
+
+    assert "evalStateNameToQualified extracts NeQualified from constant string" from
+        testQualifiedId(
+            evalStateNameToQualified(
+                mtenvironment,
+                none,
+                const(val("time"))
+            )
+        )
+    reaches
+        testQualifiedId('time)
+    end
+
+    assert "evalStateNameToQualified evaluates variable to get lookup name" from
+        testQualifiedId(
+            evalStateNameToQualified(
+                mtenvironment,
+                < 'stateName : memory | actVal: val("time") >,
+                var('stateName)
+            )
+        )
+    reaches
+        testQualifiedId('time)
+    end
+
+    assert "evalStateNameToQualified evaluates qualified variable" from
+        testQualifiedId(
+            evalStateNameToQualified(
+                mtenvironment,
+                < 'stateName . 'Node : memory | actVal: val("externalLookup") >,
+                var('stateName . 'Node)
+            )
+        )
+    reaches
+        testQualifiedId('externalLookup)
+    end
+
+end tests
+.
+
+---( stateName Change Detection Tests )---
+
+op test--cache--stateName-change-detection : -> TestResults .
+eq test--cache--stateName-change-detection =
+begin tests
+
+    assert "stateNameChanged returns false when both unknown" from
+        testBool(
+            stateNameChanged(unknown, unknown)
+        )
+    reaches
+        testBool(false)
+    end
+
+    assert "stateNameChanged returns false on first evaluation" from
+        testBool(
+            stateNameChanged(unknown, val("time"))
+        )
+    reaches
+        testBool(false)
+    end
+
+    assert "stateNameChanged returns false when stateName unchanged" from
+        testBool(
+            stateNameChanged(val("time"), val("time"))
+        )
+    reaches
+        testBool(false)
+    end
+
+    assert "stateNameChanged returns true when stateName changes" from
+        testBool(
+            stateNameChanged(val("time"), val("undefined-lookup"))
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "stateNameChanged detects change from known to different value" from
+        testBool(
+            stateNameChanged(val("oldName"), val("newName"))
+        )
+    reaches
+        testBool(true)
+    end
+
+end tests
+.
+
+---( Tolerance Comparison Tests )---
+
+op test--cache--tolerance-comparison : -> TestResults .
+eq test--cache--tolerance-comparison =
+begin tests
+
+    assert "shouldUpdate returns true when change equals tolerance (Float)" from
+        testBool(
+            shouldUpdate(
+                val(0.0),
+                val(1.0),
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "shouldUpdate returns true when change exceeds tolerance (Float)" from
+        testBool(
+            shouldUpdate(
+                val(0.0),
+                val(2.0),
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "shouldUpdate returns false when change below tolerance (Float)" from
+        testBool(
+            shouldUpdate(
+                val(0.0),
+                val(0.5),
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(false)
+    end
+
+    assert "shouldUpdate returns true when arguments change" from
+        testBool(
+            shouldUpdate(
+                val(1.0),
+                val(1.0),
+                val(1.0),
+                val(5),
+                val(4)
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "shouldUpdate handles Int/Float tolerance comparison" from
+        testBool(
+            shouldUpdate(
+                val(0),
+                val(1.0),
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "shouldUpdate establishes baseline when cache unknown" from
+        testBool(
+            shouldUpdate(
+                unknown,
+                val(1.0),
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(true)
+    end
+
+    assert "shouldUpdate returns false when both cache and env unknown" from
+        testBool(
+            shouldUpdate(
+                unknown,
+                unknown,
+                val(1.0),
+                nilarg,
+                nilarg
+            )
+        )
+    reaches
+        testBool(false)
+    end
+
+end tests
+.
+
+endm

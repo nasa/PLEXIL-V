@@ -1,0 +1,13 @@
+/*
+   Check that the tolerance distance of LookupOnChange is inclusive.
+ */
+Command pprint(...);
+Real Lookup time;
+
+lookup7: Concurrence
+{
+    StartCondition Lookup(time,1.0) > 0;
+    printer: {
+        pprint("lookup5: ", Lookup(time));
+    }
+}

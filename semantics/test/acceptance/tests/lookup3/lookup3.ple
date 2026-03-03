@@ -1,0 +1,24 @@
+/*
+    Check different LookupOnChange expressions in nested nodes.
+*/
+Command pprint(...);
+Real Lookup time;
+
+lookup3: Concurrence
+{
+    Repeat Lookup(time) < 12;
+
+    lookup3_1:
+    {
+        Start Lookup(time, 0.4) mod 12 > 10;
+    }
+
+    lookup3_2:
+    {
+        Start Lookup(time, 1) mod 12 > 10;
+    }
+
+    printer: {
+        pprint("");
+    }
+}

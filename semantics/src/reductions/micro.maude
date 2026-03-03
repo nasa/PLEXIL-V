@@ -1,6 +1,7 @@
 fmod MICRO is
   protecting ATOMIC .
   protecting SYNC-REDUCTION .
+  protecting CACHE .
 
   vars Act            : Operation     .
   vars St             : Config        .
@@ -67,10 +68,10 @@ fmod MICRO is
   eq executeTransitionsNoLog(St) = applyActions(St) .
 
   op microWithLog : Config -> Config .
-  eq microWithLog(Cfg) = executeTransitions(computeTransitions(Cfg)) .
+  eq microWithLog(Cfg) = executeTransitions(computeTransitions(updateLookupCaches(Cfg))) .
 
   op microNoLog : Config -> Config .
-  eq microNoLog(Cfg) = executeTransitionsNoLog(computeTransitions(Cfg)) .
+  eq microNoLog(Cfg) = executeTransitionsNoLog(computeTransitions(updateLookupCaches(Cfg))) .
 
   op micro : Config ~> Config .
  ceq micro(Cfg) = microWithLog(Cfg)

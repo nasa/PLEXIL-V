@@ -1,0 +1,20 @@
+/*
+   Check if the cache of LookupOnChange that receives as the lookup name a variable is reset when the variable name changes.
+ */
+Command pprint(...);
+Real Lookup time;
+
+lookup6: Concurrence
+{
+    String externalVariable = "time";
+    Exit !isKnown(Lookup((externalVariable)));
+    Repeat true;
+    printer: {
+        pprint("lookup5: ", Lookup(time));
+    }
+    updater: {
+        Start Lookup(time, 1) > 0;
+        externalVariable = "undefined-lookup";
+    }
+
+}

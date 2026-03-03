@@ -1,0 +1,185 @@
+----                                Cache Update Logic for LookupOnChange
+----
+
+fmod CACHE is
+  protecting EVAL .
+  protecting CONFIG .
+
+  --- Main cache update function
+  op updateLookupCaches : Config -> Config .
+  eq updateLookupCaches([ environment : Gamma ] [ nodes : Nodes ] [ memory : MEM ] Conf)
+   = [ environment : Gamma ] [ nodes : Nodes ] [ memory : updateCaches(Gamma, Nodes, MEM) ] Conf .
+  eq updateLookupCaches(Conf) = Conf [owise] .
+
+  --- Update all caches in memory (in numerical order by cache ID)
+  op updateCaches : Environment Configuration Configuration -> Configuration .
+  eq updateCaches(Gamma, Nodes, MEM)
+   = updateCachesFrom(Gamma, Nodes, MEM, MEM, 0) .
+
+  --- updateCachesFrom(Gamma, Nodes, OriginalMEM, CurrentMEM, NextID)
+  --- OriginalMEM: the full memory configuration (constant, for extracting caches)
+  --- CurrentMEM: the memory being built up with updated caches
+  --- NextID: the next cache ID to process
+  op updateCachesFrom : Environment Configuration Configuration Configuration Nat -> Configuration .
+
+  --- Try to update cache(N) if it exists in OriginalMEM
+  ceq updateCachesFrom(Gamma, Nodes, OriginalMEM, CurrentMEM, N)
+   = updateCachesFrom(Gamma, Nodes, OriginalMEM,
+                      replaceCacheInMem(CurrentMEM, N,
+                                       updateSingleCache(Gamma, Nodes CurrentMEM, extractCacheFromMem(OriginalMEM, N))),
+                      N + 1)
+   if hasCacheId(OriginalMEM, N) .
+
+  --- No more caches with this ID or higher - done
+  eq updateCachesFrom(Gamma, Nodes, OriginalMEM, CurrentMEM, N)
+   = CurrentMEM [owise] .
+
+  --- Check if memory has cache(N)
+  op hasCacheId : Configuration Nat -> Bool .
+  eq hasCacheId(< cache(N) : lookup-cache | AtS > MEM, N) = true .
+  eq hasCacheId(MEM, N) = false [owise] .
+
+  --- Extract cache(N) from memory (must exist)
+  op extractCacheFromMem : Configuration Nat -> Object .
+  eq extractCacheFromMem(< cache(N) : lookup-cache | AtS > MEM, N) = < cache(N) : lookup-cache | AtS > .
+
+  --- Replace cache(N) in memory with updated version
+  op replaceCacheInMem : Configuration Nat Object -> Configuration .
+  eq replaceCacheInMem(< cache(N) : lookup-cache | AtS > MEM, N, UpdatedCache)
+   = UpdatedCache MEM .
+
+  --- Update a single cache object (helper that computes all values)
+  op updateSingleCache : Environment Configuration Object -> Object .
+  eq updateSingleCache(Gamma, Nodes, < cache(N) : lookup-cache |
+                                        stateName: StateNameExpr,
+                                        prevStateName: PrevStateName,
+                                        args: Params,
+                                        prevArgs: PrevArgs,
+                                        tolerance: Tol,
+                                        cachedValue: CachedVal,
+                                        NA >)
+   = updateCacheWithValues(N, StateNameExpr, PrevStateName, Params, PrevArgs, Tol, CachedVal, NA,
+                            evalpar(Gamma, Nodes, Params),
+                            evalStateNameToQualified(Gamma, Nodes, StateNameExpr),
+                            Gamma) .
+
+  --- Evaluate stateName expression to get the actual NeQualified lookup name
+  op evalStateNameToQualified : Environment Configuration Expression -> NeQualified .
+  --- String constant case - extract string and convert to qualified identifier
+  eq evalStateNameToQualified(Gamma, Nodes, const(val(S:String)))
+   = qid(S:String) .
+  --- Variable case - evaluate to get string, then convert to qualified identifier
+  ceq evalStateNameToQualified(Gamma, Nodes, VE:VariableExpression)
+   = qid(S)
+   if const(val(S)) := eval(Gamma, Nodes, VE:VariableExpression) .
+
+  --- Perform cache update with computed values (now handles stateName changes)
+  op updateCacheWithValues : Nat Expression Value Parameters Arguments Value Value AttributeSet Arguments NeQualified Environment -> Object .
+  eq updateCacheWithValues(N, StateNameExpr, PrevStateName, Params, PrevArgs, Tol, CachedVal, NA, CurrentArgs, CurrentStateName, Gamma)
+   = < cache(N) : lookup-cache |
+       stateName: StateNameExpr,
+       prevStateName: val(string(CurrentStateName)),
+       args: Params,
+       prevArgs: if CurrentArgs == PrevArgs then PrevArgs else CurrentArgs fi,
+       tolerance: Tol,
+       cachedValue: if shouldUpdate(CachedVal, queryEnvironment(Gamma, CurrentStateName, CurrentArgs), Tol, CurrentArgs, PrevArgs) or stateNameChanged(PrevStateName, val(string(CurrentStateName)))
+                    then queryEnvironment(Gamma, CurrentStateName, CurrentArgs)
+                    else CachedVal fi,
+       NA > .
+
+  --- Check if stateName has changed (requires cache reset)
+  op stateNameChanged : Value Value -> Bool .
+  eq stateNameChanged(unknown, V) = false .  --- First evaluation, not a "change"
+  eq stateNameChanged(V, V) = false .        --- Same stateName
+  eq stateNameChanged(V, V') = true [owise] . --- Different stateName, reset cache!
+
+  --- Query environment for lookup value
+  op queryEnvironment : Environment NeQualified Arguments -> Value .
+  eq queryEnvironment((Q(Args) : V, Gamma), Q, Args) = V .
+  eq queryEnvironment(Gamma, Q, Args) = unknown [owise] .
+
+  --- Determine if cache should be updated
+  op shouldUpdate : Value Value Value Arguments Arguments -> Bool .
+
+  --- Arguments changed - always update
+  ceq shouldUpdate(CachedVal, EnvVal, Tol, CurrentArgs, PrevArgs) = true
+   if CurrentArgs =/= PrevArgs .
+
+  --- Cache is unknown - establish baseline
+  ceq shouldUpdate(unknown, EnvVal, Tol, Args, Args) = true
+   if EnvVal =/= unknown .
+
+  --- Signal lost (env became unknown)
+  --- ceq shouldUpdate(CachedVal, unknown, Tol, Args, Args) = true
+  ---  if CachedVal =/= unknown .
+
+  --- Both unknown - no update
+  eq shouldUpdate(unknown, unknown, Tol, Args, Args) = false .
+
+  --- Tolerance check for numeric values (Int/Int)
+  eq shouldUpdate(val(I:Int), val(I':Int), val(TolVal:Int), Args, Args)
+   = abs(I':Int - I:Int) >= TolVal:Int .
+
+  --- Tolerance check (Float/Float)
+  eq shouldUpdate(val(F:Float), val(F':Float), val(TolVal:Float), Args, Args)
+   = abs(F':Float - F:Float) >= TolVal:Float .
+
+  --- Tolerance check (Int/Float)
+  eq shouldUpdate(val(I:Int), val(F:Float), val(TolVal:Float), Args, Args)
+   = abs(F:Float - float(I:Int)) >= TolVal:Float .
+
+  --- Tolerance check (Float/Int)
+  eq shouldUpdate(val(F:Float), val(I:Int), val(TolVal:Float), Args, Args)
+   = abs(float(I:Int) - F:Float) >= TolVal:Float .
+
+  --- Tolerance check (Int/Int with Float tolerance)
+  eq shouldUpdate(val(I:Int), val(I':Int), val(TolVal:Float), Args, Args)
+   = abs(float(I':Int) - float(I:Int)) >= TolVal:Float .
+
+  --- Tolerance check (Float/Float with Int tolerance)
+  eq shouldUpdate(val(F:Float), val(F':Float), val(TolVal:Int), Args, Args)
+   = abs(F':Float - F:Float) >= float(TolVal:Int) .
+
+  --- Non-numeric values (Bool, String, arrays) - always update on change
+  --- Tolerance only applies to Int/Float, so any other value type should update
+  ceq shouldUpdate(CachedVal, EnvVal, Tol, Args, Args) = true
+   if CachedVal =/= EnvVal
+   and CachedVal =/= unknown
+   and EnvVal =/= unknown [owise] .
+
+  --- Within tolerance - no update
+  eq shouldUpdate(CachedVal, EnvVal, Tol, Args, Args) = false [owise] .
+
+  vars Gamma      : Environment .
+  vars Nodes      : Configuration .
+  vars MEM        : Configuration .
+  vars UpdatedMEM : Configuration .
+  vars OriginalMEM : Configuration .
+  vars CurrentMEM : Configuration .
+  vars UpdatedCache : Object .
+  vars Conf       : Config .
+  vars N M        : Nat .
+  vars TotalCaches : Nat .
+  vars Q          : NeQualified .
+  vars Cd         : Cid .
+  vars CurrentStateName : NeQualified .
+  vars Params     : Parameters .
+  vars Args       : Arguments .
+  vars CurrentArgs : Arguments .
+  vars PrevArgs   : Arguments .
+  vars NewPrevArgs : Arguments .
+  vars Tol        : Value .
+  vars CachedVal  : Value .
+  vars NewCachedVal : Value .
+  vars EnvVal     : Value .
+  vars V V'       : Value .
+  vars PrevStateName : Value .
+  vars NA         : AttributeSet .
+  vars AtS        : AttributeSet .
+  vars I I'       : Int .
+  vars F F'       : Float .
+  vars TolVal     : Nat .
+  vars StateNameExpr : Expression .
+  vars VE         : VariableExpression .
+  vars S          : String .
+endfm

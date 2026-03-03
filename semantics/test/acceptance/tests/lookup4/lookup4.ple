@@ -1,0 +1,53 @@
+/* lookup4:
+
+  Test if GAMMA state cache for Lookup with parameters have unique/per-argument
+  cache entries.
+
+  The plan:
+  - Creates a loop to iterate over the arguments 0 and 1 of the parametric Lookup `externalVar`.
+  - A variable counter and an assignment are used to track the Lookup argument.
+  - A couple of disjoint print commands are defined to execute whether the Lookup in their StartCondition is known or not.
+    NOTE: If one of the print commands is executed, the other is skipped so that they can synchronize with after the macro
+          step induced by the print command execution.
+  The script:
+  - Initializes only the Lookup instance externalVar(0) to -10.
+  - Keeps the Lookup instance externalVar(1) undefined.
+  - Ticks the time for 10,11,12, and 13.
+
+  Expected behavior:
+  - Output:
+    ```
+    [isKnownPrint] time:  10  argument counter:  0 externalVar:  -10
+    [isUnknownPrint] time:  11  argument counter:  1  externalVar:  [unknown_value]
+    [isKnownPrint] time:  12  argument counter:  0 externalVar:  -10
+    ```
+  - When the time ticks 13 the ExitCondition of the root should force all the nodes to transition towards FINISHED.
+
+  Conclusions:
+  - The executive keeps a cache entry per instance of parametric Lookups.
+
+ */
+        Command pprint(...);
+Real    Lookup  externalVar(Integer);
+Real    Lookup  time;
+
+lookup4: Concurrence
+{
+   Integer counter = 0;
+   Exit Lookup(time) > 12;
+
+   lookupOnChangePrint : Concurrence {
+      Repeat true;
+      counter = (counter + 1) mod 2;
+      isUnknownPrint: {
+        Start !isKnown(Lookup(externalVar(counter)));
+        Skip isKnownPrint.state == EXECUTING;
+        pprint("[isUnknownPrint] time: ", Lookup(time), " argument counter: ", counter, " externalVar: ", Lookup(externalVar(counter)));
+      }
+      isKnownPrint: {
+        Start isKnown(Lookup(externalVar(counter)));
+        Skip isUnknownPrint.state == EXECUTING;
+        pprint("[isKnownPrint] time: ", Lookup(time), " argument counter: ", counter, "externalVar: ", Lookup(externalVar(counter)));
+      }
+   }
+}

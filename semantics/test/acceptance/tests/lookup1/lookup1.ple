@@ -1,0 +1,18 @@
+/*
+   Check if LookupOnChange expressions with different tolerances are updated differently.
+*/
+Command pprint(...);
+Real Lookup time;
+
+lookup1: Concurrence
+{
+    lookup1_1:
+    {
+        Start Lookup(time, 0.6) > 12;
+    }
+
+    lookup1_2:
+    {
+        Start Lookup(time, 1) > 12;
+    }
+}

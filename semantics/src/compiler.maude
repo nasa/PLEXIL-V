@@ -18,15 +18,18 @@ fmod COMPILER is
   op compile : Plexil InputGenerator -> GlobalConfig .
   eq compile(PL,EG)
   = sanitizeIds(
-    stop |
-    [ generator : EG                  ]
-    [ environment : mtenvironment     ]
-    [ nodes : compileNodes(PL,nilq)   ]
-    [ memory : compileMemory(PL,nilq) ]
-    [ microacts : mtactions           ]
-    [ macroacts : mtactions           ]
-    [ interface : none                ]
-    [ trace : niltrace                ]
+      embedCacheIds(
+        stop |
+        [ generator : EG                  ]
+        [ environment : mtenvironment     ]
+        [ nodes : compileNodes(PL,nilq)   ]
+        [ memory : compileMemory(PL,nilq) collectLookupCaches(PL,nilq,0) ]
+        [ microacts : mtactions           ]
+        [ macroacts : mtactions           ]
+        [ interface : none                ]
+        [ trace : niltrace                ],
+        collectCacheMapping(PL,nilq,0)
+      )
   )
   .
 
@@ -84,13 +87,27 @@ fmod COMPILER is
       [ memory : MeM  ] Conf
     )
   =  [ nodes : sanitizeIds(Cfg,Cfg MeM) ]
-      [ memory : MeM ] Conf
+      [ memory : sanitizeIdsInMemory(MeM, Cfg MeM) ] Conf
   .
 
   op sanitizeIds : Configuration Configuration -> Configuration .
   eq sanitizeIds( < Q : Cls | AtS > Cfg, Cfg')
   = < Q : Cls | sanitizeIds(AtS, Q, Cfg') > sanitizeIds(Cfg,Cfg') [owise] .
   eq sanitizeIds(none, Cfg') = none [owise] .
+
+  op sanitizeIdsInMemory : Configuration Configuration -> Configuration .
+  eq sanitizeIdsInMemory(< cache(N) : lookup-cache | nodeContext: NQ, AtS > MeM, Cfg)
+  = < cache(N) : lookup-cache | nodeContext: NQ, sanitizeIdsInCacheAttrs(AtS, NQ, Cfg) > sanitizeIdsInMemory(MeM, Cfg) .
+  eq sanitizeIdsInMemory(< Q : Cls | AtS > MeM, Cfg)
+  = < Q : Cls | AtS > sanitizeIdsInMemory(MeM, Cfg) [owise] .
+  eq sanitizeIdsInMemory(none, Cfg) = none .
+
+  op sanitizeIdsInCacheAttrs : AttributeSet NeQualified Configuration -> AttributeSet .
+  eq sanitizeIdsInCacheAttrs((args: Ps, AtS), NQ, Cfg)
+  = (args: sanitizeIdsOnParams(Ps, NQ, Cfg), sanitizeIdsInCacheAttrs(AtS, NQ, Cfg)) .
+  eq sanitizeIdsInCacheAttrs((stateName: E, AtS), NQ, Cfg)
+  = (stateName: sanitizeIds(E, NQ, Cfg), sanitizeIdsInCacheAttrs(AtS, NQ, Cfg)) .
+  eq sanitizeIdsInCacheAttrs(AtS, NQ, Cfg) = AtS [owise] .
 
   op sanitizeIds : AttributeSet NeQualified Configuration -> Attribute .
   eq sanitizeIds((At,AtS), NQ, Cfg) = sanitizeIdsOnAttr(At, NQ, Cfg), sanitizeIds(AtS, NQ, Cfg) .
@@ -189,7 +206,11 @@ fmod COMPILER is
   eq sanitizeIds(const(varForwarding(I . Q))        , NQ, Cfg) = const(varForwarding(getFullyQualifiedVariableId(I, Q . NQ, Cfg))) .
   eq sanitizeIds(const(V)                           , NQ, Cfg) = const(V) [owise] .
   eq sanitizeIds(lookup(I,Params)                   , NQ, Cfg) = lookup(I,sanitizeIdsOnParams(Params,NQ,Cfg)) .
+  eq sanitizeIds(lookup(VE,Params)                  , NQ, Cfg) = lookup(sanitizeIds(VE,NQ,Cfg),sanitizeIdsOnParams(Params,NQ,Cfg)) .
   eq sanitizeIds(lookupOnChange(I,Params,V)         , NQ, Cfg) = lookupOnChange(I,sanitizeIdsOnParams(Params,NQ,Cfg),V) .
+  eq sanitizeIds(lookupOnChange(VE,Params,V)        , NQ, Cfg) = lookupOnChange(sanitizeIds(VE,NQ,Cfg),sanitizeIdsOnParams(Params,NQ,Cfg),V) .
+  eq sanitizeIds(lookupOnChange(N,I,Params,V)       , NQ, Cfg) = lookupOnChange(N,I,sanitizeIdsOnParams(Params,NQ,Cfg),V) .
+  eq sanitizeIds(lookupOnChange(N,VE,Params,V)      , NQ, Cfg) = lookupOnChange(N,sanitizeIds(VE,NQ,Cfg),sanitizeIdsOnParams(Params,NQ,Cfg),V) .
   eq sanitizeIds(timepoint(I . Q, Status, Timepoint), NQ, Cfg) = timepoint(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Status, Timepoint) .
 
   ceq sanitizeIds(E, NQ, Cfg) = Err:[Expression]
@@ -345,4 +366,309 @@ fmod COMPILER is
   vars Status Status' : Status .
   vars Timepoint      : Timepoint .
   vars V V'           : Value .
+  vars N N' M         : Nat .
+  vars F              : Function .
+
+  ********************************************************************************
+  ***
+  *** LookupOnChange Cache Collection
+  ***
+  *** Collect all lookupOnChange expressions and create cache objects
+  ***
+
+  --- Collect cache objects from plan
+  op collectLookupCaches : Plexil Qualified Nat -> Configuration .
+  eq collectLookupCaches(list(I, LD, (AtS), nil), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N) .
+  eq collectLookupCaches(list(I, LD, (AtS), (PL PLL)), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N)
+     collectLookupCaches(PL, (I . Q), nextCacheId(AtS, N))
+     collectLookupCachesFromChildren(PLL, I, LD, Q, nextCacheId(AtS, N) + countCachesInPlexil(PL)) .
+
+    --- Helper to collect caches from remaining children without re-processing parent attributes
+    op collectLookupCachesFromChildren : PlexilList Identifier LocalDecls Qualified Nat -> Configuration .
+    eq collectLookupCachesFromChildren(nil, I, LD, Q, N) = none .
+    eq collectLookupCachesFromChildren((PL PLL), I, LD, Q, N)
+     = collectLookupCaches(PL, (I . Q), N)
+       collectLookupCachesFromChildren(PLL, I, LD, Q, N + countCachesInPlexil(PL)) .
+
+  eq collectLookupCaches(library(I, LD, (AtS), callInfo(Callee:Identifier, IDs, Args:Parameters), PL), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N)
+     collectLookupCaches(PL, (I . Q), nextCacheId(AtS, N)) .
+  eq collectLookupCaches(command(I, LD, (AtS), C), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N) .
+  eq collectLookupCaches(assignment(I, LD, (AtS), AT := E), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N)
+     collectCachesFromExpr(E, I . Q, N + countCachesInAttrs(AtS)) .
+  eq collectLookupCaches(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N)
+     collectCachesFromPairs(PS:List{Pair{Qid,Expression}}, I . Q, N + countCachesInAttrs(AtS)) .
+  eq collectLookupCaches(empty(I, LD, AtS), Q, N)
+   = collectCachesFromAttrs(AtS, I . Q, N) .
+
+  --- Collect from attribute set (conditions)
+  op collectCachesFromAttrs : AttributeSet NeQualified Nat -> Configuration .
+  eq collectCachesFromAttrs((repeatc: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((startc: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((endc: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((exitc: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((post: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((skip: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((pre: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs((inv: E, AtS), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromAttrs(AtS, NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromAttrs(AtS, NQ, N) = none [owise] .
+
+  --- Collect from expression
+  op collectCachesFromExpr : Expression NeQualified Nat -> Configuration .
+  --- Constant lookup name (NeQualified) - convert to string constant expression
+  --- Depth-first numbering: nested caches get lower IDs, outer caches get higher IDs
+  eq collectCachesFromExpr(lookupOnChange(Q, Params, V), NQ, N)
+   = collectCachesFromParams(Params, NQ, N)
+     < cache(N + countCachesInParams(Params)) : lookup-cache |
+       stateName: const(val(string(Q))),
+       prevStateName: unknown,
+       args: Params,
+       prevArgs: nilarg,
+       tolerance: V,
+       cachedValue: unknown,
+       nodeContext: NQ > .
+  --- Variable lookup name (VariableExpression) - store variable directly
+  eq collectCachesFromExpr(lookupOnChange(VE:VariableExpression, Params, V), NQ, N)
+   = collectCachesFromParams(Params, NQ, N)
+     < cache(N + countCachesInParams(Params)) : lookup-cache |
+       stateName: VE:VariableExpression,
+       prevStateName: unknown,
+       args: Params,
+       prevArgs: nilarg,
+       tolerance: V,
+       cachedValue: unknown,
+       nodeContext: NQ > .
+  op collectCachesFromParams : Parameters NeQualified Nat -> Configuration .
+  eq collectCachesFromParams(nilpar, NQ, N) = none .
+  eq collectCachesFromParams((E Params), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromParams(Params, NQ, N + countCachesInExpr(E)) .
+
+  eq collectCachesFromExpr(E + E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E - E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E * E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E / E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E rem E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E max E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E min E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E < E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E > E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E <= E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E >= E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E equ E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E nequ E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E and E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(E or E', NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
+  eq collectCachesFromExpr(not E, NQ, N)
+   = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromExpr(isKnown(E), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromExpr(func(F:Function, E), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromExpr(E, NQ, N) = none [owise] .
+
+  --- Collect from pairs
+  op collectCachesFromPairs : List{Pair{Qid,Expression}} NeQualified Nat -> Configuration .
+  eq collectCachesFromPairs(nil, NQ, N) = none .
+  eq collectCachesFromPairs(< Q ; E > PAIRS, NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromPairs(PAIRS, NQ, N + countCachesInExpr(E)) .
+
+  --- Count caches in various structures (for ID assignment)
+  op countCachesInExpr : Expression -> Nat .
+  eq countCachesInExpr(lookupOnChange(Q, Params, V)) = 1 + countCachesInParams(Params) .
+  eq countCachesInExpr(lookupOnChange(VE:VariableExpression, Params, V)) = 1 + countCachesInParams(Params) .
+  eq countCachesInExpr(E + E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E - E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E * E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E / E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E rem E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E max E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E min E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E < E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E > E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E <= E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E >= E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E equ E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E nequ E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E and E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(E or E') = countCachesInExpr(E) + countCachesInExpr(E') .
+  eq countCachesInExpr(not E) = countCachesInExpr(E) .
+  eq countCachesInExpr(isKnown(E)) = countCachesInExpr(E) .
+  eq countCachesInExpr(func(F:Function, E)) = countCachesInExpr(E) .
+  eq countCachesInExpr(E) = 0 [owise] .
+
+  op countCachesInAttrs : AttributeSet -> Nat .
+  eq countCachesInAttrs((repeatc: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((startc: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((endc: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((exitc: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((post: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((skip: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((pre: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs((inv: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
+  eq countCachesInAttrs(AtS) = 0 [owise] .
+
+  op countCachesInPlexil : Plexil -> Nat .
+  eq countCachesInPlexil(list(I, LD, (AtS), nil)) = countCachesInAttrs(AtS) .
+  eq countCachesInPlexil(list(I, LD, (AtS), (PL PLL)))
+   = countCachesInAttrs(AtS) + countCachesInPlexil(PL) + countCachesInPlexil(list(I, LD, (AtS), PLL)) .
+  eq countCachesInPlexil(library(I, LD, (AtS), callInfo(Callee:Identifier, IDs, Args:Parameters), PL))
+   = countCachesInAttrs(AtS) + countCachesInPlexil(PL) .
+  eq countCachesInPlexil(command(I, LD, (AtS), C)) = countCachesInAttrs(AtS) .
+  eq countCachesInPlexil(assignment(I, LD, (AtS), AT := E))
+   = countCachesInAttrs(AtS) + countCachesInExpr(E) .
+  eq countCachesInPlexil(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}))
+   = countCachesInAttrs(AtS) + countCachesInPairs(PS:List{Pair{Qid,Expression}}) .
+  eq countCachesInPlexil(empty(I, LD, AtS)) = countCachesInAttrs(AtS) .
+
+  op countCachesInPairs : List{Pair{Qid,Expression}} -> Nat .
+  eq countCachesInPairs(nil) = 0 .
+  eq countCachesInPairs(< Q ; E > PAIRS) = countCachesInExpr(E) + countCachesInPairs(PAIRS) .
+
+  op countCachesInParams : Parameters -> Nat .
+  eq countCachesInParams(nilpar) = 0 .
+  eq countCachesInParams((E Params)) = countCachesInExpr(E) + countCachesInParams(Params) .
+
+  op nextCacheId : AttributeSet Nat -> Nat .
+  eq nextCacheId(AtS, N) = N + countCachesInAttrs(AtS) .
+
+  --- Collect mapping for embedding cache IDs (simplified - return counter)
+  op collectCacheMapping : Plexil Qualified Nat -> Nat .
+  eq collectCacheMapping(PL, Q, N) = countCachesInPlexil(PL) .
+
+  --- Embed cache IDs into expressions
+  op embedCacheIds : GlobalConfig Nat -> GlobalConfig .
+  eq embedCacheIds(Op | Conf, N) = Op | embedCacheIdsInConfig(Conf, 0) .
+
+  op embedCacheIdsInConfig : Config Nat -> Config .
+  eq embedCacheIdsInConfig([ nodes : Cfg ] Conf, N)
+   = [ nodes : embedCacheIdsInNodes(Cfg, N) ] embedCacheIdsInConfig(Conf, N + countCachesInConfig(Cfg)) .
+  eq embedCacheIdsInConfig([ memory : Cfg ] Conf, N)
+   = [ memory : embedCacheIdsInMemory(Cfg, 0) ] embedCacheIdsInConfig(Conf, N) .
+  eq embedCacheIdsInConfig(Conf, N) = Conf [owise] .
+
+  op embedCacheIdsInNodes : Configuration Nat -> Configuration .
+  eq embedCacheIdsInNodes(< Q : Cd | AtS > Cfg, N)
+   = < Q : Cd | embedCacheIdsInAttrs(AtS, N) > embedCacheIdsInNodes(Cfg, N + countCachesInAttrs(AtS)) .
+  eq embedCacheIdsInNodes(none, N) = none .
+
+  op embedCacheIdsInMemory : Configuration Nat -> Configuration .
+  --- Depth-first numbering: cache(N') has nested caches at IDs [N' - count, N' - 1]
+  --- So we embed starting from N' - countCachesInParams(Params)
+  eq embedCacheIdsInMemory(< cache(N') : lookup-cache | args: Params, AtS > Cfg, N)
+   = < cache(N') : lookup-cache | args: embedCacheIdsInParams(Params, N' - countCachesInParams(Params)), AtS > embedCacheIdsInMemory(Cfg, N + 1 + countCachesInParams(Params)) .
+  eq embedCacheIdsInMemory(< Q : Cd | AtS > Cfg, N)
+   = < Q : Cd | AtS > embedCacheIdsInMemory(Cfg, N) .
+  eq embedCacheIdsInMemory(none, N) = none .
+
+  op embedCacheIdsInParams : Parameters Nat -> Parameters .
+  eq embedCacheIdsInParams(nilpar, N) = nilpar .
+  eq embedCacheIdsInParams((E Params), N)
+   = (embedCacheIdsInExpr(E, N) embedCacheIdsInParams(Params, N + countCachesInExpr(E))) .
+
+  op embedCacheIdsInAttrs : AttributeSet Nat -> AttributeSet .
+  eq embedCacheIdsInAttrs((repeatc: E, AtS), N)
+   = (repeatc: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((startc: E, AtS), N)
+   = (startc: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((endc: E, AtS), N)
+   = (endc: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((exitc: E, AtS), N)
+   = (exitc: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((post: E, AtS), N)
+   = (post: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((skip: E, AtS), N)
+   = (skip: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((pre: E, AtS), N)
+   = (pre: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((inv: E, AtS), N)
+   = (inv: embedCacheIdsInExpr(E, N), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs(((AT := E), AtS), N)
+   = ((AT := embedCacheIdsInExpr(E, N)), embedCacheIdsInAttrs(AtS, N + countCachesInExpr(E))) .
+  eq embedCacheIdsInAttrs((pairs: PAIRS, AtS), N)
+   = (pairs: embedCacheIdsInPairs(PAIRS, N), embedCacheIdsInAttrs(AtS, N + countCachesInPairs(PAIRS))) .
+  eq embedCacheIdsInAttrs(AtS, N) = AtS [owise] .
+
+  op embedCacheIdsInExpr : Expression Nat -> Expression .
+  --- Depth-first numbering: nested caches get lower IDs, outer caches get higher IDs
+  --- This ensures that when updating caches in order 0→N, dependencies are satisfied
+  eq embedCacheIdsInExpr(lookupOnChange(Q, Params, V), N)
+   = lookupOnChange(N + countCachesInParams(Params), Q, embedCacheIdsInParams(Params, N), V) .
+  eq embedCacheIdsInExpr(lookupOnChange(VE:VariableExpression, Params, V), N)
+   = lookupOnChange(N + countCachesInParams(Params), VE:VariableExpression, embedCacheIdsInParams(Params, N), V) .
+  eq embedCacheIdsInExpr(E + E', N)
+   = embedCacheIdsInExpr(E, N) + embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E - E', N)
+   = embedCacheIdsInExpr(E, N) - embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E * E', N)
+   = embedCacheIdsInExpr(E, N) * embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E / E', N)
+   = embedCacheIdsInExpr(E, N) / embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E rem E', N)
+   = embedCacheIdsInExpr(E, N) rem embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E max E', N)
+   = embedCacheIdsInExpr(E, N) max embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E min E', N)
+   = embedCacheIdsInExpr(E, N) min embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E < E', N)
+   = embedCacheIdsInExpr(E, N) < embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E > E', N)
+   = embedCacheIdsInExpr(E, N) > embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E <= E', N)
+   = embedCacheIdsInExpr(E, N) <= embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E >= E', N)
+   = embedCacheIdsInExpr(E, N) >= embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E equ E', N)
+   = embedCacheIdsInExpr(E, N) equ embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E nequ E', N)
+   = embedCacheIdsInExpr(E, N) nequ embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E and E', N)
+   = embedCacheIdsInExpr(E, N) and embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(E or E', N)
+   = embedCacheIdsInExpr(E, N) or embedCacheIdsInExpr(E', N + countCachesInExpr(E)) .
+  eq embedCacheIdsInExpr(not E, N)
+   = not embedCacheIdsInExpr(E, N) .
+  eq embedCacheIdsInExpr(isKnown(E), N)
+   = isKnown(embedCacheIdsInExpr(E, N)) .
+  eq embedCacheIdsInExpr(func(F, E), N)
+   = func(F, embedCacheIdsInExpr(E, N)) .
+  eq embedCacheIdsInExpr(E, N) = E [owise] .
+
+  op embedCacheIdsInPairs : List{Pair{Qid,Expression}} Nat -> List{Pair{Qid,Expression}} .
+  eq embedCacheIdsInPairs(nil, N) = nil .
+  eq embedCacheIdsInPairs(< Q ; E > PAIRS, N)
+   = < Q ; embedCacheIdsInExpr(E, N) > embedCacheIdsInPairs(PAIRS, N + countCachesInExpr(E)) .
+
+  op countCachesInConfig : Configuration -> Nat .
+  eq countCachesInConfig(< Q : Cd | AtS > Cfg)
+   = countCachesInAttrs(AtS) + countCachesInConfig(Cfg) .
+  eq countCachesInConfig(none) = 0 .
+
 endfm

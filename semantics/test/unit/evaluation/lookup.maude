@@ -2,7 +2,7 @@ mod TEST--EVALUATION--LOOKUP is
 
 pr TEST-BASE .
 
-vars Cfg : Configuration .
+vars Cfg CfgWithCache CfgWithVarName : Configuration .
 vars Env : Environment .
 
 op  test--evaluation--lookup : -> TestResults .
@@ -37,27 +37,39 @@ reaches
   )
 end
 
-assert "lookupOnChange currently mimics lookup" from
+assert "lookupOnChange reads from cache" from
   testExpression(
     eval(
       Env,
-      Cfg,
-      lookupOnChange('state2,var('A),val(1))
+      CfgWithCache,
+      lookupOnChange(0,'state2,var('A),val(1))
     )
   )
 reaches
   testExpression(
+    const(val(true))
+  )
+end
+
+assert "lookup with variable name" from
+  testExpression(
     eval(
       Env,
-      Cfg,
-      lookup('state2,var('A))
+      CfgWithVarName,
+      lookup(var('stateName),var('A))
     )
+  )
+reaches
+  testExpression(
+    const(val(true))
   )
 end
 
 end tests
 if Cfg := < 'A : memory | actVal: val(4) >
 /\ Env := ( 'state1(nilarg): val(false), 'state2(val(4)): val(true) )
+/\ CfgWithCache := Cfg < cache(0) : lookup-cache | cachedValue: val(true), prevArgs: val(4), args: var('A), tolerance: val(1), stateName: const(val("state2")), prevStateName: val("state2"), nodeContext: 'TestNode >
+/\ CfgWithVarName := < 'A : memory | actVal: val(4) > < 'stateName : memory | actVal: val("state2") >
 .
 
 endm

@@ -1,0 +1,16 @@
+initial-state  {
+  state time               () =  0 : real;
+  state externalVar (1: real) =  0 : real;
+}
+
+script {
+  simultaneous {
+    state time             () =  1 : real;
+  }
+  simultaneous {
+    state time             () =  2 : real;
+  }
+  simultaneous {
+    state time             () =  3 : real;
+  }
+}

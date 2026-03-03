@@ -1,0 +1,256 @@
+***( Unit Tests for Cache Update Logic (shouldUpdate function)
+
+  This module tests the shouldUpdate function in CACHE, which determines
+  when a lookupOnChange cache should be updated based on:
+  - Tolerance checking for numeric values (Int, Float)
+  - Argument changes
+  - Unknown value transitions
+  - Non-numeric value changes (Bool, String, arrays)
+
+  Key design: Tolerance ONLY applies to numeric values. Non-numeric values
+  should always update when they change.
+)***
+
+mod TEST--REDUCTIONS--CACHE is
+  pr TEST-BASE .
+  pr CACHE .
+
+  ---( Test Helpers )---
+
+  --- Dummy arguments for testing
+  op dummyArgs : -> Arguments .
+  eq dummyArgs = (val(1)) .
+
+  op otherArgs : -> Arguments .
+  eq otherArgs = (val(2)) .
+
+  ---( Main Test Suite )---
+
+  op test--reductions--cache : -> TestResults .
+  eq test--reductions--cache =
+       test--reductions--cache--argument-changes
+     + test--reductions--cache--unknown-transitions
+     + test--reductions--cache--numeric-tolerance
+     + test--reductions--cache--non-numeric-values
+  .
+
+  ---( Argument Changes Tests )---
+
+  op test--reductions--cache--argument-changes : -> TestResults .
+  eq test--reductions--cache--argument-changes =
+  begin tests
+
+    assert "Arguments changed - always update regardless of values" from
+      aBool(shouldUpdate(val(10), val(10), val(5), dummyArgs, otherArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Arguments changed - update even if within tolerance" from
+      aBool(shouldUpdate(val(10), val(12), val(5), dummyArgs, otherArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Arguments changed - update even if both unknown" from
+      aBool(shouldUpdate(unknown, unknown, val(5), dummyArgs, otherArgs))
+    reaches
+      aBool(true)
+    end
+
+  end tests
+  .
+
+  ---( Unknown Value Transitions Tests )---
+
+  op test--reductions--cache--unknown-transitions : -> TestResults .
+  eq test--reductions--cache--unknown-transitions =
+  begin tests
+
+    assert "Cache unknown, env has real value - update (establish baseline)" from
+      aBool(shouldUpdate(unknown, val(42), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Cache unknown, env has float value - update (establish baseline)" from
+      aBool(shouldUpdate(unknown, val(3.14), val(0.5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Cache unknown, env has bool value - update (establish baseline)" from
+      aBool(shouldUpdate(unknown, val(true), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Cache unknown, env has string value - update (establish baseline)" from
+      aBool(shouldUpdate(unknown, val("hello"), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Both unknown - no update" from
+      aBool(shouldUpdate(unknown, unknown, val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+  end tests
+  .
+
+  ---( Numeric Tolerance Tests )---
+
+  op test--reductions--cache--numeric-tolerance : -> TestResults .
+  eq test--reductions--cache--numeric-tolerance =
+  begin tests
+
+    assert "Int/Int: Within tolerance - no update" from
+      aBool(shouldUpdate(val(10), val(12), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Int/Int: Exactly at tolerance - update (>= semantics)" from
+      aBool(shouldUpdate(val(10), val(15), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Int/Int: Exceeds tolerance - update" from
+      aBool(shouldUpdate(val(10), val(16), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Int/Int: Negative difference exceeds tolerance - update" from
+      aBool(shouldUpdate(val(10), val(4), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Float/Float: Within tolerance - no update" from
+      aBool(shouldUpdate(val(10.0), val(10.3), val(0.5), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Float/Float: Exceeds tolerance - update" from
+      aBool(shouldUpdate(val(10.0), val(10.6), val(0.5), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Int/Float: Within tolerance - update if exceeds" from
+      aBool(shouldUpdate(val(10), val(15.6), val(5.0), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Float/Int: Within tolerance - no update" from
+      aBool(shouldUpdate(val(10.0), val(12), val(5.0), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Int/Int with Float tolerance: Exceeds tolerance - update" from
+      aBool(shouldUpdate(val(10), val(16), val(5.0), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Float/Float with Int tolerance: Within tolerance - no update" from
+      aBool(shouldUpdate(val(10.0), val(12.0), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Same int value - no update" from
+      aBool(shouldUpdate(val(42), val(42), val(5), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Same float value - no update" from
+      aBool(shouldUpdate(val(3.14), val(3.14), val(0.1), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+  end tests
+  .
+
+  ---( Non-Numeric Value Tests )---
+
+  op test--reductions--cache--non-numeric-values : -> TestResults .
+  eq test--reductions--cache--non-numeric-values =
+  begin tests
+
+    assert "Bool: true to false - always update (tolerance doesn't apply)" from
+      aBool(shouldUpdate(val(true), val(false), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Bool: false to true - always update" from
+      aBool(shouldUpdate(val(false), val(true), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Bool: same value - no update" from
+      aBool(shouldUpdate(val(true), val(true), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "String: different strings - always update" from
+      aBool(shouldUpdate(val("hello"), val("world"), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "String: same string - no update" from
+      aBool(shouldUpdate(val("hello"), val("hello"), val(1), dummyArgs, dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Array: different arrays - always update" from
+      aBool(shouldUpdate(
+        array(val(1) # val(2)),
+        array(val(1) # val(3)),
+        val(100),
+        dummyArgs,
+        dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+    assert "Array: same array - no update" from
+      aBool(shouldUpdate(
+        array(val(1) # val(2)),
+        array(val(1) # val(2)),
+        val(100),
+        dummyArgs,
+        dummyArgs))
+    reaches
+      aBool(false)
+    end
+
+    assert "Array: different lengths - always update" from
+      aBool(shouldUpdate(
+        array(val(1) # val(2)),
+        array(val(1) # val(2) # val(3)),
+        val(100),
+        dummyArgs,
+        dummyArgs))
+    reaches
+      aBool(true)
+    end
+
+  end tests
+  .
+
+endm

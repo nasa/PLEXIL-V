@@ -26,11 +26,16 @@ fmod NODE is
  pr MAYBE{CommandHandle} .
 
  subsort NeQualified < Oid .
+
+ *** Cache identifier constructor
+ op cache : Nat -> Oid [ctor] .
+
  sort NodeType .
  subsort NodeType < Cid .
  ops list command retCommand assignment empty update library command-on-execution update-on-execution : -> NodeType .
  op memory            : -> NodeType .
  op memory-forwarding : -> NodeType .
+ op lookup-cache      : -> NodeType .
 
  op callee:_     : Identifier -> Attribute [ctor gather (&)] .
  op parameters:_ : Identifiers -> Attribute [ctor gather (&)] .
@@ -65,6 +70,15 @@ fmod NODE is
  op timepoints:_     : Timepoints -> Attribute [ctor gather (&)] .
  op ack:_            : Ack        -> Attribute [ctor gather (&)] .
  op pairs:_          : List{Pair{Qid,Expression}} -> Attribute [ctor gather (&)] .
+
+*** Lookup cache attributes
+ op cachedValue:_    : Value      -> Attribute [ctor gather (&)] .
+ op prevArgs:_       : Arguments  -> Attribute [ctor gather (&)] .
+ op args:_           : Parameters -> Attribute [ctor gather (&)] .
+ op tolerance:_      : Value      -> Attribute [ctor gather (&)] .
+ op stateName:_      : Expression -> Attribute [ctor gather (&)] . --- Changed from NeQualified to support variable lookups
+ op prevStateName:_  : Value      -> Attribute [ctor gather (&)] . --- Track previous evaluated stateName
+ op nodeContext:_    : NeQualified -> Attribute [ctor gather (&)] .
 
 *** Body conditions
  op repeatc:_       : Expression -> Attribute [ctor gather (&)] .

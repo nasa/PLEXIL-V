@@ -1,0 +1,453 @@
+***( Unit Tests for Cache ID Embedding
+
+  Tests the embedCacheIds function family to ensure:
+    1. Cache IDs embedded correctly across all condition types
+    2. Cache IDs embedded in assignment expressions
+    3. Cache IDs embedded in LibraryCall pairs
+    4. Cache IDs embedded in binary/unary operators
+    5. Depth-first ordering preserved after embedding
+
+  KEY PROPERTY: After embedding, if cache(N) references cache(M) in its args,
+  then M < N (dependency satisfaction for forward iteration).
+)***
+
+mod TEST--COMPILER--EMBED-CACHE-IDS is
+
+pr TEST-BASE .
+pr COMPILER .
+
+op test--compiler--embed-cache-ids : -> TestResults .
+eq test--compiler--embed-cache-ids =
+    test--embed--condition-attributes
+    + test--embed--assignment-expressions
+    + test--embed--operators
+    + test--embed--depth-first-ordering
+    .
+
+---( Embedding in Condition Attributes Tests )---
+
+op test--embed--condition-attributes : -> TestResults .
+eq test--embed--condition-attributes =
+begin tests
+
+    assert "embedCacheIdsInAttrs embeds cache ID in repeatc condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                repeatc: lookupOnChange('sensor, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            repeatc: lookupOnChange(0, 'sensor, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in startc condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                startc: lookupOnChange('ready, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            startc: lookupOnChange(0, 'ready, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in endc condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                endc: lookupOnChange('complete, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            endc: lookupOnChange(0, 'complete, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in exitc condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                exitc: lookupOnChange('abort, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            exitc: lookupOnChange(0, 'abort, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in inv condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                inv: lookupOnChange('valid, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            inv: lookupOnChange(0, 'valid, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in post condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                post: lookupOnChange('success, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            post: lookupOnChange(0, 'success, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in skip condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                skip: lookupOnChange('skipFlag, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            skip: lookupOnChange(0, 'skipFlag, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in pre condition" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                pre: lookupOnChange('precond, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            pre: lookupOnChange(0, 'precond, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds multiple cache IDs sequentially" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                (startc: lookupOnChange('start, nilpar, val(1)), endc: lookupOnChange('end, nilpar, val(1))),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            (startc: lookupOnChange(0, 'start, nilpar, val(1)), endc: lookupOnChange(1, 'end, nilpar, val(1)))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs uses starting ID offset" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                repeatc: lookupOnChange('sensor, nilpar, val(1)),
+                5
+            )
+        )
+    reaches
+        testAttributes(
+            repeatc: lookupOnChange(5, 'sensor, nilpar, val(1))
+        )
+    end
+
+end tests
+.
+
+---( Embedding in Assignment Expressions Tests )---
+
+op test--embed--assignment-expressions : -> TestResults .
+eq test--embed--assignment-expressions =
+begin tests
+
+    assert "embedCacheIdsInAttrs embeds cache ID in assignment right-hand side" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                (var('x) := lookupOnChange('value, nilpar, val(5))),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            (var('x) := lookupOnChange(0, 'value, nilpar, val(5)))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs embeds cache ID in assignment with offset" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                (var('y) := lookupOnChange('data, nilpar, val(10))),
+                3
+            )
+        )
+    reaches
+        testAttributes(
+            (var('y) := lookupOnChange(3, 'data, nilpar, val(10)))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache ID in simple lookupOnChange" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('sensor, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'sensor, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache ID in variable-based lookupOnChange" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange(var('stateName), nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, var('stateName), nilpar, val(1))
+        )
+    end
+
+end tests
+.
+
+---( Embedding in Operators Tests )---
+
+op test--embed--operators : -> TestResults .
+eq test--embed--operators =
+begin tests
+
+    assert "embedCacheIdsInExpr embeds cache IDs in addition (left then right)" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('a, nilpar, val(1)) + lookupOnChange('b, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'a, nilpar, val(1)) + lookupOnChange(1, 'b, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in subtraction" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('x, nilpar, val(1)) - lookupOnChange('y, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'x, nilpar, val(1)) - lookupOnChange(1, 'y, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in multiplication" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('m, nilpar, val(1)) * lookupOnChange('n, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'm, nilpar, val(1)) * lookupOnChange(1, 'n, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in comparison" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('left, nilpar, val(1)) < lookupOnChange('right, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'left, nilpar, val(1)) < lookupOnChange(1, 'right, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in logical and" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('flag1, nilpar, val(0)) and lookupOnChange('flag2, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'flag1, nilpar, val(0)) and lookupOnChange(1, 'flag2, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in logical or" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('cond1, nilpar, val(1)) or lookupOnChange('cond2, nilpar, val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(0, 'cond1, nilpar, val(1)) or lookupOnChange(1, 'cond2, nilpar, val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache ID in unary not" from
+        testExpression(
+            embedCacheIdsInExpr(
+                not lookupOnChange('flag, nilpar, val(0)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            not lookupOnChange(0, 'flag, nilpar, val(0))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache ID in isKnown" from
+        testExpression(
+            embedCacheIdsInExpr(
+                isKnown(lookupOnChange('status, nilpar, val(1))),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            isKnown(lookupOnChange(0, 'status, nilpar, val(1)))
+        )
+    end
+
+end tests
+.
+
+---( Depth-First Ordering Tests )---
+
+op test--embed--depth-first-ordering : -> TestResults .
+eq test--embed--depth-first-ordering =
+begin tests
+
+    assert "embedCacheIdsInExpr: nested lookupOnChange gets lower ID than outer" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('outer, lookupOnChange('inner, nilpar, val(1)), val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(1, 'outer, lookupOnChange(0, 'inner, nilpar, val(1)), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr: multiple nested lookups maintain depth-first order" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('outer, (lookupOnChange('inner1, nilpar, val(1)) lookupOnChange('inner2, nilpar, val(1))), val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(2, 'outer, (lookupOnChange(0, 'inner1, nilpar, val(1)) lookupOnChange(1, 'inner2, nilpar, val(1))), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr: triple nesting maintains depth-first order" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('level3, lookupOnChange('level2, lookupOnChange('level1, nilpar, val(1)), val(1)), val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(2, 'level3, lookupOnChange(1, 'level2, lookupOnChange(0, 'level1, nilpar, val(1)), val(1)), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInAttrs: nested lookups in condition maintain depth-first order" from
+        testAttributes(
+            embedCacheIdsInAttrs(
+                startc: lookupOnChange('external, lookupOnChange('time, nilpar, val(1)), val(1)),
+                0
+            )
+        )
+    reaches
+        testAttributes(
+            startc: lookupOnChange(1, 'external, lookupOnChange(0, 'time, nilpar, val(1)), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInExpr: nested in binary operator maintains depth-first order" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('a, lookupOnChange('param, nilpar, val(1)), val(1)) + const(val(10)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(1, 'a, lookupOnChange(0, 'param, nilpar, val(1)), val(1)) + const(val(10))
+        )
+    end
+
+    assert "embedCacheIdsInExpr: complex nesting with multiple parameters" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('result, (lookupOnChange('x, nilpar, val(1)) lookupOnChange('y, lookupOnChange('z, nilpar, val(1)), val(1))), val(1)),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(3, 'result, (lookupOnChange(0, 'x, nilpar, val(1)) lookupOnChange(2, 'y, lookupOnChange(1, 'z, nilpar, val(1)), val(1))), val(1))
+        )
+    end
+
+    assert "embedCacheIdsInParams: processes parameters in depth-first order" from
+        testExpression(
+            embedCacheIdsInParams(
+                (lookupOnChange('first, nilpar, val(1)) lookupOnChange('second, nilpar, val(1))),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            (lookupOnChange(0, 'first, nilpar, val(1)) lookupOnChange(1, 'second, nilpar, val(1)))
+        )
+    end
+
+    assert "embedCacheIdsInExpr: preserves cache ID after offset" from
+        testExpression(
+            embedCacheIdsInExpr(
+                lookupOnChange('data, lookupOnChange('time, nilpar, val(1)), val(1)),
+                10
+            )
+        )
+    reaches
+        testExpression(
+            lookupOnChange(11, 'data, lookupOnChange(10, 'time, nilpar, val(1)), val(1))
+        )
+    end
+
+end tests
+.
+
+endm

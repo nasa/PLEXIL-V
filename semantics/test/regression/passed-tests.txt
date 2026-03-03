@@ -40,6 +40,7 @@ empty4.maude
 interface1.maude
 invariant1.maude
 lookup1.maude
+lookup2.maude
 lookup3.maude
 modulo1.maude
 repeat1.maude
@@ -71,8 +72,8 @@ maxTest.maude
 minTest.maude
 TestAbsSqrt.maude
 RoundTest.maude
-repeat5.maude
-repeat7.maude
 repeat8.maude
 unknown_lookup.maude
 IterationEnded1.maude
+repeat5.maude
+repeat7.maude

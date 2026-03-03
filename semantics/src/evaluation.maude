@@ -30,6 +30,10 @@ vars V V'       : Value .
 vars Args Args' : Arguments .
 vars P          : Parameters .
 vars Pars Pars' : Parameters .
+vars N          : Nat .
+vars MEM MEM'   : Configuration .
+vars Tol        : Value .
+vars VE         : VariableExpression .
 
  eq eval(C, PS, E)
   = eval(C, [ PS ], E) .
@@ -220,9 +224,21 @@ eq [eval-recursive-forwarding-step] :
 *** On Lookups (external variables)
 --- Core implementation
 eq eval(C, [ PS ],         lookup(Q,Pars)  ) = eval(C, [ PS ], lookup(Q,evalpar(C,PS,Pars))) .
-eq eval(C, [ PS ], lookupOnChange(Q,Pars,V)) = eval(C, [ PS ], lookup(Q,evalpar(C,PS,Pars))) . --- TODO: LookupOnChange should be properly implemented
 eq eval(((Q(Args) : V),C), PL, lookup(Q,Args)) = const(V)               .
 eq eval(C                , PL, lookup(Q,Args)) = const(unknown) [owise] .
+
+--- Variable-based lookup: first evaluate the variable to get the lookup name
+ceq eval(C, [ PS ], lookup(VE,Pars)) = eval(C, [ PS ], lookup(qid(R),evalpar(C,PS,Pars)))
+ if const(val(R)) := eval(C, [ PS ], VE) .
+
+*** On LookupOnChange (reads from cache)
+eq eval(C, [ < cache(N) : lookup-cache | cachedValue: V, NA > PS ], lookupOnChange(N, Q, Pars, Tol))
+ = const(V) .
+
+--- Variable-based lookupOnChange: first evaluate the variable to get the lookup name
+ceq eval(C, [ < cache(N) : lookup-cache | cachedValue: V, NA > PS ], lookupOnChange(N, VE, Pars, Tol))
+ = const(V)
+ if const(val(R)) := eval(C, [ PS ], VE) .
 --- `new`-lookup variant --- TODO: Review its usage and deprecate if necessary
 eq eval((new(Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)               .
 eq eval((   (Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)       [owise] .

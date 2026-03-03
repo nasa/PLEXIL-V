@@ -1,0 +1,46 @@
+/*
+   Check if the updates below the tolerance of LookupOnChange expressions
+   triggers the evaluation of its expression or not.
+
+   To make this observation reproduce the following steps:
+     1. Compile `lookup5.ple` and `lookup5.pst`
+     2. Call the PLEXIL *test executive* with a debugger
+        ```
+        $ lldb $PLEXIL_HOME/bin/TestExec
+        ```
+     3. Set a breakpoint where the *StartCondition* is checked inside
+        the `NodeImpl::getDestStateFromWaiting` method
+        ```
+        (lldb) break set -f NodeImpl.cc -l 1042
+        ```
+     4. Run the program with the compiled plan and script
+        ```
+        (lldb) run -p lookup5.plx -s lookup5.psx -d Debug.All.cfg
+        ```
+     5. Skip the first break with the `continue` command
+        ```
+        (lldb) continue
+        ```
+     6. At this point the *StartCondition* is going to be evaluated for the second time.
+        If you follow step-by-step the evaluation. You can confirm that the *LookupOnChange*
+        gets evaluated to its previous cached value `10` instead of the most recent `10.5`.
+        The condition is evaluated even though the newest *lookup* value is within the
+        specified tolerance.
+        ```
+        (lldb) s
+        ...
+        (lldb) n
+        ...
+        (lldb) p <variable>
+        ```
+ */
+Command pprint(...);
+Real Lookup time;
+
+lookup5: Concurrence
+{
+    Exit Lookup(time) > 12;
+    Repeat true;
+    Start Lookup(time, 1) > 11;
+    pprint("lookup5: ", Lookup(time));
+}

@@ -1,5 +1,8 @@
 load update.maude
 load id-sanitizer.maude
+load collect-caches.maude
+load variable-lookup.maude
+load embed-cache-ids.maude
 
 mod TEST--COMPILER is
 
@@ -7,12 +10,18 @@ pr COMPILER .
 pr TEST-BASE .
 pr TEST--COMPILER--UPDATE .
 pr TEST--COMPILER--ID-SANITIZER .
+pr TEST--COMPILER--COLLECT-CACHES .
+pr TEST--COMPILER--VARIABLE-LOOKUP .
+pr TEST--COMPILER--EMBED-CACHE-IDS .
 
 op test--compiler : -> TestResults .
 eq test--compiler =
     test--compiler--compile
     + test--compiler--update
-    + test--compiler--id-sanitizer .
+    + test--compiler--id-sanitizer
+    + test--compiler--collect-caches
+    + test--compiler--variable-lookup
+    + test--compiler--embed-cache-ids .
 
 op anEmptyNode : -> PlexilEmpty .
 eq anEmptyNode = empty('aNode, nilocdecl, none) .

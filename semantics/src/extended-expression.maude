@@ -38,10 +38,14 @@ protecting VALUE .
  op hasIterationEnded?      : NeQualified -> Expression .
  op hasRcvAck?              : NeQualified -> Expression .
 
-op lookup             : NeQualified Parameters       -> Lookup [format (b o)] .
-op lookup             : NeQualified Arguments        -> Lookup [format (b o)] .
-op lookupOnChange     : NeQualified Parameters Value -> Lookup [format (b o)] .
-op lookupOnChange     : NeQualified Arguments  Value -> Lookup [format (b o)] .
+op lookup         : NeQualified        Parameters       -> Lookup [format (b o)] .
+op lookup         : NeQualified        Arguments        -> Lookup [format (b o)] .
+op lookup         : VariableExpression Parameters       -> Lookup [format (b o)] .
+op lookupOnChange :     NeQualified        Parameters Value -> Lookup [format (b o)] .
+op lookupOnChange :     VariableExpression Parameters Value -> Lookup [format (b o)] .
+op lookupOnChange :     NeQualified        Arguments  Value -> Lookup [format (b o)] .
+op lookupOnChange : Nat NeQualified        Parameters Value -> Lookup [format (b o)] . *** Compiled form with cache ID
+op lookupOnChange : Nat VariableExpression Parameters Value -> Lookup [format (b o)] . *** Compiled form with cache ID
 
 vars Q Q' : NeQualified .
 vars V    : Value .
