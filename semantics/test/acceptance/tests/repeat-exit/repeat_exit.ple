@@ -1,0 +1,34 @@
+/*
+   repeat_exit:
+
+   Test a non-termination condition occurring when both RepeatCondition and ExitCondition are true.
+
+   The plan:
+   - Creates an infinite loop with an exit condition dependent on the external environment.
+   - Repeateadly increments a counter to force reading updates from the environment.
+   The script:
+   - Initializes time to 0.
+   - Updates for time to 1 for the next macro.
+
+   Expected behavior:
+   - Non-terminating quiescence in the third macro step with the following loop
+      |- repeat_exit: FAILING ------------> ITERATION_ENDED -> WAITING -> EXECUTING -> FAILING  (loop)
+      |- assignment:  FAILING -> FINISHED ------------------------------> INACTIVE  -> FINISHED (loop)
+
+ */
+
+Command pprint(...);
+
+Real Lookup time;
+
+repeat_exit:
+{
+   Real counter = 0;
+
+   Repeat true;
+   Exit Lookup(time) > 0;
+
+   assignment: {
+      counter = counter + 1;
+   }
+}
