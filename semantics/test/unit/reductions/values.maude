@@ -9,15 +9,14 @@ mod TEST--REDUCTIONS--VALUES is
       getNodesCell(
         performAssignments(
           [ memory : < 'id : memory | actVal: array(val(0) # val(1) # val(2)), prevVal: array(val(0) # val(0) # val(0)) > ]
-          [ macroacts : setMem('id,array(val(3) # val(4)),nothing) ]
+          [ microacts : setMem('id,array(val(3) # val(4)),nothing) ]
         )
       )
     reaches
       getNodesCell(
         performAssignments(
-          --- [ memory : < 'id : memory | actVal: assign(PArr, PArr'), prevVal: V, AtS > PS ]
           [ memory : < 'id : memory | actVal: array(val(3) # val(4) # unknown), prevVal: array(val(0) # val(1) # val(2)) > ]
-          [ macroacts : mtactions ]
+          [ microacts : mtactions ]
         )
       )
     end
@@ -26,14 +25,14 @@ mod TEST--REDUCTIONS--VALUES is
       getNodesCell(
         performAssignments(
           [ memory : < 'id : memory | actVal: array(unknown # unknown # unknown # unknown), prevVal: array(unknown # unknown # unknown # unknown) > ]
-          [ macroacts : setMem('id,array(val(0) # val(1)),nothing) ]
+          [ microacts : setMem('id,array(val(0) # val(1)),nothing) ]
         )
       )
     reaches
       getNodesCell(
         performAssignments(
           [ memory : < 'id : memory | actVal: array(val(0) # val(1) # unknown # unknown), prevVal: array(unknown # unknown # unknown # unknown) > ]
-          [ macroacts : mtactions ]
+          [ microacts : mtactions ]
         )
       )
     end

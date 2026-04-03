@@ -107,8 +107,8 @@ fmod ATOMIC is
         then [ microacts : AS,setStatus(A, iterationEnded),setOutcome(A, failure(preconditionFailed)),logTransition(A,waiting,iterationEnded,5) ]
              [ macroacts : AS' ]
         else if C == assignment
-        then [ macroacts : setMem(assignmentVariable(A, Nds), expToVal(eval(GAMMA,MEM,assignmentExpression(A,Nds))),if isArrayAssignment(A,Nds) then just(expToVal(eval(GAMMA,MEM,assignmentIndexExpression(A,Nds)))) else nothing fi), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+        then [ macroacts : AS' ]
+             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),setMem(assignmentVariable(A, Nds), expToVal(eval(GAMMA,MEM,assignmentExpression(A,Nds))),if isArrayAssignment(A,Nds) then just(expToVal(eval(GAMMA,MEM,assignmentIndexExpression(A,Nds)))) else nothing fi),AS ]
         else if C == command
         then [ macroacts :
                 runCommand(
@@ -192,20 +192,20 @@ fmod ATOMIC is
                      [ environment : GAMMA ] [ memory : MEM ] [ microacts : AS ] [ macroacts : AS' ] CONF)
    = execassignment( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,executing,failing,1),AS ]
-            [ macroacts : undoMem(assignmentVariable(A, Nds)),AS' ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,1),AS ]
+            [ macroacts : AS' ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,executing,failing,2),AS ]
-              [ macroacts : undoMem(assignmentVariable(A, Nds)),AS' ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,2),AS ]
+              [ macroacts : AS' ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,executing,failing,3),AS ]
-                [ macroacts : undoMem(assignmentVariable(A, Nds)),AS' ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,3),AS ]
+                [ macroacts : AS' ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,executing,failing,4),AS ]
-                  [ macroacts : undoMem(assignmentVariable(A, Nds)),AS' ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,4),AS ]
+                  [ macroacts : AS' ]
            else
                if isTrue(eval(GAMMA, Nds MEM, EndC))
                then

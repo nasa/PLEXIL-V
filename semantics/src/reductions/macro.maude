@@ -51,9 +51,7 @@ fmod MACRO is
       executeUpdates(
         executeCommands(
           unSuspendMacroNodes(
-            performAssignments(
-              Cfg
-            )
+            Cfg
           )
         )
       )
@@ -70,17 +68,6 @@ fmod MACRO is
   **************************************************
   *** Utility functions                          ***
   **************************************************
-
-  op hasAssignmentToExecuteOrRetract? : Config -> Bool .
-  eq hasAssignmentToExecuteOrRetract?(St) = hasAssignmentAction?(getMacroacts(St)) .
-
-  var MV : Maybe{Value} .
-
-  op hasAssignmentAction? : ActionSet -> Bool .
-  eq hasAssignmentAction?( (undoMem(Q)    ,AS) ) = true .
-  eq hasAssignmentAction?( (setMem(Q,V,MV),AS) ) = true .
-  eq hasAssignmentAction?( (resetMem(Q)   ,AS) ) = true .
-  eq hasAssignmentAction?( (               AS) ) = false [owise] .
 
   op hasCommandToExecute? : Config -> Bool .
   eq hasCommandToExecute?(St) = false .
@@ -268,121 +255,6 @@ fmod MACRO is
       )
     .
   eq unSuspendMacroNodes(Conf) = Conf [owise] .
-
-  op performAssignments : Config -> Config .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V,  prevVal: V', AtS > PS ]
-      [ macroacts : undoMem(Q), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V', prevVal: V, AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: array(PArr), prevVal: V'', AtS > PS ]
-      [ macroacts : setMem(Q,array(PArr'),nothing), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: assign(PArr, PArr'), prevVal: array(PArr), AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(
-      Conf
-      [ memory : < Q  : memory-forwarding | target: Q',  AtS  >
-                 < Q' : memory-forwarding | target: Q'', AtS  > PS ]
-      [ macroacts : setMem(Q,V,nothing), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q  : memory-forwarding | target: Q',  AtS  >
-                 < Q' : memory-forwarding | target: Q'', AtS  > PS ]
-      [ macroacts : setMem(Q',V,nothing), AS ]
-      )
-    [owise] .
-  eq performAssignments(
-      Conf
-      [ memory : < Q  : memory-forwarding | target: Q',               AtS  >
-                 < Q' : memory            | actVal: V', prevVal: V'', AtS' > PS ]
-      [ macroacts : setMem(Q,V,nothing), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q  : memory-forwarding | target: Q',             AtS  >
-                 < Q' : memory            | actVal: V, prevVal: V', AtS' > PS ]
-      [ macroacts : AS ]
-      )
-    [owise] .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
-      [ macroacts : setMem(Q,V,nothing), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V, prevVal: V', AtS > PS ]
-      [ macroacts : AS ]
-      )
-    [owise] .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
-      [ macroacts : setMem(Q,V,just(val(N))), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: updateArray(V',N,V), prevVal: V', AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
-      [ macroacts : setMem(Q,V,just(unknown)), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: unknown, prevVal: V', AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V', prevVal: V'', initVal: V, AtS > PS ]
-      [ macroacts : resetMem(Q), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V,  prevVal: V,   initVal: V, AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V, prevVal: V', AtS > PS ]
-      [ macroacts : undoMem(Q), AS ]
-      )
-  =
-    performAssignments(
-      Conf
-      [ memory : < Q : memory | actVal: V',  prevVal: V',  AtS > PS ]
-      [ macroacts : AS ]
-      )
-    .
-  eq performAssignments(Conf) = Conf [owise] .
 
  op counter : -> Cid .
  var N : Nat .

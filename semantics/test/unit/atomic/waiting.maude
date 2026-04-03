@@ -332,8 +332,8 @@ mod TEST--ATOMIC--WAITING is
                                        prevVal: val(0) > ]
         [ microacts : setStatus(B . A,executing),
                       logTransition(B . A,waiting,executing,6),
-                      suspend(B . A) ]
-        [ macroacts : setMem(M . B . A, val(15),nothing) ]
+                      setMem(M . B . A, val(15),nothing) ]
+        [ macroacts : mtactions ]
       )
     end
 

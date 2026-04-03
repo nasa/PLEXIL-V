@@ -23,7 +23,8 @@ vars I           : Identifier .
 vars N           : Nat .
 vars O O'        : Outcome .
 vars Pairs       : List{Pair{Qid,Expression}} .
-vars Q Q'        : NeQualified .
+vars PArr PArr'  : PrimitiveArray .
+vars Q Q' Q''    : NeQualified .
 vars Target      : NeQualified .
 vars QID         : Qid .
 vars S S' T T'   : Status .
@@ -45,7 +46,7 @@ eq logApplyActions(Conf) = mtsoup [owise] .
 
 op applyActions : Config ~> Config .
 eq applyActions ([ trace :         TL ] Conf)
- = applyActions'([ trace : mttrans TL ] Conf) .
+ = performAssignments(applyActions'([ trace : mttrans TL ] Conf)) .
 
 
 op createOrUpdateVarForwarding : Qualified Qualified Config ~> Config .
@@ -120,6 +121,121 @@ eq applyActions'(Conf) = Conf [owise] .
 
   op pathLabel : Nat -> String .
   eq pathLabel(N) = "path-" + string(N,10) .
+
+  op performAssignments : Config -> Config .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V,  prevVal: V', AtS > PS ]
+      [ microacts : undoMem(Q), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V', prevVal: V, AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: array(PArr), prevVal: V'', AtS > PS ]
+      [ microacts : setMem(Q,array(PArr'),nothing), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: assign(PArr, PArr'), prevVal: array(PArr), AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(
+      Conf
+      [ memory : < Q  : memory-forwarding | target: Q',  AtS  >
+                 < Q' : memory-forwarding | target: Q'', AtS  > PS ]
+      [ microacts : setMem(Q,V,nothing), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q  : memory-forwarding | target: Q',  AtS  >
+                 < Q' : memory-forwarding | target: Q'', AtS  > PS ]
+      [ microacts : setMem(Q',V,nothing), AS ]
+      )
+    [owise] .
+  eq performAssignments(
+      Conf
+      [ memory : < Q  : memory-forwarding | target: Q',               AtS  >
+                 < Q' : memory            | actVal: V', prevVal: V'', AtS' > PS ]
+      [ microacts : setMem(Q,V,nothing), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q  : memory-forwarding | target: Q',             AtS  >
+                 < Q' : memory            | actVal: V, prevVal: V', AtS' > PS ]
+      [ microacts : AS ]
+      )
+    [owise] .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
+      [ microacts : setMem(Q,V,nothing), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V, prevVal: V', AtS > PS ]
+      [ microacts : AS ]
+      )
+    [owise] .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
+      [ microacts : setMem(Q,V,just(val(N))), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: updateArray(V',N,V), prevVal: V', AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V', prevVal: V'', AtS > PS ]
+      [ microacts : setMem(Q,V,just(unknown)), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: unknown, prevVal: V', AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V', prevVal: V'', initVal: V, AtS > PS ]
+      [ microacts : resetMem(Q), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V,  prevVal: V,   initVal: V, AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V, prevVal: V', AtS > PS ]
+      [ microacts : undoMem(Q), AS ]
+      )
+  =
+    performAssignments(
+      Conf
+      [ memory : < Q : memory | actVal: V',  prevVal: V',  AtS > PS ]
+      [ microacts : AS ]
+      )
+    .
+  eq performAssignments(Conf) = Conf [owise] .
 
 
 

@@ -39,8 +39,9 @@ mod TEST--ATOMIC--EXECUTING--ASSIGNMENT-NODE is
                                    (var(M . A) := const(val(2))) > ]
         [ microacts : setOutcome(B . A,interrupted(parentExited)),
                       setStatus(B . A,failing),
+                      undoMem(M . A),
                       logTransition(B . A, executing, failing, 1) ]
-        [ macroacts : undoMem(M . A) ]
+        [ macroacts : mtactions ]
         [ memory : none ]
       )
     end
@@ -77,8 +78,9 @@ mod TEST--ATOMIC--EXECUTING--ASSIGNMENT-NODE is
                                    (var(M . A) := const(val(2))) > ]
         [ microacts : setOutcome(B . A,interrupted(exited)),
                       setStatus(B . A,failing),
+                      undoMem(M . A),
                       logTransition(B . A, executing, failing, 2) ]
-        [ macroacts : undoMem(M . A) ]
+        [ macroacts : mtactions ]
         [ memory : none ]
       )
     end
@@ -115,8 +117,9 @@ mod TEST--ATOMIC--EXECUTING--ASSIGNMENT-NODE is
                                    (var(M . A) := const(val(2))) > ]
         [ microacts : setOutcome(B . A,failure(parentFailed)),
                       setStatus(B . A,failing),
+                      undoMem(M . A),
                       logTransition(B . A, executing, failing, 3) ]
-        [ macroacts : undoMem(M . A) ]
+        [ macroacts : mtactions ]
         [ memory : none ]
       )
     end
@@ -153,8 +156,9 @@ mod TEST--ATOMIC--EXECUTING--ASSIGNMENT-NODE is
                                    (var(M . A) := const(val(2))) > ]
         [ microacts : setOutcome(B . A,failure(invariantFailed)),
                       setStatus(B . A,failing),
+                      undoMem(M . A),
                       logTransition(B . A, executing, failing, 4) ]
-        [ macroacts : undoMem(M . A) ]
+        [ macroacts : mtactions]
         [ memory : none ]
       )
     end

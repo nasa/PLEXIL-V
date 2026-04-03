@@ -1,0 +1,8 @@
+Real Lookup time;
+
+assignmentDoesNotInduceMacro:
+{
+  Real i = 0;
+  Invariant i == 1;
+  i = Lookup(time);
+}
