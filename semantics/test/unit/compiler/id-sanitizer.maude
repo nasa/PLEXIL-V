@@ -418,6 +418,20 @@ begin tests
         )
     end
 
+    assert "A `func` expression propagates the sanitization" from
+        testExpression(
+            sanitizeIds(
+                func(absp,var(V)),
+                Q,
+                Cfg
+            )
+        )
+        reaches
+        testExpression(
+            func(absp,var(QV))
+        )
+    end
+
     assert "An `isKnown` expression propagates the sanitization" from
         testExpression(
             sanitizeIds(

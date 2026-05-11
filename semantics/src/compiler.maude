@@ -142,6 +142,7 @@ fmod COMPILER is
     eq attributeIsSanitizable(At) = false [owise] .
 
   var Hndl : CommandHandle .
+  var Fun  : Function .
 
   op sanitizeIds : Expression NeQualified Configuration ~> Expression .
   eq sanitizeIds((not E)                            , NQ, Cfg) = not sanitizeIds(E, NQ, Cfg) .
@@ -160,6 +161,7 @@ fmod COMPILER is
   eq sanitizeIds(cmdHandleIs?(I . Q,Hndl)           , NQ, Cfg) = cmdHandleIs?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Hndl) .
   eq sanitizeIds(areChildren?(I . Q,Status)         , NQ, Cfg) = areChildren?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Status) .
   eq sanitizeIds(isFailure?(I . Q,FlTy)             , NQ, Cfg) = isFailure?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), FlTy) .
+  eq sanitizeIds(func(Fun,E)                        , NQ, Cfg) = func(Fun,sanitizeIds(E, NQ, Cfg)) .
   eq sanitizeIds(isKnown(E)                         , NQ, Cfg) = isKnown(sanitizeIds(E, NQ, Cfg)) .
   eq sanitizeIds(noChildFailed                      , NQ, Cfg) = noChildFailed(NQ) .
   eq sanitizeIds(isFinished?(sibling(I))            , NQ, Cfg) = isFinished?(getFullyQualifiedNodeId(self,I . tailQualified(NQ),Cfg)) .

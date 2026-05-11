@@ -1,0 +1,8 @@
+initial-state {
+    state time () = 3: real;
+}
+
+script {
+    state time () =  1: real;
+    state time () =  2: real;
+}

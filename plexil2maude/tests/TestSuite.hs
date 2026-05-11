@@ -117,6 +117,7 @@ testsLegacy =
         ,testsBinarizeList
         ,testsParseNodeCondition
         ,testLookups
+        ,testArithmeticExpressions
         ,testUpdate
         ,testsParseConcat
         ,testGroup "Different issues" $
@@ -1099,6 +1100,19 @@ testLookups =
         |],
         [r|lookupOnChange('time,(nilarg),val (0.1))|])
       ]
+
+testArithmeticExpressions :: TestTree
+testArithmeticExpressions =
+  testGroup "ArithmeticExpressions" $
+    map (testify'' elementVisitor)
+    [ ("Absolute value",
+       [r|
+        <ABS ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+        </ABS>
+        |],
+       "(func(absp,const(val(0))))")
+    ]
 
 testUpdate :: TestTree
 testUpdate =
