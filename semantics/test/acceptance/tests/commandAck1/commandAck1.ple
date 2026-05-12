@@ -1,0 +1,12 @@
+Command cmd_name(Boolean);
+
+commandAck1: Concurrence
+{
+  cmd1: {
+    cmd_name(true);
+  }
+  cmd2: {
+    EndCondition cmd1.state == FINISHING;
+    cmd_name(true);
+  }
+}

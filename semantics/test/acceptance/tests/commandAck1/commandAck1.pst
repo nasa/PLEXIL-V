@@ -1,0 +1,8 @@
+
+// commandAck1
+
+script {
+    state time () =  1: real;
+    state time () =  2: real;
+    command-success cmd_name(1 : bool);
+}
