@@ -159,6 +159,8 @@ instance Pretty Parameter where
                 text "val" <> parens (text $ case valueStr of
                                         "1" -> "true"
                                         "0" -> "false"
+                                        "true"  -> "true"
+                                        "false" -> "false"
                                       )
 
               prettyString valueStr =
