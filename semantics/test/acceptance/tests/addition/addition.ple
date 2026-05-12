@@ -1,0 +1,5 @@
+addition: {
+    Real r = 2.0;
+    Integer i = 9;
+    Invariant (4 + r) == 6.0 && (3 + i) == 12;
+}

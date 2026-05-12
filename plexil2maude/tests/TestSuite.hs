@@ -1103,9 +1103,17 @@ testLookups =
 
 testArithmeticExpressions :: TestTree
 testArithmeticExpressions =
-  testGroup "ArithmeticExpressions" $
+  testGroup "ArithmeticOperator" $
     map (testify'' elementVisitor)
-    [ ("Absolute value",
+    [ ("ADD",
+       [r|
+        <ADD ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </ADD>
+        |],
+       "_+_(const(val(0)),const(val(1)))")
+    , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">
           <IntegerValue>0</IntegerValue>
