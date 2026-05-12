@@ -1,4 +1,5 @@
 load add.maude
+load sub.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -7,11 +8,13 @@ mod TEST--EVALUATION is
 
   --- Test submodules
   pr TEST--EVALUATION--ADD .
+  pr TEST--EVALUATION--SUB .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
   eq test--evaluation =
        test--evaluation--add +
+       test--evaluation--sub +
        test--evaluation--equ +
 
 begin tests
