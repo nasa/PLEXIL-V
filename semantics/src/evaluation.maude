@@ -99,6 +99,7 @@ fmod EVAL is
  eq const(unknown) - E = const(unknown) .
  eq const(unknown) * E = const(unknown) .
  eq const(unknown) / E = const(unknown) .
+ eq const(unknown) rem E = const(unknown) .
  eq const(unknown) < E = const(unknown) .
  eq const(unknown) > E = const(unknown) .
  eq const(unknown) <= E = const(unknown) .
@@ -107,6 +108,7 @@ fmod EVAL is
  eq E - const(unknown) = const(unknown) .
  eq E * const(unknown) = const(unknown) .
  eq E / const(unknown) = const(unknown) .
+ eq E rem const(unknown) = const(unknown) .
  eq E < const(unknown) = const(unknown) .
  eq E > const(unknown) = const(unknown) .
  eq E <= const(unknown) = const(unknown) .

@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--MOD is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--mod : -> TestResults .
+ceq test--evaluation--mod =
+begin tests
+
+assert "Integer remainder" from
+  testExpression(
+    const(val(4)) rem const(val(3))
+  )
+reaches
+  testExpression(
+    const(val(1))
+  )
+end
+
+assert "Float remainder" from
+  testExpression(
+    const(val(6.0)) rem const(val(4.0))
+  )
+reaches
+  testExpression(
+    const(val(2.0))
+  )
+end
+
+assert "Float coerced remainder" from
+  testExpression(
+    const(val(10)) rem const(val(7.0))
+  )
+  testExpression(
+    const(val(10.0)) rem const(val(7))
+  )
+reaches
+  testExpression(
+    const(val(3.0))
+  )
+  testExpression(
+    const(val(3.0))
+  )
+end
+
+assert "Unknown remainder" from
+  testExpression(
+    const(unknown) rem const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) rem const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive remainder" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) rem var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(1.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(13.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm
