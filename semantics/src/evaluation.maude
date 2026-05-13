@@ -53,6 +53,7 @@ fmod EVAL is
  eq const(val(I)) + const(val(I')) = const(val(I + I')) .
  eq const(val(I)) - const(val(I')) = const(val(I - I')) .
  eq const(val(I)) * const(val(I')) = const(val(I * I')) .
+ eq const(val(I)) / const(val(I')) = const(val(I / I')) .
  eq const(val(I)) rem const(val(I')) = const(val(I rem I')) .
  eq const(val(I)) < const(val(I')) = const(val(I < I')) .
  eq const(val(I)) > const(val(I')) = const(val(I > I')) .
@@ -61,6 +62,7 @@ fmod EVAL is
  eq const(val(F)) + const(val(F')) = const(val(F + F')) .
  eq const(val(F)) - const(val(F')) = const(val(F - F')) .
  eq const(val(F)) * const(val(F')) = const(val(F * F')) .
+ eq const(val(F)) / const(val(F')) = const(val(F / F')) .
  eq const(val(F)) rem const(val(F')) = const(val(F rem F')) .
  eq const(val(F)) < const(val(F')) = const(val(F < F')) .
  eq const(val(F)) > const(val(F')) = const(val(F > F')) .
@@ -74,6 +76,8 @@ fmod EVAL is
  eq const(val(F))  - const(val(I)) = const(val(F))         - const(val(float(I))) .
  eq const(val(I))  * const(val(F)) = const(val(float(I)))  * const(val(F))        .
  eq const(val(F))  * const(val(I)) = const(val(F))         * const(val(float(I))) .
+ eq const(val(I))  / const(val(F)) = const(val(float(I)))  / const(val(F))        .
+ eq const(val(F))  / const(val(I)) = const(val(F))         / const(val(float(I))) .
  eq const(val(I))  rem const(val(F)) = const(val(float(I))) rem const(val(F))        .
  eq const(val(F))  rem const(val(I)) = const(val(F))        rem const(val(float(I))) .
  eq const(val(I))  < const(val(F)) = const(val(float(I)))  < const(val(F))        .
@@ -94,6 +98,7 @@ fmod EVAL is
  eq const(unknown) + E = const(unknown) .
  eq const(unknown) - E = const(unknown) .
  eq const(unknown) * E = const(unknown) .
+ eq const(unknown) / E = const(unknown) .
  eq const(unknown) < E = const(unknown) .
  eq const(unknown) > E = const(unknown) .
  eq const(unknown) <= E = const(unknown) .
@@ -101,6 +106,7 @@ fmod EVAL is
  eq E + const(unknown) = const(unknown) .
  eq E - const(unknown) = const(unknown) .
  eq E * const(unknown) = const(unknown) .
+ eq E / const(unknown) = const(unknown) .
  eq E < const(unknown) = const(unknown) .
  eq E > const(unknown) = const(unknown) .
  eq E <= const(unknown) = const(unknown) .
@@ -132,6 +138,7 @@ fmod EVAL is
  eq eval(C,PL,E + E') = eval(C,PL,E) + eval(C,PL,E') .
  eq eval(C,PL,E - E') = eval(C,PL,E) - eval(C,PL,E') .
  eq eval(C,PL,E * E') = eval(C,PL,E) * eval(C,PL,E') .
+ eq eval(C,PL,E / E') = eval(C,PL,E) / eval(C,PL,E') .
  eq eval(C,PL,E rem E') = eval(C,PL,E) rem eval(C,PL,E') .
  eq eval(C,PL,E < E') = eval(C,PL,E) < eval(C,PL,E') .
  eq eval(C,PL,E > E') = eval(C,PL,E) > eval(C,PL,E') .

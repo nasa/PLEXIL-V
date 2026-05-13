@@ -1129,6 +1129,14 @@ testArithmeticExpressions =
         </MUL>
         |],
        "_*_(const(val(0)),const(val(1)))")
+    , ("DIV",
+       [r|
+        <DIV ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </DIV>
+        |],
+       "_/_(const(val(0)),const(val(1)))")
     , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">
