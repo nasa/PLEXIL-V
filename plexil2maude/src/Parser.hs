@@ -767,12 +767,12 @@ helper el children =
             "GT" -> binarizeFunctionApplication ">"
             "LE" -> binarizeFunctionApplication "<="
             "LT" -> binarizeFunctionApplication "<"
+            "ADD" -> binarizeFunctionApplication "+"
             "SUB" -> binarizeFunctionApplication "-"
             "MUL" -> binarizeFunctionApplication "*"
-            "ADD" -> binarizeFunctionApplication "+"
             "MOD" -> binarizeFunctionApplication "rem"
-            "Concat" -> errorize $ parseConcat cursor
             "ABS" -> parens $ text "func" <> parens (text "absp" <> comma <> hcat (punctuate comma children))
+            "Concat" -> errorize $ parseConcat cursor
             "IsKnown" -> text "isKnown" <> parens (hcat ( punctuate comma children))
 
             "NoChildFailed" -> text "noChildFailed"

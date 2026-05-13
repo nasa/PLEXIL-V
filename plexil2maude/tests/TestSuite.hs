@@ -1113,6 +1113,22 @@ testArithmeticExpressions =
         </ADD>
         |],
        "_+_(const(val(0)),const(val(1)))")
+    , ("SUB",
+       [r|
+        <SUB ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </SUB>
+        |],
+       "_-_(const(val(0)),const(val(1)))")
+    , ("MUL",
+       [r|
+        <MUL ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MUL>
+        |],
+       "_*_(const(val(0)),const(val(1)))")
     , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">
