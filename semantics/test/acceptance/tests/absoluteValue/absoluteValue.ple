@@ -1,5 +1,5 @@
-Real Lookup time;
-
 absoluteValue: {
-    Invariant abs(Lookup(time)) > 0;
+    Real r = -2.0;
+    Integer i = -9;
+    Invariant abs(r) == 2.0 && abs(i) == 9;
 }

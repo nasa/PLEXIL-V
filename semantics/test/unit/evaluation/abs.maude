@@ -1,0 +1,71 @@
+mod TEST--EVALUATION--ABS is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--abs : -> TestResults .
+ceq test--evaluation--abs =
+begin tests
+
+assert "Integer abs" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(absp, const(val(-4)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(4))
+  )
+end
+
+assert "Float abs" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(absp, const(val(-6.0)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(6.0))
+  )
+end
+
+assert "Unknown abs" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(absp, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive abs" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(absp, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(12.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(-12.0) >
+.
+
+endm

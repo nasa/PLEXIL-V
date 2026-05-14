@@ -1,5 +1,0 @@
-Integer Lookup itime;
-
-absoluteValue2: {
-    Invariant abs(Lookup(itime)) > 0;
-}
