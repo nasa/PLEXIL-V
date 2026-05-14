@@ -1,9 +1,16 @@
+load equ.maude
+
 mod TEST--EVALUATION is
 
   pr TEST-BASE .
 
+  --- Test submodules
+  pr TEST--EVALUATION--EQU .
+
   op test--evaluation : -> TestResults .
   eq test--evaluation =
+       test--evaluation--equ +
+
 begin tests
 
   assert "numberOfCommandsOnExecutionWithId return 0 if there are no commands on execution" from

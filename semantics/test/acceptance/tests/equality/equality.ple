@@ -1,0 +1,7 @@
+equality: {
+    Integer i = 2;
+    Real r = 2.0;
+    Boolean b = true;
+    String s = "foo";
+    Invariant i == 2 && r == 2.0 && i == r && !b == !b  && s == "foo";
+}

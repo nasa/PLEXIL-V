@@ -1,0 +1,167 @@
+mod TEST--EVALUATION--EQU is
+
+pr TEST-BASE .
+
+vars Cfg : Configuration .
+
+op  test--evaluation--equ : -> TestResults .
+ceq test--evaluation--equ =
+begin tests
+
+assert "Integer equality" from
+  testExpression(
+    const(val(4)) equ const(val(4))
+  )
+  testExpression(
+    const(val(4)) equ const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "Float equality" from
+  testExpression(
+    const(val(3.0)) equ const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) equ const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "Float coerced equality" from
+  testExpression(
+    const(val(10)) equ const(val(10.0))
+  )
+  testExpression(
+    const(val(10.0)) equ const(val(10))
+  )
+  testExpression(
+    const(val(10)) equ const(val(2.0))
+  )
+  testExpression(
+    const(val(10.0)) equ const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "Boolean equality" from
+  testExpression(
+    const(val(true)) equ const(val(true))
+  )
+  testExpression(
+    const(val(false)) equ const(val(false))
+  )
+  testExpression(
+    const(val(true)) equ const(val(false))
+  )
+  testExpression(
+    const(val(false)) equ const(val(true))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "String equality" from
+  testExpression(
+    const(val("foo")) equ const(val("foo"))
+  )
+  testExpression(
+    const(val("foo")) equ const(val("bar"))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "Unknown equality" from
+  testExpression(
+    const(unknown) equ const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) equ const(unknown)
+  )
+  testExpression(
+    const(unknown) equ const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive equality" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) equ var('B)
+    )
+  )
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) equ var('C)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(12.0) >
+          < 'C : memory | actVal: val(4)  >
+.
+
+endm

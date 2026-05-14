@@ -106,17 +106,19 @@ fmod EVAL is
  eq E <= const(unknown) = const(unknown) .
  eq E >= const(unknown) = const(unknown) .
 
- eq const(val(I)) equ const(val(I)) = const(val(true)) .
- eq const(val(I)) equ const(val(I')) = const(val(false)) [owise] .
- eq const(val(I)) equ const(val(F)) = const(val(false)) .
- eq const(val(F)) equ const(val(I)) = const(val(false)) .
- eq const(val(F)) equ const(val(F)) = const(val(true)) .
- eq const(val(F)) equ const(val(F')) = const(val(false)) [owise] .
- eq const(val(R)) equ const(val(R)) = const(val(true)) .
- eq const(val(R)) equ const(val(R')) = const(val(false)) [owise] .
- eq const(unknown) equ E = const(unknown) .
- eq E equ E = const(val(true)) [owise] .
- eq E equ const(unknown) = const(unknown) .
+ eq const(val(I))  equ const(val(I))  = const(val(true))                              .
+ eq const(val(I))  equ const(val(I')) = const(val(false))                     [owise] .
+ eq const(val(I))  equ const(val(F))  = const(val(float(I))) equ const(val(F))        .
+ eq const(val(F))  equ const(val(I))  = const(val(F))        equ const(val(float(I))) .
+ eq const(val(F))  equ const(val(F))  = const(val(true))                              .
+ eq const(val(F))  equ const(val(F')) = const(val(false))                     [owise] .
+ eq const(val(R))  equ const(val(R))  = const(val(true))                              .
+ eq const(val(R))  equ const(val(R')) = const(val(false))                     [owise] .
+ eq const(val(B))  equ const(val(B))  = const(val(true))                              .
+ eq const(val(B))  equ const(val(B')) = const(val(false))                     [owise] .
+ eq const(unknown) equ E              = const(unknown)                                .
+ eq E              equ const(unknown) = const(unknown)                                .
+ eq E              equ E              = const(val(true))                      [owise] .
 
  eq E nequ E' = not (E equ E') .
 
