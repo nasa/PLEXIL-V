@@ -773,6 +773,7 @@ helper el children =
             "DIV" -> binarizeFunctionApplication "/"
             "MOD" -> binarizeFunctionApplication "rem"
             "MAX" -> binarizeFunctionApplication "max"
+            "MIN" -> binarizeFunctionApplication "min"
             "ABS" -> parens $ text "func" <> parens (text "absp" <> comma <> hcat (punctuate comma children))
             "Concat" -> errorize $ parseConcat cursor
             "IsKnown" -> text "isKnown" <> parens (hcat ( punctuate comma children))

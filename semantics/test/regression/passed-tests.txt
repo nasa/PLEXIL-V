@@ -64,3 +64,4 @@ Resource4HvmRepeatCond.maude
 AtomicAssignment.maude
 AssignToParentInvariant.maude
 maxTest.maude
+minTest.maude

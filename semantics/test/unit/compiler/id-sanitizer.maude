@@ -496,6 +496,13 @@ begin tests
                 Cfg
             )
         )
+        testExpression(
+            sanitizeIds(
+                var(V) min var(W),
+                Q,
+                Cfg
+            )
+        )
         reaches
         testExpression(
             var(QV) + var(QW)
@@ -511,6 +518,9 @@ begin tests
         )
         testExpression(
             var(QV) max var(QW)
+        )
+        testExpression(
+            var(QV) min var(QW)
         )
     end
 

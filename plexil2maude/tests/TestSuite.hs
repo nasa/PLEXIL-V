@@ -1153,6 +1153,14 @@ testArithmeticExpressions =
         </MAX>
         |],
        "_max_(const(val(0)),const(val(1)))")
+    , ("MIN",
+       [r|
+        <MIN ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MIN>
+        |],
+       "_min_(const(val(0)),const(val(1)))")
     , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">
