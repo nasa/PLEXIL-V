@@ -3,6 +3,7 @@ load sub.maude
 load mul.maude
 load div.maude
 load mod.maude
+load max.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -15,6 +16,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--MUL .
   pr TEST--EVALUATION--DIV .
   pr TEST--EVALUATION--MOD .
+  pr TEST--EVALUATION--MAX .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
@@ -24,6 +26,7 @@ mod TEST--EVALUATION is
        test--evaluation--mul +
        test--evaluation--div +
        test--evaluation--mod +
+       test--evaluation--max +
        test--evaluation--equ +
 
 begin tests

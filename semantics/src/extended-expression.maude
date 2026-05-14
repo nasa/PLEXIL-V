@@ -14,6 +14,7 @@ fmod EXTENDED-EXPRESSION is
  op _*_           : Expression Expression -> Expression [prec 12 format (o sc o o)] .
  op _/_           : Expression Expression -> Expression [prec 12 format (o sc o o)] .
  op _rem_         : Expression Expression -> Expression [prec 12 format (o sc o o)] .
+ op _max_         : Expression Expression -> Expression [prec 14 format (o sc o o)] .
  op _<_           : Expression Expression -> Expression [prec 15 format (o sc o o)] .
  op _<=_          : Expression Expression -> Expression [prec 15 format (o sc o o)] .
  op _>_           : Expression Expression -> Expression [prec 15 format (o sc o o)] .

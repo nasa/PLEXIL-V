@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--MAX is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--max : -> TestResults .
+ceq test--evaluation--max =
+begin tests
+
+assert "Integer max" from
+  testExpression(
+    const(val(4)) max const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(4))
+  )
+end
+
+assert "Float max" from
+  testExpression(
+    const(val(6.0)) max const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(6.0))
+  )
+end
+
+assert "Float coerced max" from
+  testExpression(
+    const(val(10)) max const(val(7.0))
+  )
+  testExpression(
+    const(val(10.0)) max const(val(7))
+  )
+reaches
+  testExpression(
+    const(val(10.0))
+  )
+  testExpression(
+    const(val(10.0))
+  )
+end
+
+assert "Unknown max" from
+  testExpression(
+    const(unknown) max const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) max const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive max" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) max var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(12.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm

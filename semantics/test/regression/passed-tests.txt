@@ -63,3 +63,4 @@ LibraryCall6.maude
 Resource4HvmRepeatCond.maude
 AtomicAssignment.maude
 AssignToParentInvariant.maude
+maxTest.maude

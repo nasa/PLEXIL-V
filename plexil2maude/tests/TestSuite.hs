@@ -1145,6 +1145,14 @@ testArithmeticExpressions =
         </MOD>
         |],
        "_rem_(const(val(8)),const(val(3)))")
+    , ("MAX",
+       [r|
+        <MAX ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MAX>
+        |],
+       "_max_(const(val(0)),const(val(1)))")
     , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">

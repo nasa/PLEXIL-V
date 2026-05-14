@@ -158,6 +158,7 @@ fmod COMPILER is
   eq sanitizeIds((E - E')                           , NQ, Cfg) = sanitizeIds(E, NQ, Cfg)  -   sanitizeIds(E', NQ, Cfg) .
   eq sanitizeIds((E * E')                           , NQ, Cfg) = sanitizeIds(E, NQ, Cfg)  *   sanitizeIds(E', NQ, Cfg) .
   eq sanitizeIds((E / E')                           , NQ, Cfg) = sanitizeIds(E, NQ, Cfg)  /   sanitizeIds(E', NQ, Cfg) .
+  eq sanitizeIds((E max E')                         , NQ, Cfg) = sanitizeIds(E, NQ, Cfg)  max sanitizeIds(E', NQ, Cfg) .
   eq sanitizeIds((E rem E')                         , NQ, Cfg) = sanitizeIds(E, NQ, Cfg)  rem sanitizeIds(E', NQ, Cfg) .
   eq sanitizeIds(cmdHandleIs?(I . Q,Hndl)           , NQ, Cfg) = cmdHandleIs?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Hndl) .
   eq sanitizeIds(areChildren?(I . Q,Status)         , NQ, Cfg) = areChildren?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Status) .
