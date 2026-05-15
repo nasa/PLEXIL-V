@@ -246,6 +246,21 @@ eq [eval-forwarded-variable] :
  ceq eval(C,PL,func(floor,E)) = const(unknown)
   if const(unknown) == eval(C,PL,E) .
 
+ ceq eval(C,PL,func(round,E)) = const(val(round(F)))
+  if const(val(F)) := eval(C,PL,E) .
+
+ ceq eval(C,PL,func(round,E)) = const(val(round(float(I))))
+  if const(val(I)) := eval(C,PL,E) .
+
+ ceq eval(C,PL,func(round,E)) = const(unknown)
+  if const(unknown) == eval(C,PL,E) .
+
+   op round : Float -> Float .
+  ceq round(F) = floor(F + 0.5)
+    if F >= 0.0 .
+  ceq round(F) = ceiling(F - 0.5)
+    if F < 0.0 .
+
 *** Predicates on Processes
 
 var FT FT' : FailureType .

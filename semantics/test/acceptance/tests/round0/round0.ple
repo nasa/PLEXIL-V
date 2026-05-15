@@ -1,0 +1,20 @@
+round0: {
+    Real x = 1.4;
+    Real y = 1.5;
+    Real z = 1.6;
+    Real a = -1.4;
+    Real b = -1.5;
+    Real c = -1.6;
+    Real d = 0.0;
+    Real e = 2.7;
+    Real f = -2.7;
+    Invariant round(x) == 1
+      && round(y) == 2
+      && round(z) == 2
+      && round(a) == -1
+      && round(b) == -2
+      && round(c) == -2
+      && round(d) == 0
+      && round(e) == 3
+      && round(f) == -3;
+}

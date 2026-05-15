@@ -1,0 +1,141 @@
+mod TEST--EVALUATION--ROUND is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--round : -> TestResults .
+ceq test--evaluation--round =
+begin tests
+
+assert "Integer round" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(9)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(9.0))
+  )
+end
+
+assert "Float round positive" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(1.4)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(1.0))
+  )
+end
+
+assert "Float round positive half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(1.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(2.0))
+  )
+end
+
+assert "Float round positive above half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(1.6)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(2.0))
+  )
+end
+
+assert "Float round negative" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(-1.4)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-1.0))
+  )
+end
+
+assert "Float round negative half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(-1.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-2.0))
+  )
+end
+
+assert "Float round negative below half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(val(-1.6)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-2.0))
+  )
+end
+
+assert "Unknown round" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive round" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(round, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(25.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(25.3) >
+.
+
+endm

@@ -44,6 +44,8 @@ fmod EXTENDED-EXPRESSION is
  op ceiling : -> Function .
 **** Floor (of integers and reals)
  op floor   : -> Function .
+**** Round (of integers and reals)
+ op round   : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .
