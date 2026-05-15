@@ -1175,6 +1175,13 @@ testArithmeticExpressions =
         </ABS>
         |],
        "(func(absp,const(val(0))))")
+    , ("CEIL",
+       [r|
+        <CEIL ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </CEIL>
+        |],
+       "(func(ceiling,const(val(4.7))))")
     ]
 
 testUpdate :: TestTree

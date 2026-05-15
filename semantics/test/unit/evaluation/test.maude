@@ -7,6 +7,7 @@ load max.maude
 load min.maude
 load sqrt.maude
 load abs.maude
+load ceiling.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -23,6 +24,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--MIN .
   pr TEST--EVALUATION--SQRT .
   pr TEST--EVALUATION--ABS .
+  pr TEST--EVALUATION--CEILING .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
@@ -36,6 +38,7 @@ mod TEST--EVALUATION is
        test--evaluation--min +
        test--evaluation--sqrt +
        test--evaluation--abs +
+       test--evaluation--ceiling +
        test--evaluation--equ +
 
 begin tests

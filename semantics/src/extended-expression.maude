@@ -37,9 +37,11 @@ fmod EXTENDED-EXPRESSION is
 
 *** Function Ids
 **** Absolute value (of integers and reals)
- op absp  : -> Function .
+ op absp    : -> Function .
 **** Square root (of reals)
- op sqrt  : -> Function .
+ op sqrt    : -> Function .
+**** Ceiling (of integers and reals)
+ op ceiling : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .
