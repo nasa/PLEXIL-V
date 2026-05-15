@@ -93,22 +93,22 @@ fmod ATOMIC is
       then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,1) ]
            [ macroacts : AS' ]
       else if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,3) ]
+      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,2) ]
            [ macroacts : AS' ]
       else if ancestorEndTrue?(GAMMA, Nds MEM, A)
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,4) ]
+      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,3) ]
            [ macroacts : AS' ]
       else if isTrue(eval(GAMMA, Nds MEM, SkC))
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,5) ]
+      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,4) ]
            [ macroacts : AS' ]
       else if isTrue(eval(GAMMA,Nds MEM,StC))
       then
         if not isTrue(eval(GAMMA,Nds MEM,PC))
-        then [ microacts : AS,setStatus(A, iterationEnded),setOutcome(A, failure(preconditionFailed)),logTransition(A,waiting,iterationEnded,6) ]
+        then [ microacts : AS,setStatus(A, iterationEnded),setOutcome(A, failure(preconditionFailed)),logTransition(A,waiting,iterationEnded,5) ]
              [ macroacts : AS' ]
         else if C == assignment
         then [ macroacts : setMem(assignmentVariable(A, Nds), expToVal(eval(GAMMA,MEM,assignmentExpression(A,Nds))),if isArrayAssignment(A,Nds) then just(expToVal(eval(GAMMA,MEM,assignmentIndexExpression(A,Nds)))) else nothing fi), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,7),AS ]
+             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else if C == command
         then [ macroacts :
                 runCommand(
@@ -118,22 +118,22 @@ fmod ATOMIC is
                     evalpar(GAMMA, MEM, getCommandArguments(A, Nds'))
                   )
                 ), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,7),AS ]
+             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else if C == update
         then [ macroacts : runUpdate(A, evalPairs(GAMMA, MEM, getPairs(A, Nds'))), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,7),AS ]
+             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else if C == library
         then [ macroacts : AS' ]
-             [ microacts : callLibrary(A,evalLibraryCallArguments(A,GAMMA, Nds MEM)), setStatus(A,executing),logTransition(A,waiting,executing,7),AS ]
+             [ microacts : callLibrary(A,evalLibraryCallArguments(A,GAMMA, Nds MEM)), setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else [ macroacts : AS' ]
-             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,7),AS ]
+             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         fi
         fi
         fi
         fi
         fi
       else [ macroacts : AS' ]
-           [ microacts : logTransition(A,waiting,waiting,8),AS ]
+           [ microacts : logTransition(A,waiting,waiting,7),AS ]
       fi
       fi
       fi

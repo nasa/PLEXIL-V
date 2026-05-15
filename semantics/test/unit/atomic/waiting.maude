@@ -118,12 +118,12 @@ mod TEST--ATOMIC--WAITING is
                               pre: const(unknown),
                               exitc: const(val(true)) > ]
         [ memory : none ]
-        [ microacts : logTransition(B . A, waiting, waiting, 8) ]
+        [ microacts : logTransition(B . A, waiting, waiting, 7) ]
         [ macroacts : mtactions ]
       )
     end
 
-    assert "Waiting node follows path 3 (waiting-03)" from
+    assert "Waiting node follows path 2 (waiting-02)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -148,6 +148,48 @@ mod TEST--ATOMIC--WAITING is
             < A     : list  | status: executing,
                               exitc: const(unknown),
                               inv: const(val(false)) >
+            < B . A : empty | status: waiting,
+                              active: false,
+                              suspended: false,
+                              skip: const(unknown),
+                              startc: const(unknown),
+                              pre: const(unknown),
+                              exitc: const(unknown) > ]
+        [ memory : none ]
+        [ microacts : setStatus(B . A, finished),
+                      setOutcome(B . A,skipped),
+                      logTransition(B . A,waiting,finished,2) ]
+        [ macroacts : mtactions ]
+      )
+    end
+
+    assert "Waiting node follows path 3 (waiting-03)" from
+      waiting(
+        [ environment : mtenvironment ]
+        [ nodes :
+            < A     : list  | status: executing,
+                              exitc: const(unknown),
+                              inv: const(unknown),
+                              endc: const(val(true)) >
+            < B . A : empty | status: waiting,
+                              active: true,
+                              suspended: false,
+                              skip: const(unknown),
+                              startc: const(unknown),
+                              pre: const(unknown),
+                              exitc: const(unknown) > ]
+        [ memory : none ]
+        [ microacts : mtactions ]
+        [ macroacts : mtactions ]
+      )
+    reaches
+      waiting(
+        [ environment : mtenvironment ]
+        [ nodes :
+            < A     : list  | status: executing,
+                              exitc: const(unknown),
+                              inv: const(unknown),
+                              endc: const(val(true)) >
             < B . A : empty | status: waiting,
                               active: false,
                               suspended: false,
@@ -170,11 +212,11 @@ mod TEST--ATOMIC--WAITING is
             < A     : list  | status: executing,
                               exitc: const(unknown),
                               inv: const(unknown),
-                              endc: const(val(true)) >
+                              endc: const(unknown) >
             < B . A : empty | status: waiting,
                               active: true,
                               suspended: false,
-                              skip: const(unknown),
+                              skip: const(val(true)),
                               startc: const(unknown),
                               pre: const(unknown),
                               exitc: const(unknown) > ]
@@ -189,11 +231,11 @@ mod TEST--ATOMIC--WAITING is
             < A     : list  | status: executing,
                               exitc: const(unknown),
                               inv: const(unknown),
-                              endc: const(val(true)) >
+                              endc: const(unknown) >
             < B . A : empty | status: waiting,
                               active: false,
                               suspended: false,
-                              skip: const(unknown),
+                              skip: const(val(true)),
                               startc: const(unknown),
                               pre: const(unknown),
                               exitc: const(unknown) > ]
@@ -206,48 +248,6 @@ mod TEST--ATOMIC--WAITING is
     end
 
     assert "Waiting node follows path 5 (waiting-05)" from
-      waiting(
-        [ environment : mtenvironment ]
-        [ nodes :
-            < A     : list  | status: executing,
-                              exitc: const(unknown),
-                              inv: const(unknown),
-                              endc: const(unknown) >
-            < B . A : empty | status: waiting,
-                              active: true,
-                              suspended: false,
-                              skip: const(val(true)),
-                              startc: const(unknown),
-                              pre: const(unknown),
-                              exitc: const(unknown) > ]
-        [ memory : none ]
-        [ microacts : mtactions ]
-        [ macroacts : mtactions ]
-      )
-    reaches
-      waiting(
-        [ environment : mtenvironment ]
-        [ nodes :
-            < A     : list  | status: executing,
-                              exitc: const(unknown),
-                              inv: const(unknown),
-                              endc: const(unknown) >
-            < B . A : empty | status: waiting,
-                              active: false,
-                              suspended: false,
-                              skip: const(val(true)),
-                              startc: const(unknown),
-                              pre: const(unknown),
-                              exitc: const(unknown) > ]
-        [ memory : none ]
-        [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,waiting,finished,5) ]
-        [ macroacts : mtactions ]
-      )
-    end
-
-    assert "Waiting node follows path 6 (waiting-06)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -284,12 +284,12 @@ mod TEST--ATOMIC--WAITING is
         [ memory : none ]
         [ microacts : setStatus(B . A, iterationEnded),
                       setOutcome(B . A,failure(preconditionFailed)),
-                      logTransition(B . A,waiting,iterationEnded,6) ]
+                      logTransition(B . A,waiting,iterationEnded,5) ]
         [ macroacts : mtactions ]
       )
     end
 
-    assert "Waiting assignment node follows path 7 (waiting-07-assignment)" from
+    assert "Waiting assignment node follows path 6 (waiting-06-assignment)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -331,13 +331,13 @@ mod TEST--ATOMIC--WAITING is
             < M . B . A : memory     | actVal: val(5),
                                        prevVal: val(0) > ]
         [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,7),
+                      logTransition(B . A,waiting,executing,6),
                       suspend(B . A) ]
         [ macroacts : setMem(M . B . A, val(15),nothing) ]
       )
     end
 
-    assert "Waiting command node follows path 7 (waiting-07-command)" from
+    assert "Waiting command node follows path 6 (waiting-06-command)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -377,13 +377,13 @@ mod TEST--ATOMIC--WAITING is
         [ memory :
             < M . B . A : memory  | actVal: val("Hello World!") > ]
         [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,7),
+                      logTransition(B . A,waiting,executing,6),
                       suspend(B . A) ]
         [ macroacts : runCommand(B . A, cmdInvocation('pprint,val("Hello World!"))) ]
       )
     end
 
-    assert "Waiting update node follows path 7 (waiting-07-update)" from
+    assert "Waiting update node follows path 6 (waiting-06-update)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -431,13 +431,13 @@ mod TEST--ATOMIC--WAITING is
         [ memory :
             < M . B . A : memory  | actVal: val("Hello World!") > ]
         [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,7),
+                      logTransition(B . A,waiting,executing,6),
                       suspend(B . A) ]
         [ macroacts : runUpdate(B . A, < 'field1 ; const(val("Hello World!")) > < 'field2 ; const(val(2)) >) ]
       )
     end
 
-    assert "Waiting other node follows path 7 (waiting-07-other)" from
+    assert "Waiting other node follows path 6 (waiting-06-other)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -473,12 +473,12 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, executing),
-                      logTransition(B . A,waiting,executing,7) ]
+                      logTransition(B . A,waiting,executing,6) ]
         [ macroacts : mtactions ]
       )
     end
 
-    assert "Waiting node follows path 8 (waiting-08)" from
+    assert "Waiting node follows path 7 (waiting-07)" from
       waiting(
         [ environment : mtenvironment ]
         [ nodes :
@@ -513,7 +513,7 @@ mod TEST--ATOMIC--WAITING is
                               pre: const(unknown),
                               exitc: const(unknown) > ]
         [ memory : none ]
-        [ microacts : logTransition(B . A, waiting, waiting, 8) ]
+        [ microacts : logTransition(B . A, waiting, waiting, 7) ]
         [ macroacts : mtactions ]
       )
     end
