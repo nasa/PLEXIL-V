@@ -1203,6 +1203,13 @@ testArithmeticExpressions =
         </TRUNC>
         |],
        "(func(trunc,const(val(4.7))))")
+     , ("REAL_TO_INT",
+       [r|
+        <REAL_TO_INT ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </REAL_TO_INT>
+        |],
+       "(func(real-to-int,const(val(4.7))))")
     ]
 
 testUpdate :: TestTree

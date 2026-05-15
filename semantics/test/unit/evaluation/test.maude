@@ -11,6 +11,7 @@ load ceiling.maude
 load floor.maude
 load round.maude
 load trunc.maude
+load real_to_int.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -31,6 +32,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--FLOOR .
   pr TEST--EVALUATION--ROUND .
   pr TEST--EVALUATION--TRUNC .
+  pr TEST--EVALUATION--REAL-TO-INT .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
@@ -48,6 +50,7 @@ mod TEST--EVALUATION is
        test--evaluation--floor +
        test--evaluation--round +
        test--evaluation--trunc +
+       test--evaluation--real-to-int +
        test--evaluation--equ +
 
 begin tests

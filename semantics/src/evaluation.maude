@@ -276,6 +276,19 @@ eq [eval-forwarded-variable] :
   ceq trunc(F) = ceiling(F)
     if F < 0.0 .
 
+ ceq eval(C,PL,func(real-to-int,E)) = const(val(real-to-int(F)))
+  if const(val(F)) := eval(C,PL,E) .
+
+ ceq eval(C,PL,func(real-to-int,E)) = const(val(I))
+  if const(val(I)) := eval(C,PL,E) .
+
+ ceq eval(C,PL,func(real-to-int,E)) = const(unknown)
+  if const(unknown) == eval(C,PL,E) .
+
+  op real-to-int : Float -> Int .
+  eq real-to-int(F) = trunc(rat(F)) .
+
+
 *** Predicates on Processes
 
 var FT FT' : FailureType .

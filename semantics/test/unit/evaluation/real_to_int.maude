@@ -1,0 +1,141 @@
+mod TEST--EVALUATION--REAL-TO-INT is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--real-to-int : -> TestResults .
+ceq test--evaluation--real-to-int =
+begin tests
+
+assert "Integer real_to_int" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(9)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(9))
+  )
+end
+
+assert "Float real_to_int positive" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(1.4)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(1))
+  )
+end
+
+assert "Float real_to_int positive half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(1.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(1))
+  )
+end
+
+assert "Float real_to_int positive above half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(1.6)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(1))
+  )
+end
+
+assert "Float real_to_int negative" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(-1.4)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-1))
+  )
+end
+
+assert "Float real_to_int negative half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(-1.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-1))
+  )
+end
+
+assert "Float real_to_int negative below half" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(val(-1.6)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(-1))
+  )
+end
+
+assert "Unknown real_to_int" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive real_to_int" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(real-to-int, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(25))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(25.3) >
+.
+
+endm

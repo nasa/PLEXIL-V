@@ -48,6 +48,8 @@ fmod EXTENDED-EXPRESSION is
  op round   : -> Function .
 **** Trunc (of integers and reals)
  op trunc   : -> Function .
+**** Real to int (of integers and reals)
+ op real-to-int : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .
