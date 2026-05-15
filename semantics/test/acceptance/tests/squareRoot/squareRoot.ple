@@ -1,0 +1,5 @@
+squareRoot: {
+    Real r = 4.0;
+    Integer i = 9;
+    Invariant sqrt(r) == 2.0 && sqrt(i) == 3.0;
+}

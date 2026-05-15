@@ -1161,6 +1161,13 @@ testArithmeticExpressions =
         </MIN>
         |],
        "_min_(const(val(0)),const(val(1)))")
+    , ("SQRT",
+       [r|
+        <SQRT ColNo="14" LineNo="4">
+          <IntegerValue>9</IntegerValue>
+        </SQRT>
+        |],
+       "(func(sqrt,const(val(9))))")
     , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">

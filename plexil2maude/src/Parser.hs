@@ -774,6 +774,7 @@ helper el children =
             "MOD" -> binarizeFunctionApplication "rem"
             "MAX" -> binarizeFunctionApplication "max"
             "MIN" -> binarizeFunctionApplication "min"
+            "SQRT" -> parens $ text "func" <> parens (text "sqrt" <> comma <> hcat (punctuate comma children))
             "ABS" -> parens $ text "func" <> parens (text "absp" <> comma <> hcat (punctuate comma children))
             "Concat" -> errorize $ parseConcat cursor
             "IsKnown" -> text "isKnown" <> parens (hcat ( punctuate comma children))

@@ -65,3 +65,4 @@ AtomicAssignment.maude
 AssignToParentInvariant.maude
 maxTest.maude
 minTest.maude
+TestAbsSqrt.maude
