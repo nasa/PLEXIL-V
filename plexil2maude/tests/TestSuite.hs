@@ -1103,15 +1103,113 @@ testLookups =
 
 testArithmeticExpressions :: TestTree
 testArithmeticExpressions =
-  testGroup "ArithmeticExpressions" $
+  testGroup "ArithmeticOperator" $
     map (testify'' elementVisitor)
-    [ ("Absolute value",
+    [ ("ADD",
+       [r|
+        <ADD ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </ADD>
+        |],
+       "_+_(const(val(0)),const(val(1)))")
+    , ("SUB",
+       [r|
+        <SUB ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </SUB>
+        |],
+       "_-_(const(val(0)),const(val(1)))")
+    , ("MUL",
+       [r|
+        <MUL ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MUL>
+        |],
+       "_*_(const(val(0)),const(val(1)))")
+    , ("DIV",
+       [r|
+        <DIV ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </DIV>
+        |],
+       "_/_(const(val(0)),const(val(1)))")
+    , ("MOD",
+       [r|
+        <MOD ColNo="14" LineNo="4">
+          <IntegerValue>8</IntegerValue>
+          <IntegerValue>3</IntegerValue>
+        </MOD>
+        |],
+       "_rem_(const(val(8)),const(val(3)))")
+    , ("MAX",
+       [r|
+        <MAX ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MAX>
+        |],
+       "_max_(const(val(0)),const(val(1)))")
+    , ("MIN",
+       [r|
+        <MIN ColNo="14" LineNo="4">
+          <IntegerValue>0</IntegerValue>
+          <IntegerValue>1</IntegerValue>
+        </MIN>
+        |],
+       "_min_(const(val(0)),const(val(1)))")
+    , ("SQRT",
+       [r|
+        <SQRT ColNo="14" LineNo="4">
+          <IntegerValue>9</IntegerValue>
+        </SQRT>
+        |],
+       "(func(sqrt,const(val(9))))")
+    , ("ABS",
        [r|
         <ABS ColNo="14" LineNo="4">
           <IntegerValue>0</IntegerValue>
         </ABS>
         |],
        "(func(absp,const(val(0))))")
+    , ("CEIL",
+       [r|
+        <CEIL ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </CEIL>
+        |],
+       "(func(ceiling,const(val(4.7))))")
+    , ("FLOOR",
+       [r|
+        <FLOOR ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </FLOOR>
+        |],
+       "(func(floor,const(val(4.7))))")
+    , ("ROUND",
+       [r|
+        <ROUND ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </ROUND>
+        |],
+       "(func(round,const(val(4.7))))")
+    , ("TRUNC",
+       [r|
+        <TRUNC ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </TRUNC>
+        |],
+       "(func(trunc,const(val(4.7))))")
+     , ("REAL_TO_INT",
+       [r|
+        <REAL_TO_INT ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </REAL_TO_INT>
+        |],
+       "(func(real-to-int,const(val(4.7))))")
     ]
 
 testUpdate :: TestTree

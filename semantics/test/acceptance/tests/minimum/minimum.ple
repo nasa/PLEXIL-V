@@ -1,0 +1,5 @@
+minimum: {
+    Real r = 2.0;
+    Integer i = 3;
+    Invariant min(4, r) == 2.0 && min(9, i) == 3;
+}

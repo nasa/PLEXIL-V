@@ -1,0 +1,71 @@
+mod TEST--EVALUATION--SQRT is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--sqrt : -> TestResults .
+ceq test--evaluation--sqrt =
+begin tests
+
+assert "Integer sqrt" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(sqrt, const(val(9)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(3.0))
+  )
+end
+
+assert "Float sqrt" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(sqrt, const(val(16.0)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(4.0))
+  )
+end
+
+assert "Unknown sqrt" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(sqrt, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive sqrt" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(sqrt, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(5.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(25.0) >
+.
+
+endm

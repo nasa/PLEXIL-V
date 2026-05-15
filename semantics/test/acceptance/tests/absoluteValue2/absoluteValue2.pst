@@ -1,8 +1,0 @@
-initial-state {
-    state itime () = -3: int;
-}
-
-script {
-    state itime () =  -1: int;
-    state itime () =  2: int;
-}

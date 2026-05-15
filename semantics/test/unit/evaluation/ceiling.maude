@@ -1,0 +1,71 @@
+mod TEST--EVALUATION--CEILING is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--ceiling : -> TestResults .
+ceq test--evaluation--ceiling =
+begin tests
+
+assert "Integer ceiling" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(ceiling, const(val(9)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(9.0))
+  )
+end
+
+assert "Float ceiling" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(ceiling, const(val(16.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(17.0))
+  )
+end
+
+assert "Unknown ceiling" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(ceiling, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive ceiling" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(ceiling, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(26.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(25.3) >
+.
+
+endm

@@ -1,3 +1,17 @@
+load add.maude
+load sub.maude
+load mul.maude
+load div.maude
+load mod.maude
+load max.maude
+load min.maude
+load sqrt.maude
+load abs.maude
+load ceiling.maude
+load floor.maude
+load round.maude
+load trunc.maude
+load real_to_int.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -5,10 +19,38 @@ mod TEST--EVALUATION is
   pr TEST-BASE .
 
   --- Test submodules
+  pr TEST--EVALUATION--ADD .
+  pr TEST--EVALUATION--SUB .
+  pr TEST--EVALUATION--MUL .
+  pr TEST--EVALUATION--DIV .
+  pr TEST--EVALUATION--MOD .
+  pr TEST--EVALUATION--MAX .
+  pr TEST--EVALUATION--MIN .
+  pr TEST--EVALUATION--SQRT .
+  pr TEST--EVALUATION--ABS .
+  pr TEST--EVALUATION--CEILING .
+  pr TEST--EVALUATION--FLOOR .
+  pr TEST--EVALUATION--ROUND .
+  pr TEST--EVALUATION--TRUNC .
+  pr TEST--EVALUATION--REAL-TO-INT .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
   eq test--evaluation =
+       test--evaluation--add +
+       test--evaluation--sub +
+       test--evaluation--mul +
+       test--evaluation--div +
+       test--evaluation--mod +
+       test--evaluation--max +
+       test--evaluation--min +
+       test--evaluation--sqrt +
+       test--evaluation--abs +
+       test--evaluation--ceiling +
+       test--evaluation--floor +
+       test--evaluation--round +
+       test--evaluation--trunc +
+       test--evaluation--real-to-int +
        test--evaluation--equ +
 
 begin tests

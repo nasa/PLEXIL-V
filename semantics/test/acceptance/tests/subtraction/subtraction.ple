@@ -1,0 +1,5 @@
+subtraction: {
+    Real r = 2;
+    Integer i = 9;
+    Invariant (4 - r) == 2.0 && (13 - i) == 4;
+}

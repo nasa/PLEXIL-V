@@ -1,0 +1,5 @@
+remainder: {
+    Real r = 2;
+    Integer i = 8;
+    Invariant 7.5 mod r == 1.5 && 9 mod i == 1.0;
+}

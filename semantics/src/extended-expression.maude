@@ -12,7 +12,10 @@ fmod EXTENDED-EXPRESSION is
  op _+_           : Expression Expression -> Expression [prec 13 format (o sc o o)] .
  op _-_           : Expression Expression -> Expression [prec 13 format (o sc o o)] .
  op _*_           : Expression Expression -> Expression [prec 12 format (o sc o o)] .
+ op _/_           : Expression Expression -> Expression [prec 12 format (o sc o o)] .
  op _rem_         : Expression Expression -> Expression [prec 12 format (o sc o o)] .
+ op _max_         : Expression Expression -> Expression [prec 14 format (o sc o o)] .
+ op _min_         : Expression Expression -> Expression [prec 14 format (o sc o o)] .
  op _<_           : Expression Expression -> Expression [prec 15 format (o sc o o)] .
  op _<=_          : Expression Expression -> Expression [prec 15 format (o sc o o)] .
  op _>_           : Expression Expression -> Expression [prec 15 format (o sc o o)] .
@@ -34,11 +37,19 @@ fmod EXTENDED-EXPRESSION is
 
 *** Function Ids
 **** Absolute value (of integers and reals)
- op absp  : -> Function .
+ op absp    : -> Function .
 **** Square root (of reals)
- op sqrt  : -> Function .
-**** Boolean negation
- op notp  : -> Function .
+ op sqrt    : -> Function .
+**** Ceiling (of integers and reals)
+ op ceiling : -> Function .
+**** Floor (of integers and reals)
+ op floor   : -> Function .
+**** Round (of integers and reals)
+ op round   : -> Function .
+**** Trunc (of integers and reals)
+ op trunc   : -> Function .
+**** Real to int (of integers and reals)
+ op real-to-int : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .

@@ -1,0 +1,5 @@
+maximum: {
+    Real r = 2;
+    Integer i = 9;
+    Invariant max(4, r) == 4.0 && max(3, i) == 9;
+}

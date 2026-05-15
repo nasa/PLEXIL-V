@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--SUB is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--sub : -> TestResults .
+ceq test--evaluation--sub =
+begin tests
+
+assert "Integer sub" from
+  testExpression(
+    const(val(4)) - const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(2))
+  )
+end
+
+assert "Float sub" from
+  testExpression(
+    const(val(6.0)) - const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(3.0))
+  )
+end
+
+assert "Float coerced sub" from
+  testExpression(
+    const(val(10)) - const(val(7.0))
+  )
+  testExpression(
+    const(val(10.0)) - const(val(7))
+  )
+reaches
+  testExpression(
+    const(val(3.0))
+  )
+  testExpression(
+    const(val(3.0))
+  )
+end
+
+assert "Unknown sub" from
+  testExpression(
+    const(unknown) - const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) - const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive sub" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) - var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(8.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm

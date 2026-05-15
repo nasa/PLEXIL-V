@@ -1,0 +1,5 @@
+ceiling: {
+    Real r = 4.7;
+    Integer i = 9;
+    Invariant ceil(r) == 5.0 && ceil(i) == 9.0;
+}

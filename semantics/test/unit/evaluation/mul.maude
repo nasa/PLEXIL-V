@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--MUL is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--mul : -> TestResults .
+ceq test--evaluation--mul =
+begin tests
+
+assert "Integer mul" from
+  testExpression(
+    const(val(4)) * const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(8))
+  )
+end
+
+assert "Float mul" from
+  testExpression(
+    const(val(6.0)) * const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(18.0))
+  )
+end
+
+assert "Float coerced mul" from
+  testExpression(
+    const(val(10)) * const(val(7.0))
+  )
+  testExpression(
+    const(val(10.0)) * const(val(7))
+  )
+reaches
+  testExpression(
+    const(val(70.0))
+  )
+  testExpression(
+    const(val(70.0))
+  )
+end
+
+assert "Unknown mul" from
+  testExpression(
+    const(unknown) * const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) * const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive mul" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) * var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(48.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm

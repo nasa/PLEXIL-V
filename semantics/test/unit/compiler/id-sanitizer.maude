@@ -482,6 +482,27 @@ begin tests
                 Cfg
             )
         )
+        testExpression(
+            sanitizeIds(
+                var(V) / var(W),
+                Q,
+                Cfg
+            )
+        )
+        testExpression(
+            sanitizeIds(
+                var(V) max var(W),
+                Q,
+                Cfg
+            )
+        )
+        testExpression(
+            sanitizeIds(
+                var(V) min var(W),
+                Q,
+                Cfg
+            )
+        )
         reaches
         testExpression(
             var(QV) + var(QW)
@@ -491,6 +512,15 @@ begin tests
         )
         testExpression(
             var(QV) * var(QW)
+        )
+        testExpression(
+            var(QV) / var(QW)
+        )
+        testExpression(
+            var(QV) max var(QW)
+        )
+        testExpression(
+            var(QV) min var(QW)
         )
     end
 

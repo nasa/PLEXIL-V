@@ -1,0 +1,5 @@
+division: {
+    Real r = 2;
+    Integer i = 3;
+    Invariant 4 / r == 2 && 9 / i == 3;
+}

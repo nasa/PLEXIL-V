@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--MIN is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--min : -> TestResults .
+ceq test--evaluation--min =
+begin tests
+
+assert "Integer min" from
+  testExpression(
+    const(val(4)) min const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(2))
+  )
+end
+
+assert "Float min" from
+  testExpression(
+    const(val(6.0)) min const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(3.0))
+  )
+end
+
+assert "Float coerced min" from
+  testExpression(
+    const(val(10)) min const(val(2.0))
+  )
+  testExpression(
+    const(val(10.0)) min const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(2.0))
+  )
+  testExpression(
+    const(val(2.0))
+  )
+end
+
+assert "Unknown min" from
+  testExpression(
+    const(unknown) min const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) min const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive min" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) min var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(4.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm

@@ -1,0 +1,8 @@
+initial-state {
+}
+
+script {
+  // The delays simulate the extra macro performed by `plexiltest` after quiescence
+  delay;
+  delay;
+}

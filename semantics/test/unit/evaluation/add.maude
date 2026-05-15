@@ -1,0 +1,82 @@
+mod TEST--EVALUATION--ADD is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--add : -> TestResults .
+ceq test--evaluation--add =
+begin tests
+
+assert "Integer addition" from
+  testExpression(
+    const(val(4)) + const(val(2))
+  )
+reaches
+  testExpression(
+    const(val(6))
+  )
+end
+
+assert "Float addition" from
+  testExpression(
+    const(val(6.0)) + const(val(3.0))
+  )
+reaches
+  testExpression(
+    const(val(9.0))
+  )
+end
+
+assert "Float coerced addition" from
+  testExpression(
+    const(val(10)) + const(val(7.0))
+  )
+  testExpression(
+    const(val(10.0)) + const(val(7))
+  )
+reaches
+  testExpression(
+    const(val(17.0))
+  )
+  testExpression(
+    const(val(17.0))
+  )
+end
+
+assert "Unknown addition" from
+  testExpression(
+    const(unknown) + const(val(3.0))
+  )
+  testExpression(
+    const(val(6.0)) + const(unknown)
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive addition" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      var('A) + var('B)
+    )
+  )
+reaches
+  testExpression(
+    const(val(16.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(12.0) >
+          < 'B : memory | actVal: val(4)  >
+.
+
+endm

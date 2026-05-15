@@ -1,0 +1,5 @@
+floor0: {
+    Real r = 4.7;
+    Integer i = 9;
+    Invariant floor(r) == 4.0 && floor(i) == 9.0;
+}

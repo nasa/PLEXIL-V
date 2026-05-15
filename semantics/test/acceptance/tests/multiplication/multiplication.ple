@@ -1,0 +1,5 @@
+multiplication: {
+    Real r = 2;
+    Integer i = 9;
+    Invariant r * 4 == 8.0 && i * 3 == 27;
+}
