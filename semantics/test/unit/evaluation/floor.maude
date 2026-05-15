@@ -1,0 +1,71 @@
+mod TEST--EVALUATION--FLOOR is
+
+pr TEST-BASE .
+
+vars Cfg      : Configuration .
+
+op  test--evaluation--floor : -> TestResults .
+ceq test--evaluation--floor =
+begin tests
+
+assert "Integer floor" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(floor, const(val(9)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(9.0))
+  )
+end
+
+assert "Float floor" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(floor, const(val(16.5)))
+    )
+  )
+reaches
+  testExpression(
+    const(val(16.0))
+  )
+end
+
+assert "Unknown floor" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(floor, const(unknown))
+    )
+  )
+reaches
+  testExpression(
+    const(unknown)
+  )
+end
+
+assert "Recursive floor" from
+  testExpression(
+    eval(
+      mtenvironment,
+      Cfg,
+      func(floor, var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(25.0))
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(25.3) >
+.
+
+endm

@@ -1182,6 +1182,13 @@ testArithmeticExpressions =
         </CEIL>
         |],
        "(func(ceiling,const(val(4.7))))")
+    , ("FLOOR",
+       [r|
+        <FLOOR ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </FLOOR>
+        |],
+       "(func(floor,const(val(4.7))))")
     ]
 
 testUpdate :: TestTree

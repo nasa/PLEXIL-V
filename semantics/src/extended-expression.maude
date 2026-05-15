@@ -42,6 +42,8 @@ fmod EXTENDED-EXPRESSION is
  op sqrt    : -> Function .
 **** Ceiling (of integers and reals)
  op ceiling : -> Function .
+**** Floor (of integers and reals)
+ op floor   : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .
