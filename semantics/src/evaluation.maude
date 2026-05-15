@@ -222,9 +222,6 @@ eq [eval-forwarded-variable] :
  ceq eval(C,PL,func(absp,E)) = const(unknown)
   if const(unknown) == eval(C,PL,E) .
 
- ceq eval(C,PL,func(notp,E)) = const(val(not(B)))
-  if const(val(B)) := eval(C,PL,E) .
-
 *** Predicates on Processes
 
 var FT FT' : FailureType .

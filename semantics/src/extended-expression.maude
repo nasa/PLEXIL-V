@@ -40,8 +40,6 @@ fmod EXTENDED-EXPRESSION is
  op absp  : -> Function .
 **** Square root (of reals)
  op sqrt  : -> Function .
-**** Boolean negation
- op notp  : -> Function .
 
 *** Predicates on processes
  op isStatus?         : NeQualified Status      -> Expression .
