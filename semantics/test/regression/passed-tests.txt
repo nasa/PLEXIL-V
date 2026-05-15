@@ -66,3 +66,4 @@ AssignToParentInvariant.maude
 maxTest.maude
 minTest.maude
 TestAbsSqrt.maude
+RoundTest.maude

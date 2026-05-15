@@ -10,6 +10,7 @@ load abs.maude
 load ceiling.maude
 load floor.maude
 load round.maude
+load trunc.maude
 load equ.maude
 
 mod TEST--EVALUATION is
@@ -29,6 +30,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--CEILING .
   pr TEST--EVALUATION--FLOOR .
   pr TEST--EVALUATION--ROUND .
+  pr TEST--EVALUATION--TRUNC .
   pr TEST--EVALUATION--EQU .
 
   op test--evaluation : -> TestResults .
@@ -45,6 +47,7 @@ mod TEST--EVALUATION is
        test--evaluation--ceiling +
        test--evaluation--floor +
        test--evaluation--round +
+       test--evaluation--trunc +
        test--evaluation--equ +
 
 begin tests

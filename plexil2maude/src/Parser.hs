@@ -779,6 +779,7 @@ helper el children =
             "CEIL" -> parens $ text "func" <> parens (text "ceiling" <> comma <> hcat (punctuate comma children))
             "FLOOR" -> parens $ text "func" <> parens (text "floor" <> comma <> hcat (punctuate comma children))
             "ROUND" -> parens $ text "func" <> parens (text "round" <> comma <> hcat (punctuate comma children))
+            "TRUNC" -> parens $ text "func" <> parens (text "trunc" <> comma <> hcat (punctuate comma children))
             "Concat" -> errorize $ parseConcat cursor
             "IsKnown" -> text "isKnown" <> parens (hcat ( punctuate comma children))
 

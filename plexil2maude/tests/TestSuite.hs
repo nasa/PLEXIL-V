@@ -1196,6 +1196,13 @@ testArithmeticExpressions =
         </ROUND>
         |],
        "(func(round,const(val(4.7))))")
+    , ("TRUNC",
+       [r|
+        <TRUNC ColNo="14" LineNo="4">
+          <RealValue>4.7</RealValue>
+        </TRUNC>
+        |],
+       "(func(trunc,const(val(4.7))))")
     ]
 
 testUpdate :: TestTree
