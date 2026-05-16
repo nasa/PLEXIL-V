@@ -1,0 +1,31 @@
+in checkConditions.maude
+in commandIsExecuting.maude
+in hasCmdHandle.maude
+in hasNoCmdHandle.maude
+in isTrue.maude
+in isFalse.maude
+in isUnknown.maude
+
+mod TEST--MODEL-CHECKER--PROPERTIES is
+
+pr TEST-BASE .
+pr TEST--MODEL-CHECKER--PROPERTIES--CHECK-CONDITIONS .
+pr TEST--MODEL-CHECKER--PROPERTIES--COMMAND-IS-EXECUTING .
+pr TEST--MODEL-CHECKER--PROPERTIES--HAS-CMD-HANDLE .
+pr TEST--MODEL-CHECKER--PROPERTIES--HAS-NO-CMD-HANDLE .
+pr TEST--MODEL-CHECKER--PROPERTIES--IS-TRUE .
+pr TEST--MODEL-CHECKER--PROPERTIES--IS-FALSE .
+pr TEST--MODEL-CHECKER--PROPERTIES--IS-UNKNOWN .
+
+op test--model-checker--properties : -> TestResults .
+eq test--model-checker--properties
+  = test--model-checker--properties--checkConditions
+  + test--model-checker--properties--commandIsExecuting
+  + test--model-checker--properties--hasCmdHandle?
+  + test--model-checker--properties--hasNoCmdHandle?
+  + test--model-checker--properties--isTrue?
+  + test--model-checker--properties--isFalse?
+  + test--model-checker--properties--isUnknown?
+.
+
+endm

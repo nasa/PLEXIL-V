@@ -1,0 +1,179 @@
+***( Formula Preprocessing for Model Checking
+
+  Resolves node identifier shortcuts (prefix/id) in LTL formulas before model checking.
+
+  ENTRY POINTS:
+    preprocess(Formula, State) -> [Formula]
+      - Top-level entry point that extracts node configuration from state
+    preprocess'(Formula, Configuration) -> [Formula]
+      - Core implementation that recursively processes formula tree
+
+  KEY DESIGN DECISIONS:
+    - Short-circuit error propagation: First error encountered terminates preprocessing
+    - Explicit error handling for each operator ensures no errors are silently dropped
+    - Only hasStatus and hasOutcome properties currently support shortcuts
+    - Boolean/temporal operators propagate errors without modification
+
+  ERROR HANDLING:
+    When a shortcut cannot be resolved (e.g., prefix('Missing)), returns:
+      ERROR(inContext("preprocess'", errorMsg), originalFormula)
+    This produces [Formula] (kind) rather than Formula (sort), preventing model checking.
+
+  PREPROCESSING STRATEGY:
+    1. LTL constants (True/False) pass through unchanged
+    2. Properties with shortcuts: resolve via normalize() from ID-SHORTCUTS module
+    3. Operators: recursively preprocess arguments, propagate any errors upward
+    4. Other propositions: pass through unchanged (assumed already normalized)
+)***
+
+fmod PLEXIL-V--MODEL-CHECKER--PREPROCESSING is
+  protecting PLEXIL-V--MODEL-CHECKER--BASE .
+  protecting PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS .
+  protecting PLEXIL-V--MODEL-CHECKER--PROPERTIES .
+  protecting ERROR{Formula} .
+  protecting MODEL-CHECKER .
+
+  ---( Main API )---
+
+  op preprocess : [Formula] State -> [Formula] .
+  eq preprocess(F, St) = preprocess'(F, getNodes(getConfig(St))) .
+
+  ---( Core Implementation )---
+
+  op preprocess' : [Formula] Configuration -> [Formula] .
+
+  ---( LTL constants )---
+
+  eq preprocess'(True, NdS) = True .
+  eq preprocess'(False, NdS) = False .
+
+  ---( Properties with Shortcuts )---
+
+ ceq preprocess'(hasStatus(I, S), NdS)
+  = (
+    if NQ? :: NeQualified
+      then hasStatus(NQ?, S)
+      else ERROR(inContext("preprocess'", getPayload(NQ?)), hasStatus(I, S))
+    fi
+  )
+  if NQ? := normalize(I, NdS) .
+
+ ceq preprocess'(hasOutcome(I, O), NdS)
+  = (
+    if NQ? :: NeQualified
+      then hasOutcome(NQ?, O)
+      else ERROR(inContext("preprocess'", getPayload(NQ?)), hasOutcome(I, O))
+    fi
+   )
+  if NQ? := normalize(I, NdS) .
+
+  ---( Boolean Operators - Error Propagation )---
+
+ ceq preprocess'(~ F, NdS)
+   = ERROR(Msg, ~ F)
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+  eq preprocess'(~ F, NdS)
+   = ~ preprocess'(F, NdS) [owise] .
+
+ ceq preprocess'(F /\ F', NdS)
+   = ERROR(Msg, F /\ F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F /\ F', NdS)
+   = ERROR(Msg, F /\ F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F /\ F', NdS)
+   = preprocess'(F, NdS) /\ preprocess'(F', NdS) [owise] .
+
+ ceq preprocess'(F \/ F', NdS)
+   = ERROR(Msg, F \/ F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F \/ F', NdS)
+   = ERROR(Msg, F \/ F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F \/ F', NdS)
+   = preprocess'(F, NdS) \/ preprocess'(F', NdS) [owise] .
+
+ ceq preprocess'(F -> F', NdS)
+   = ERROR(Msg, F -> F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F -> F', NdS)
+   = ERROR(Msg, F -> F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F -> F', NdS)
+   = preprocess'(F, NdS) -> preprocess'(F', NdS) [owise] .
+
+ ceq preprocess'(F <-> F', NdS)
+   = ERROR(Msg, F <-> F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F <-> F', NdS)
+   = ERROR(Msg, F <-> F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F <-> F', NdS)
+   = preprocess'(F, NdS) <-> preprocess'(F', NdS) [owise] .
+
+  ---( Temporal Operators - Error Propagation )---
+
+ ceq preprocess'(O F, NdS)
+   = ERROR(Msg, O F)
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+  eq preprocess'(O F, NdS)
+   = O preprocess'(F, NdS) [owise] .
+
+ ceq preprocess'([] F, NdS)
+   = ERROR(Msg, [] F)
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+  eq preprocess'([] F, NdS)
+   = [] preprocess'(F, NdS) [owise] .
+
+ ceq preprocess'(<> F, NdS)
+   = ERROR(Msg, <> F)
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+  eq preprocess'(<> F, NdS)
+   = <> preprocess'(F, NdS) [owise] .
+
+ ceq preprocess'(F U F', NdS)
+   = ERROR(Msg, F U F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F U F', NdS)
+   = ERROR(Msg, F U F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F U F', NdS)
+   = preprocess'(F, NdS) U preprocess'(F', NdS) [owise] .
+
+ ceq preprocess'(F R F', NdS)
+   = ERROR(Msg, F R F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F R F', NdS)
+   = ERROR(Msg, F R F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F R F', NdS)
+   = preprocess'(F, NdS) R preprocess'(F', NdS) [owise] .
+
+ ceq preprocess'(F W F', NdS)
+   = ERROR(Msg, F W F')
+  if ERROR(Msg, FErr) := preprocess'(F, NdS) .
+ ceq preprocess'(F W F', NdS)
+   = ERROR(Msg, F W F')
+  if ERROR(Msg, FErr) := preprocess'(F', NdS) [owise] .
+  eq preprocess'(F W F', NdS)
+   = preprocess'(F, NdS) W preprocess'(F', NdS) [owise] .
+
+  ---( Fallback Cases )---
+
+  eq preprocess'(P, NdS) = P [owise] .
+  eq preprocess'(ERROR(Msg, F), NdS) = ERROR(Msg, F) [owise] .
+
+  ---( Variables )---
+
+  vars FRes FErr   : [Formula] .
+  vars F F'        : [Formula] .
+  vars I           : IdShortcut .
+  vars Msg         : ErrorMsg .
+  vars NdS         : Configuration .
+  vars NQ          : NeQualified .
+  vars NQ?         : [NeQualified] .
+  vars O           : Outcome .
+  vars P           : Prop .
+  vars S           : Status .
+  vars St          : State .
+endfm

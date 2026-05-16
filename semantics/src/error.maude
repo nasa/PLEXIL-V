@@ -1,0 +1,34 @@
+fmod ERROR-CORE is
+  protecting STRING .
+  protecting QID .
+  protecting TRUTH .
+
+  sort ErrorMsg .  *** Abstract base SORT
+
+  *** Core structural combinators
+  op inContext  : String    ErrorMsg -> ErrorMsg [ctor              format (r! o    )] .
+  op _causedBy_ : ErrorMsg  ErrorMsg -> ErrorMsg [ctor gather (e E) format (o r! o o)] .
+endfm
+
+fmod ERROR{X :: TRIV} is
+  protecting ERROR-CORE .
+
+  sort ErrorMsg{X} .
+  subsort ErrorMsg{X} < ErrorMsg .
+
+  op inContext : String  ErrorMsg{X} -> ErrorMsg{X} [ditto] .
+
+  op ERROR : ErrorMsg    [X$Elt] -> [X$Elt] [ctor strat (1 0) format (r! o)] .
+  op ERROR : ErrorMsg{X} [X$Elt] -> [X$Elt] [ctor strat (1 0) format (r! o)] .
+
+  op getPayload : [X$Elt] -> [ErrorMsg] .
+ ceq getPayload(VarX) = P' if not (VarX :: X$Elt) /\ ERROR(P',E) := VarX .
+
+  op getPayload : [X$Elt] -> [ErrorMsg{X}] .
+ ceq getPayload(VarX) = P if not (VarX :: X$Elt) /\ ERROR(P,E) := VarX .
+
+  vars VarX : [X$Elt] .
+  vars E    : [X$Elt] .
+  vars P    : ErrorMsg{X} .
+  vars P'   : ErrorMsg .
+endfm

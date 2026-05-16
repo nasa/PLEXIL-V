@@ -1,9 +1,9 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-FALSE is
+mod TEST--MODEL-CHECKER--PROPERTIES--IS-FALSE is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--isFalse? : -> TestResults .
-eq test--model-checker-extensions--properties--isFalse? =
+op test--model-checker--properties--isFalse? : -> TestResults .
+eq test--model-checker--properties--isFalse? =
 begin tests
   assert "isFalse? accepts expressions depending on nodes" from
     testBool(

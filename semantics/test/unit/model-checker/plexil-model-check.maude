@@ -1,0 +1,446 @@
+mod TEST--MODEL-CHECKER--PLEXIL-MODEL-CHECK is
+  pr TEST-BASE .
+  pr PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK .
+
+  op test--model-checker--plexil-model-check : -> TestResults .
+  eq test--model-checker--plexil-model-check
+    = test--model-checker--plexil-model-check--success-paths
+    + test--model-checker--plexil-model-check--error-paths
+    + test--model-checker--plexil-model-check--counterexample-paths
+  .
+
+  *** ================================================================
+  *** SUCCESS PATHS: Properties with shortcuts that hold
+  *** ================================================================
+
+  vars StateSimple        : GlobalConfig .
+  vars StateComplex       : GlobalConfig .
+  vars StateWithExecuting : GlobalConfig .
+  vars StateWithOutcome   : GlobalConfig .
+
+  op test--model-checker--plexil-model-check--success-paths : -> TestResults .
+  ceq test--model-checker--plexil-model-check--success-paths =
+  begin tests
+
+    assert "modelCheck with prefix shortcut - property holds (eventually finished)" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          <> hasStatus(prefix('A), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+    assert "modelCheck with id shortcut - property holds (eventually finished)" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          <> hasStatus(id('A), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+    assert "modelCheck with hasOutcome and prefix shortcut - none holds" from
+      anMCResult(
+        plexilModelCheck(
+          StateWithOutcome,
+          <> hasOutcome(prefix('Success), success),
+          transitionCounterexampleWithFinalState
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+    assert "modelCheck with hasOutcome and id shortcut - none holds" from
+      anMCResult(
+        plexilModelCheck(
+          StateWithOutcome,
+          <> hasOutcome(id('Success), success),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+    assert "modelCheck with complex formula - conjunction with shortcuts holds" from
+      anMCResult(
+        plexilModelCheck(
+          StateComplex,
+          <> (hasStatus(prefix('A), finished) /\ hasStatus(prefix('B), finished)),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+    assert "modelCheck with nested temporal operator - eventually always inactive" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          <> [] hasStatus(prefix('A), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(succeeded)
+    end
+
+  end tests
+  if StateSimple := run(compile(
+                  list('Root, nilocdecl, (none),
+                    empty('A, nilocdecl, (none))
+                  )
+                ))
+  /\ StateWithOutcome := run(compile(
+                  list('Root, nilocdecl, (none),
+                    empty('Success, nilocdecl, (none))
+                  )
+                ))
+  /\ StateComplex := run(compile(
+                list('Root, nilocdecl, (none),
+                  (empty('A, nilocdecl, (none))
+                   empty('B, nilocdecl, (none)))
+                )
+              )) .
+
+
+  *** ================================================================
+  *** ERROR PATHS: Invalid shortcuts that should be detected
+  *** ================================================================
+
+  op test--model-checker--plexil-model-check--error-paths : -> TestResults .
+  ceq test--model-checker--plexil-model-check--error-paths =
+  begin tests
+
+    assert "modelCheck with invalid prefix shortcut - returns error not result" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          <> hasStatus(prefix('Missing), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Missing)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Missing))),
+              O (True U hasStatus(prefix('Missing), finished))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with invalid id shortcut - returns error not result" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          [] hasStatus(id('NonExistent), executing),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('NonExistent)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('NonExistent))),
+              O (False R hasStatus(id('NonExistent), executing))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in negation - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          ~ hasStatus(prefix('Bad), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Bad)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Bad))),
+              O ~ hasStatus(prefix('Bad), finished)
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in conjunction left side - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          (hasStatus(prefix('Missing), finished) /\ True),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Missing)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Missing))),
+              O (hasStatus(prefix('Missing), finished) /\ True)
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in conjunction right side - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          (True /\ hasStatus(prefix('Missing), finished)),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Missing)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Missing))),
+              O (True /\ hasStatus(prefix('Missing), finished))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in eventually operator - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          <> hasStatus(prefix('X), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('X)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('X))),
+              O (True U hasStatus(prefix('X), finished))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in always operator - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          [] hasStatus(prefix('Y), finished),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Y)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Y))),
+              O (False R hasStatus(prefix('Y), finished))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in until left side - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          (hasStatus(prefix('Bad), finished) U True),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Bad)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Bad))),
+              O (hasStatus(prefix('Bad), finished) U True)
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with error in until right side - propagates error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          (True U hasStatus(prefix('Bad), finished)),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Bad)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Bad))),
+              O (True U hasStatus(prefix('Bad), finished))
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+    assert "modelCheck with hasOutcome and invalid shortcut - returns error" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          hasOutcome(prefix('Missing), success),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(
+        ERROR(
+          inContext("plexilModelCheck'", inContext("preprocess'", noNodeHasPrefix(prefix('Missing)))),
+          plexilModelCheck'(
+            [HOLE],
+            ERROR(
+              inContext("preprocess'", noNodeHasPrefix(prefix('Missing))),
+              O hasOutcome(prefix('Missing), success)
+            ),
+            noCounterexample
+          )
+        )
+      )
+    end
+
+  end tests
+  if StateSimple := run(compile(
+                  list('Root, nilocdecl, (none),
+                    empty('A, nilocdecl, (none))
+                  )
+                )) .
+
+
+  *** ================================================================
+  *** COUNTEREXAMPLE PATHS: Valid shortcuts but properties violated
+  *** ================================================================
+
+  op test--model-checker--plexil-model-check--counterexample-paths : -> TestResults .
+  ceq test--model-checker--plexil-model-check--counterexample-paths =
+  begin tests
+
+    assert "modelCheck with valid shortcut but false property - returns false" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          [] hasStatus(prefix('A), waiting),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(failed)
+    end
+
+    assert "modelCheck with valid id shortcut but false property - returns false" from
+      anMCResult(
+        plexilModelCheck(
+          StateSimple,
+          hasStatus(id('A), waiting),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(failed)
+    end
+
+    assert "modelCheck with counterexample mode - returns counterexample structure" from
+      testBool(
+        plexilModelCheck(
+          StateWithExecuting,
+          [] hasStatus(prefix('NodeB), inactive),
+          transitionCounterexample
+        ) :: PlexilModelCheckResult
+      )
+    reaches
+      testBool(true)
+    end
+
+    assert "modelCheck with hasOutcome false property - returns false" from
+      anMCResult(
+        plexilModelCheck(
+          StateWithOutcome,
+          hasOutcome(prefix('Success), failure(exited)),
+          noCounterexample
+        )
+      )
+    reaches
+      anMCResult(failed)
+    end
+
+  end tests
+  if StateSimple := run(compile(
+                  list('Root, nilocdecl, (none),
+                    empty('A, nilocdecl, (none))
+                  )
+                ))
+  /\ StateWithExecuting := stop |
+            [ nodes :
+              < 'Root : list | status: executing, outcome: none >
+              < 'NodeB . 'Root : empty | status: executing, outcome: none >
+            ]
+  /\ StateWithOutcome := run(compile(
+                  list('Root, nilocdecl, (none),
+                    empty('Success, nilocdecl, (none))
+                  )
+                )) .
+
+
+endm

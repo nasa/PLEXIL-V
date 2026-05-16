@@ -1,0 +1,134 @@
+fmod PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK__BASE is
+  protecting PLEXIL-V--MODEL-CHECKER--BASE .
+  protecting PLEXIL-V--MODEL-CHECKER--PREPROCESSING .
+
+  sort PlexilModelCheckResult .
+endfm
+
+view PlexilModelCheckResult from TRIV to PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK__BASE is
+  sort Elt to PlexilModelCheckResult .
+endv
+
+***( PLEXIL Model Checking
+
+  Wraps Maude's LTL model checker with PLEXIL-specific verification capabilities.
+
+  ENTRY POINT:
+    plexilModelCheck(State, Formula, CounterexamplesTypes) -> PlexilModelCheckResult
+
+  COUNTEREXAMPLE MODES (design rationale):
+    - noCounterexample: Returns succeeded/failed only (fastest, for simple property checks)
+    - transitionCounterexample: Returns environment input trace (for understanding violations)
+    - transitionCounterexampleWithFinalState: Includes final state (for detailed debugging)
+
+  SORT HIERARCHY (key design decision):
+    EnvInput < TransitionCounterexample < PlexilModelCheckResult
+    This allows counterexample traces to be valid results, enabling direct pattern matching
+    without wrapper constructors.
+
+  ERROR HANDLING:
+    Preprocessing errors (e.g., unresolved node shortcuts) are propagated via ERROR pattern,
+    returning [PlexilModelCheckResult] (kind) rather than PlexilModelCheckResult (sort).
+
+  PREPROCESSING:
+    Formulas are automatically preprocessed to resolve node identifier shortcuts (prefix/id)
+    before model checking. The formula is wrapped with 'O' (next) to handle simulate
+    non-deterministic initial states.
+)***
+
+fmod PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK is
+  protecting PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK__BASE .
+  protecting ERROR{PlexilModelCheckResult} .
+  protecting MODEL-CHECKER .
+
+  ---( Main API )---
+
+  op plexilModelCheck : State Formula CounterexamplesTypes -> [PlexilModelCheckResult] .
+  eq plexilModelCheck(St, F, C:CounterexamplesTypes)
+   = plexilModelCheck'(St, preprocess(O F, St), C:CounterexamplesTypes) .
+
+  op plexilModelCheck' : State [Formula] CounterexamplesTypes -> [PlexilModelCheckResult] .
+ ceq plexilModelCheck'(St, F, C)
+   = customModelCheck(St, F, C)
+   if F :: Formula .
+  eq plexilModelCheck'(St, F, C)
+   = ERROR(inContext("plexilModelCheck'", getPayload(F)), plexilModelCheck'([HOLE], F, C))
+   [owise] .
+
+  ---( Counterexample Mode Enumeration )---
+
+  sort CounterexamplesTypes .
+  op transitionCounterexample : -> CounterexamplesTypes .
+  op transitionCounterexampleWithFinalState : -> CounterexamplesTypes .
+  op noCounterexample : -> CounterexamplesTypes .
+
+  ---( Result Constructors )---
+
+  ops succeeded failed : -> PlexilModelCheckResult [ctor] .
+
+  ---( Counterexample Structure )---
+
+  sorts EnvInput TransitionCounterexample .
+  subsort EnvInput < TransitionCounterexample < PlexilModelCheckResult .
+
+  op Start :        -> EnvInput [ctor format (y! o)] .
+  op Input : Inputs -> EnvInput [ctor format (y! o)] .
+  op Loop{_} : TransitionCounterexample -> EnvInput [ctor format (nr! o+ ni n-i o)] .
+  op Loop{_,finalState(_)} : TransitionCounterexample State -> EnvInput [ctor format (nr! o++ ni n--i ++ni o ++ni --ni --n --o)] .
+  op NoTransitions : -> TransitionCounterexample .
+  op _-->_ : TransitionCounterexample TransitionCounterexample -> TransitionCounterexample [assoc format (ny! no g o) id: NoTransitions] .
+
+  ---( Internal Implementation )---
+
+  op customModelCheck : State Formula CounterexamplesTypes -> PlexilModelCheckResult .
+  eq customModelCheck(St,F,noCounterexample)                       = customModelCheckWithoutCounterexample(St,F) .
+  eq customModelCheck(St,F,transitionCounterexample)               = customModelCheckWithCounterexample(St,F) .
+  eq customModelCheck(St,F,transitionCounterexampleWithFinalState) = customModelCheckWithCounterexampleAndFinalState(St,F) .
+
+  op customModelCheckWithoutCounterexample : State Formula -> PlexilModelCheckResult .
+ ceq customModelCheckWithoutCounterexample(St,F) = (if MCResult == true then succeeded else failed fi)
+  if MCResult := modelCheck(St,F) .
+
+  op customModelCheckWithCounterexample : State Formula -> PlexilModelCheckResult .
+  eq customModelCheckWithCounterexample(St,F) = formatCounterexample(modelCheck(St,F)) .
+
+    op formatCounterexample : ModelCheckResult -> PlexilModelCheckResult .
+    eq formatCounterexample(true) = succeeded .
+    eq formatCounterexample(false) = failed .
+    eq formatCounterexample(counterexample(TS1,TS2))
+    = extractInterfaceHistory(TS1) --> Loop{extractInterfaceHistory(TS2)} .
+
+      op extractInterfaceHistory : TransitionList -> TransitionCounterexample .
+      eq extractInterfaceHistory((nil).TransitionList) = NoTransitions .
+      eq extractInterfaceHistory(({St,RN} TransList)) = extractInterfaceHistory'(St) --> extractInterfaceHistory(TransList) .
+
+        op extractInterfaceHistory' : State -> EnvInput .
+        eq extractInterfaceHistory'(Op | [ interface-history : EInput # EINS ] Conf) = Input(EInput) .
+        eq extractInterfaceHistory'(Op | Conf) = Start [owise] .
+
+  op customModelCheckWithCounterexampleAndFinalState : State Formula -> PlexilModelCheckResult .
+  eq customModelCheckWithCounterexampleAndFinalState(St,F) = formatCounterexampleWithFinalState(modelCheck(St,F)) .
+
+    op formatCounterexampleWithFinalState : ModelCheckResult -> PlexilModelCheckResult .
+    eq formatCounterexampleWithFinalState(true) = succeeded .
+    eq formatCounterexampleWithFinalState(false) = failed .
+    eq formatCounterexampleWithFinalState(counterexample(TS1,TS2))
+    = extractInterfaceHistory(TS1) --> Loop{extractInterfaceHistory(TS2),finalState(extractLastState(TS2))} .
+
+      op extractLastState : TransitionList -> State .
+      eq extractLastState({St,RN}) = St .
+      eq extractLastState({St,RN} TransList) = extractLastState(TransList) [owise] .
+
+  ---( Variables )---
+
+  var  C                 : CounterexamplesTypes .
+  var  Conf              : Config .
+  var  EInput            : Inputs .
+  var  EINS              : EInputsList .
+  var  F                 : [Formula] .
+  var  MCResult          : ModelCheckResult .
+  var  Op                : Operation .
+  var  RN                : RuleName .
+  var  St                : State .
+  vars TransList TS1 TS2 : TransitionList .
+endfm

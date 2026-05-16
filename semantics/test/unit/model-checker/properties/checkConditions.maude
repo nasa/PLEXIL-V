@@ -1,19 +1,19 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--CHECK-CONDITIONS is
+mod TEST--MODEL-CHECKER--PROPERTIES--CHECK-CONDITIONS is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--checkConditions : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions
-  = test--model-checker-extensions--properties--checkConditions--empty
-  + test--model-checker-extensions--properties--checkConditions--single-node
-  + test--model-checker-extensions--properties--checkConditions--multiple-nodes
-  + test--model-checker-extensions--properties--checkConditions--mixed-failures
-  + test--model-checker-extensions--properties--checkConditions--other-failures
+op test--model-checker--properties--checkConditions : -> TestResults .
+eq test--model-checker--properties--checkConditions
+  = test--model-checker--properties--checkConditions--empty
+  + test--model-checker--properties--checkConditions--single-node
+  + test--model-checker--properties--checkConditions--multiple-nodes
+  + test--model-checker--properties--checkConditions--mixed-failures
+  + test--model-checker--properties--checkConditions--other-failures
 .
 
 *** Test with empty configuration (no nodes)
-op test--model-checker-extensions--properties--checkConditions--empty : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions--empty =
+op test--model-checker--properties--checkConditions--empty : -> TestResults .
+eq test--model-checker--properties--checkConditions--empty =
 begin tests
 
   assert "checkConditions returns true when there are no nodes" from
@@ -31,8 +31,8 @@ begin tests
 end tests .
 
 *** Test with single node having various outcomes
-op test--model-checker-extensions--properties--checkConditions--single-node : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions--single-node =
+op test--model-checker--properties--checkConditions--single-node : -> TestResults .
+eq test--model-checker--properties--checkConditions--single-node =
 begin tests
 
   assert "checkConditions returns false when a single node has preconditionFailed" from
@@ -110,8 +110,8 @@ begin tests
 end tests .
 
 *** Test with multiple nodes
-op test--model-checker-extensions--properties--checkConditions--multiple-nodes : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions--multiple-nodes =
+op test--model-checker--properties--checkConditions--multiple-nodes : -> TestResults .
+eq test--model-checker--properties--checkConditions--multiple-nodes =
 begin tests
 
   assert "checkConditions returns true when all nodes have success outcome" from
@@ -197,8 +197,8 @@ begin tests
 end tests .
 
 *** Test with multiple condition failures
-op test--model-checker-extensions--properties--checkConditions--mixed-failures : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions--mixed-failures =
+op test--model-checker--properties--checkConditions--mixed-failures : -> TestResults .
+eq test--model-checker--properties--checkConditions--mixed-failures =
 begin tests
 
   assert "checkConditions returns false when multiple nodes have different condition failures" from
@@ -238,8 +238,8 @@ begin tests
 end tests .
 
 *** Test with other failure types (not condition-related)
-op test--model-checker-extensions--properties--checkConditions--other-failures : -> TestResults .
-eq test--model-checker-extensions--properties--checkConditions--other-failures =
+op test--model-checker--properties--checkConditions--other-failures : -> TestResults .
+eq test--model-checker--properties--checkConditions--other-failures =
 begin tests
 
   assert "checkConditions returns true when a node has failure(exited)" from

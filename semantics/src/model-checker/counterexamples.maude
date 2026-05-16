@@ -1,0 +1,25 @@
+fmod PLEXIL-V--MODEL-CHECKER--COUNTEREXAMPLES is
+  protecting MODEL-CHECKER .
+
+  vars Rl     : RuleName .
+  vars T      : Transition .
+  vars Ts Ts' : TransitionList .
+  vars St     : State .
+  var  B      : Bool .
+
+  op prettyCounterexample : ModelCheckResult -> ModelCheckResult .
+  eq prettyCounterexample(counterexample(Ts,Ts'))
+   = counterexample(prettyTransitionList(Ts),prettyTransitionList(Ts'))
+  [print "\n\nCOUNTEREXAMPLE:\n"]
+  .
+
+  op prettyTransitionList : TransitionList -> TransitionList .
+  eq prettyTransitionList(T Ts) = prettyTransition(T) prettyTransitionList(Ts) .
+  eq prettyTransitionList(nil) = nil .
+
+  op prettyTransition : Transition -> Transition .
+  ceq prettyTransition({St,Rl}) = {St,Rl}
+  if B:Bool := true
+  [print Rl "\n\t" St "\n\n->\n\n"]
+  .
+endfm

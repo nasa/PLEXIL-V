@@ -34,5 +34,6 @@ fmod SYSTEM--INTERFACE is
   op NDChoice   : InputsSet -> Operation .
 
   sort GlobalConfig .
-  op _|_ : Operation Config -> GlobalConfig .
+  op _|_    : Operation Config -> GlobalConfig .
+  op [HOLE] :                  -> [GlobalConfig] [ctor format (b! d d d)] .
 endfm

@@ -1,0 +1,14 @@
+in model-checker.maude
+fmod PLEXIL-V--MODEL-CHECKER--BASE is
+  protecting PLEXIL .
+  protecting COMPILER .
+  protecting INTERFACE .
+  protecting GENERATORS--BASIC .
+  protecting MODEL-CHECKER .
+
+  subsort GlobalConfig < State .
+endfm
+
+view Formula from TRIV to PLEXIL-V--MODEL-CHECKER--BASE is
+  sort Elt to Formula .
+endv

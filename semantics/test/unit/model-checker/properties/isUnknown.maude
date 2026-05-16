@@ -1,9 +1,9 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-UNKNOWN is
+mod TEST--MODEL-CHECKER--PROPERTIES--IS-UNKNOWN is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--isUnknown? : -> TestResults .
-eq test--model-checker-extensions--properties--isUnknown? =
+op test--model-checker--properties--isUnknown? : -> TestResults .
+eq test--model-checker--properties--isUnknown? =
 begin tests
   assert "isUnknown? returns true if the expression evaluates to unknown" from
     testBool(

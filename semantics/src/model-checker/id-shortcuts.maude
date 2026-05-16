@@ -1,0 +1,115 @@
+***( Node Identifier Shortcuts - Base Definitions
+
+  Defines flexible reference schemes for node identifiers in LTL formulas.
+
+  SHORTCUT TYPES:
+    - id(<node-id>): Match by exact node ID (last component of qualified path)
+    - prefix(<partial-path>): Match by prefix of qualified path
+    - prefix(<prefix>, <infix>): Match nodes with given prefix and containing infix
+
+  EXAMPLES:
+    Given node 'Child . 'Parent . 'Root:
+      - id('Child) resolves to 'Child . 'Parent . 'Root
+      - prefix('Child . 'Parent) resolves to 'Child . 'Parent . 'Root
+      - prefix('Child) resolves to 'Child . 'Parent . 'Root
+      - prefix('Root, 'Parent) resolves to 'Child . 'Parent . 'Root
+
+  This base module only defines the IdShortcut sort and constructors.
+  The main module provides resolution via normalize().
+)***
+
+fmod PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS__BASE is
+  protecting IDENTIFIERS .
+  protecting NODE .
+  protecting STRING .
+
+  ---( Sort Definitions )---
+
+  sort IdShortcut .
+  op id     : Identifier              -> IdShortcut [ctor] .
+  op prefix : NeQualified             -> IdShortcut [ctor] .
+  op prefix : NeQualified NeQualified -> IdShortcut [ctor] .
+endfm
+
+view IdShortcut from TRIV to PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS__BASE is
+  sort Elt to IdShortcut .
+endv
+
+***( Node Identifier Shortcut Resolution
+
+  Resolves node identifier shortcuts to fully qualified node paths.
+
+  ENTRY POINT:
+    normalize(IdShortcut, Configuration) -> [NeQualified]
+      - Returns fully qualified node identifier if shortcut resolves uniquely
+      - Returns ERROR(...) if shortcut is ambiguous or doesn't match any node
+
+  KEY DESIGN DECISIONS:
+    - All shortcuts delegate to overloaded getFullyQualifiedId operations
+    - Identifier is a subsort of NeQualified, allowing unified implementation
+    - Pattern matching on node configuration detects ambiguous vs unique vs missing
+    - prefix(prefix, infix) matches pattern: prefix . Q . infix . Q' where Q, Q' are Qualified
+
+  ERROR CASES:
+    - noNodeHasPrefix: No node matches the given prefix (or prefix+infix)
+    - ambiguousPrefix: Multiple nodes match the prefix (shows both matches)
+
+  AUXILIARY FUNCTIONS:
+    - isUniquePrefix(prefix, nodes) -> Bool
+      Returns true if prefix matches exactly one node
+    - isUniquePrefix(prefix, infix, nodes) -> Bool
+      Returns true if prefix+infix pattern matches exactly one node
+)***
+
+fmod PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS is
+  protecting PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS__BASE .
+  protecting ERROR{NeQualified} .
+
+  ---( Error Constructors )---
+
+  op noNodeHasPrefix : IdShortcut                         -> ErrorMsg{NeQualified} [ctor format (r y)] .
+  op ambiguousPrefix : IdShortcut NeQualified NeQualified -> ErrorMsg{NeQualified} [ctor format (r y)] .
+
+  ---( Main API )---
+
+  op normalize : IdShortcut Configuration -> NeQualified .
+  eq normalize(               id(Id), NdS) = getFullyQualifiedId(Id,NdS) .
+  eq normalize(           prefix(NQ), NdS) = getFullyQualifiedId(NQ,NdS) .
+  eq normalize(prefix(Prefix, Infix), NdS) = getFullyQualifiedId(Prefix, Infix, NdS) .
+
+  ---( Implementation )---
+
+  op getFullyQualifiedId : NeQualified Configuration -> [NeQualified] .
+  eq getFullyQualifiedId(NQ, < NQ . Q : C | AtS > < NQ . Q' : C' | AtS' > NdS) = ERROR(ambiguousPrefix(prefix(NQ), NQ . Q, NQ . Q'), NQ) .
+  eq getFullyQualifiedId(NQ, < NQ . Q : C | AtS >                         NdS) = NQ . Q [owise] .
+  eq getFullyQualifiedId(NQ,                                              NdS) = ERROR(noNodeHasPrefix(prefix(NQ)), NQ) [owise] .
+
+  op getFullyQualifiedId : NeQualified NeQualified Configuration -> [NeQualified] .
+  eq getFullyQualifiedId(Prefix, Infix, < Prefix . Q . Infix . Q' : C | AtS > < Prefix . Q'' . Infix . Q''' : C' | AtS' > NdS)
+   = ERROR(ambiguousPrefix(prefix(Prefix, Infix), Prefix . Q . Infix . Q', Prefix . Q'' . Infix . Q'''), Prefix) .
+  eq getFullyQualifiedId(Prefix, Infix, < Prefix . Q . Infix . Q' : C | AtS > NdS)
+   = Prefix . Q . Infix . Q' [owise] .
+  eq getFullyQualifiedId(Prefix, Infix, NdS)
+   = ERROR(noNodeHasPrefix(prefix(Prefix, Infix)), Prefix) [owise] .
+
+  op isUniquePrefix : NeQualified Configuration -> Bool .
+  eq isUniquePrefix(NQ, < NQ . Q : C | AtS > < NQ . Q' : C' | AtS' > NdS) = false         .
+  eq isUniquePrefix(NQ, < NQ . Q : C | AtS >                         NdS) = true  [owise] .
+  eq isUniquePrefix(NQ,                                              NdS) = false [owise] .
+
+  op isUniquePrefix : NeQualified NeQualified Configuration -> Bool .
+  eq isUniquePrefix(Prefix, Infix, < Prefix . Q . Infix . Q' : C | AtS > < Prefix . Q'' . Infix . Q''' : C' | AtS' > NdS) = false         .
+  eq isUniquePrefix(Prefix, Infix, < Prefix . Q . Infix . Q' : C | AtS > NdS)                                             = true  [owise] .
+  eq isUniquePrefix(Prefix, Infix,                                       NdS)                                             = false [owise] .
+
+  ---( Variables )---
+
+  vars AtS AtS'      : AttributeSet .
+  vars C C'          : Cid .
+  vars Id            : Identifier .
+  vars Infix         : NeQualified .
+  vars NdS           : Configuration .
+  vars NQ            : NeQualified .
+  vars Prefix        : NeQualified .
+  vars Q Q' Q'' Q''' : Qualified .
+endfm

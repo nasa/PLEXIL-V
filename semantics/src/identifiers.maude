@@ -3,7 +3,6 @@ fmod IDENTIFIER is
 
  sort Identifier .
  subsort Qid < Identifier .
- op id : Qid -> Identifier .
 
 ----------------------------------------
 --- Relative identifiers
@@ -42,7 +41,7 @@ view NeQualified from TRIV to QUALIFIED is
 endv
 
 fmod IDENTIFIERS is
-  protecting QUALIFIED .
+  extending QUALIFIED  .
   sort Identifiers .
   op ids : Qualified -> Identifiers [ctor] .
 endfm

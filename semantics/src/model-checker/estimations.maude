@@ -1,0 +1,52 @@
+fmod PLEXIL-V--MODEL-CHECKER--ESTIMATIONS is
+  protecting PLEXIL-V--MODEL-CHECKER--BASE .
+
+  sort StateSpaceBound .
+  op StateSpaceBound(inputsStatesPerStep:_,numberOfSteps:_,maximumNumberOfStates:_) : Nat ExNat ExNat -> StateSpaceBound [ctor format (nn!u o o !b o o !b o o !r o nn)] .
+
+  sort ExecutionTimeBound .
+  op ExecutionTimeBound(hours:_,minutes:_) : Nat Nat -> ExecutionTimeBound [ctor format (nn!u o o o o o o o nn)] .
+  op ExecutionTimeBound(unbounded) : -> ExecutionTimeBound [ctor format (nn!u o !r o nn)] .
+
+  op  estimateMCExecutionTime(msPerExecutionSequence:_,state:_) : Nat State ~> ExecutionTimeBound .
+  ceq estimateMCExecutionTime(msPerExecutionSequence: MS, state: St)
+    =
+      if maxNumOfStates == infinity
+      then
+        ExecutionTimeBound(unbounded)
+      else
+        estimateMCExecutionTime'(MS,maxNumOfStates)
+      fi
+  if GEN := getGenerator(getConfig(St))
+  /\ maxNumOfStates := stateSpaceSize(cardinality(GEN))
+  .
+
+    op  estimateMCExecutionTime' : Nat Nat ~> ExecutionTimeBound .
+    ceq estimateMCExecutionTime'(MS, maxNumOfStates)
+      =
+        ExecutionTimeBound(hours: totalHours , minutes: totalRemainingMinutes)
+    if msTotalTime := MS * maxNumOfStates
+    /\ msPerHour := 60 * 60 * 1000
+    /\ msPerMinute := 60 * 1000
+    /\ totalHours := msTotalTime quo msPerHour
+    /\ totalRemainingMinutes := (msTotalTime rem msPerHour) quo msPerMinute
+    .
+
+  op estimateMCStateSpace : State ~> StateSpaceBound .
+  ceq estimateMCStateSpace(St) = StateSpaceBound(inputsStatesPerStep: N, numberOfSteps: EN, maximumNumberOfStates: SSS)
+  if GEN := getGenerator(getConfig(St))
+  /\ Cardinality(countPerStep : N:Nat,numberOfSteps : EN) := cardinality(GEN)
+  /\ SSS := stateSpaceSize(cardinality(GEN)) .
+
+  vars totalHours : Nat .
+  vars totalRemainingMinutes : Nat .
+  vars MS : Nat .
+  vars msPerHour : Nat .
+  vars msPerMinute : Nat .
+  vars msTotalTime : Nat .
+  vars maxNumOfStates : ExNat .
+  vars GEN : InputGenerator .
+  vars St : State .
+  vars N : Nat .
+  vars EN SSS : ExNat .
+endfm

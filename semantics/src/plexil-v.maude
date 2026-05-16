@@ -1,5 +1,34 @@
-load plexilite.maude
+in ../lib/pair/top.maude
+in utils.maude
+in identifiers.maude
+in error.maude
+in values.maude
+in expressions.maude
+in commands.maude
+in libraries.maude
+in status.maude
+in timepoint.maude
+in outcome.maude
+in extended-expression.maude
+in nodes.maude
+in environment.maude
+in declarations.maude
+in action.maude
+in traces.maude
+in system/interface.maude
+in generators/interface.maude
+in system/top.maude
+in defs.maude
+in plexil.maude
+in evaluation.maude
+in funpred.maude
+in interface.maude
+in reductions/top.maude
+in generators/top.maude
+in compiler.maude
+in model-checker/top.maude
 
 mod PLEXIL-V is
-  pr PLEXILITE-PREDS .
+  pr PLEXIL-V--MODEL-CHECKER .
+  pr REDUCTIONS .
 endm

@@ -1,0 +1,277 @@
+mod TEST--MODEL-CHECKER--PREPROCESSING is
+  pr TEST-BASE .
+
+  op test--model-checker--preprocessing : -> TestResults .
+ ceq test--model-checker--preprocessing =
+  begin tests
+
+    assert "preprocess' success case for hasStatus with prefix A" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished))
+    end
+
+    assert "preprocess' success case for hasStatus with prefix B" from
+      aFormula(preprocess'(hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('B . 'Root, executing))
+    end
+
+    assert "preprocess' error detection for missing node" from
+      aFormula(preprocess'(hasStatus(prefix('Missing), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Missing))), hasStatus(prefix('Missing), finished)))
+    end
+
+    assert "Error propagation through negation operator" from
+      aFormula(preprocess'(~ hasStatus(prefix('Missing), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Missing))), ~ hasStatus(prefix('Missing), finished)))
+    end
+
+    assert "Error propagation through eventually operator" from
+      aFormula(preprocess'(<> hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), True U hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "Error propagation through until operator" from
+      aFormula(preprocess'(True U hasStatus(prefix('X), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('X))), True U hasStatus(prefix('X), finished)))
+    end
+
+    assert "LTL constant True passes through" from
+      aFormula(preprocess'(True, nodes))
+    reaches
+      aFormula(True)
+    end
+
+    assert "LTL constant False passes through" from
+      aFormula(preprocess'(False, nodes))
+    reaches
+      aFormula(False)
+    end
+
+    assert "plexilModelCheck error handling for missing node" from
+      aFormula(preprocess(<> hasStatus(prefix('Missing), finished), state))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Missing))), True U hasStatus(prefix('Missing), finished)))
+    end
+
+    assert "preprocess' success case for hasOutcome with prefix A" from
+      aFormula(preprocess'(hasOutcome(prefix('A), success), nodes))
+    reaches
+      aFormula(hasOutcome('A . 'Root, success))
+    end
+
+    assert "preprocess' error detection for hasOutcome with missing node" from
+      aFormula(preprocess'(hasOutcome(prefix('Missing), failure(exited)), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Missing))), hasOutcome(prefix('Missing), failure(exited))))
+    end
+
+    assert "preprocess' success case for hasStatus with id shortcut" from
+      aFormula(preprocess'(hasStatus(id('A), finished), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished))
+    end
+
+    assert "preprocess' success case for hasOutcome with id shortcut" from
+      aFormula(preprocess'(hasOutcome(id('B), skipped), nodes))
+    reaches
+      aFormula(hasOutcome('B . 'Root, skipped))
+    end
+
+    assert "preprocess' error detection for hasStatus with invalid id" from
+      aFormula(preprocess'(hasStatus(id('Missing), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Missing))), hasStatus(id('Missing), finished)))
+    end
+
+    assert "preprocess' success case for negation" from
+      aFormula(preprocess'(~ hasStatus(prefix('A), finished), nodes))
+    reaches
+      aFormula(~ hasStatus('A . 'Root, finished))
+    end
+
+    assert "Error propagation through until operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) U True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), hasStatus(prefix('Bad), finished) U True))
+    end
+
+    assert "preprocess' success case for until operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) U hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) U hasStatus('B . 'Root, executing))
+    end
+
+    assert "preprocess' success case for next operator" from
+      aFormula(preprocess'(O hasStatus(prefix('A), finished), nodes))
+    reaches
+      aFormula(O hasStatus('A . 'Root, finished))
+    end
+
+    assert "Error propagation through next operator" from
+      aFormula(preprocess'(O hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), O hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for always operator" from
+      aFormula(preprocess'([] hasStatus(prefix('A), finished), nodes))
+    reaches
+      aFormula([] hasStatus('A . 'Root, finished))
+    end
+
+    assert "Error propagation through always operator" from
+      aFormula(preprocess'([] hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), False R hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for and operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) /\ hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) /\ hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through and operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) /\ True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), hasStatus(prefix('Bad), finished) /\ True))
+    end
+
+    assert "Error propagation through and operator - right argument" from
+      aFormula(preprocess'(True /\ hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), True /\ hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for or operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) \/ hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) \/ hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through or operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) \/ True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), hasStatus(prefix('Bad), finished) \/ True))
+    end
+
+    assert "Error propagation through or operator - right argument" from
+      aFormula(preprocess'(True \/ hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), True \/ hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for release operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) R hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) R hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through release operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) R True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), hasStatus(prefix('Bad), finished) R True))
+    end
+
+    assert "Error propagation through release operator - right argument" from
+      aFormula(preprocess'(True R hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), True R hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for weak until operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) W hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) W hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through weak until operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) W True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), (hasStatus(prefix('Bad), finished) U True) \/ (False R hasStatus(prefix('Bad), finished))))
+    end
+
+    assert "Error propagation through weak until operator - right argument" from
+      aFormula(preprocess'(True W hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), (True U hasStatus(prefix('Bad), finished)) \/ (False R True)))
+    end
+
+    assert "preprocess' success case for implies operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) -> hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) -> hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through implies operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) -> True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), True \/ ~ hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "Error propagation through implies operator - right argument" from
+      aFormula(preprocess'(True -> hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), False \/ hasStatus(prefix('Bad), finished)))
+    end
+
+    assert "preprocess' success case for iff operator" from
+      aFormula(preprocess'(hasStatus(prefix('A), finished) <-> hasStatus(prefix('B), executing), nodes))
+    reaches
+      aFormula(hasStatus('A . 'Root, finished) <-> hasStatus('B . 'Root, executing))
+    end
+
+    assert "Error propagation through iff operator - left argument" from
+      aFormula(preprocess'(hasStatus(prefix('Bad), finished) <-> True, nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), (True \/ ~ hasStatus(prefix('Bad), finished)) /\ (False \/ hasStatus(prefix('Bad), finished))))
+    end
+
+    assert "Error propagation through iff operator - right argument" from
+      aFormula(preprocess'(True <-> hasStatus(prefix('Bad), finished), nodes))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Bad))), (True \/ ~ hasStatus(prefix('Bad), finished)) /\ (False \/ hasStatus(prefix('Bad), finished))))
+    end
+
+    assert "preprocess' with prefix+infix in hasStatus" from
+      aFormula(preprocess'(hasStatus(prefix('Child, 'A), finished), nodesNested))
+    reaches
+      aFormula(hasStatus('Child . 'A . 'Root, finished))
+    end
+
+    assert "preprocess' with prefix+infix in hasOutcome" from
+      aFormula(preprocess'(hasOutcome(prefix('A, 'Root), success), nodesNested))
+    reaches
+      aFormula(hasOutcome('A . 'Root, success))
+    end
+
+    assert "preprocess' error with invalid prefix+infix" from
+      aFormula(preprocess'(hasStatus(prefix('Child, 'Missing), finished), nodesNested))
+    reaches
+      aFormula(ERROR(inContext("preprocess'", noNodeHasPrefix(prefix('Child, 'Missing))), hasStatus(prefix('Child, 'Missing), finished)))
+    end
+
+  end tests
+  if nodes := getNodes(getConfig(run(compile(
+       list('Root, nilocdecl, (none),
+         (empty('A, nilocdecl, (none))
+          empty('B, nilocdecl, (none))))))))
+  /\ state := run(compile(
+       list('Root, nilocdecl, (none),
+         (empty('A, nilocdecl, (none))
+          empty('B, nilocdecl, (none))))))
+  /\ nodesNested := getNodes(getConfig(run(compile(
+       list('Root, nilocdecl, (none),
+         (list('A, nilocdecl, (none), empty('Child, nilocdecl, (none)))
+          empty('B, nilocdecl, (none))))))))  .
+
+  vars nodesNested : Configuration .
+  vars nodes       : Configuration .
+  vars state       : GlobalConfig .
+endm

@@ -1,0 +1,118 @@
+fmod PLEXIL-V--MODEL-CHECKER--PROPERTIES is
+  protecting PLEXIL-V--MODEL-CHECKER--BASE .
+  protecting PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS .
+  protecting MAYBE{NeQualified} .
+  protecting SET{NeQualified} .
+  including MODEL-CHECKER .
+
+  subsort GlobalConfig < State .
+
+  op hasCmdHandle? : NeQualified CommandHandle -> Prop [ctor] .
+  eq ( Op | [ interface : < NQ : command-on-execution | handle: just(CmdHandle) , AtS > NdS ] Conf)
+    |= hasCmdHandle?(NQ,CmdHandle)
+    = true .
+
+  op hasNoCmdHandle? : NeQualified -> Prop .
+  eq ( Op | [ interface : < NQ : command-on-execution | handle: nothing, AtS > NdS ] Conf)
+    |= hasNoCmdHandle?(NQ)
+    = true .
+  eq ( Op | [ interface : < NQ : command-on-execution | handle: just(CmdHandle), AtS > NdS ] Conf)
+    |= hasNoCmdHandle?(NQ)
+    = false .
+  eq ( Op | [ interface : NdS ] Conf)
+    |= hasNoCmdHandle?(NQ)
+    = true [owise] .
+
+  op commandIsExecuting : Identifier -> Prop .
+  eq ( Op | [ nodes : < Q : command | status: executing, AtS' > NdS' ]
+            [ interface : < Id . Q : command-on-execution | AtS > NdS ] Conf)
+    |= commandIsExecuting(Id)
+    = true .
+
+  op inConflict : -> Prop .
+  eq ( Op | [ environment : GAMMA' , ('inConflict (nilarg) : val(true), GAMMA) ] Conf )
+    |= inConflict
+    = true .
+
+  op varIs : Identifier Value -> Prop .
+  eq ( Op | [ memory : < Id . Q : memory | actVal: V, AtS > MEM ] Conf )
+    |= varIs(Id,V)
+    = true .
+
+  op isTrue? : Expression -> Prop .
+  ceq [propIsTrue] : ( Op | [ memory : MEM ] [ nodes : NDS ] [ interface : IFACE ] [ environment : ENV ] Conf)
+    |= isTrue?(E)
+    = V == val(true)
+  if V := expToVal(eval(ENV, MEM NDS IFACE,E)) .
+
+  op isFalse? : Expression -> Prop .
+  ceq [propIsFalse] : ( Op | [ memory : MEM ] [ nodes : NDS ] [ interface : IFACE ] [ environment : ENV ] Conf)
+    |= isFalse?(E)
+    = V == val(false)
+  if V := expToVal(eval(ENV, MEM NDS IFACE,E)) .
+
+  op isUnknown? : Expression -> Prop .
+  ceq [propIsUnknown] : ( Op | [ memory : MEM ] [ interface : IFACE ] [ nodes : NDS ][ environment : ENV ] Conf)
+    |= isUnknown?(E)
+    = V == unknown
+    if E' := eval(ENV, MEM NDS IFACE,E) /\ V := expToVal(E') .
+
+  op isKnown? : Expression -> Prop .
+  eq isKnown?(E) = ~ isUnknown?(E) .
+
+  op hasOutcome : IdShortcut Outcome -> [Prop] .
+
+  op hasOutcome : NeQualified Outcome -> Prop .
+  eq (Op | [ nodes : < Id . Q : C | AtS, outcome: O:Outcome > NdS ] Conf) |= hasOutcome(Id . Q, O:Outcome)
+   = true .
+
+  op checkConditions : -> Prop .
+ ceq (Op | [ nodes : NdS ] Conf) |= checkConditions
+    = true
+  if IdS := getAllIds(NdS)
+  /\ checkConditions'(IdS, NdS) .
+
+    op getAllIds : Configuration -> Set{NeQualified} .
+    eq getAllIds(NdS) = getAllIdsAcc(NdS, empty) .
+
+    op getAllIdsAcc : Configuration Set{NeQualified} -> Set{NeQualified} .
+    eq getAllIdsAcc(< Q : C | AtS > NdS, IdS) = getAllIdsAcc(NdS, (Q, IdS)) .
+    eq getAllIdsAcc(                NdS, IdS) = IdS [owise] .
+
+    op checkConditions' : Set{NeQualified} Configuration -> Bool .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(preconditionFailed) , AtS > NdS) = false .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(invariantFailed)    , AtS > NdS) = false .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(postconditionFailed), AtS > NdS) = false .
+    eq checkConditions'(IdS, NdS) = true [owise] .
+
+  eq St |= P = false [owise] .
+
+  op hasStatus : IdShortcut Status -> Prop .
+
+  op hasStatus : NeQualified Status -> Prop .
+  eq (Op | [ nodes : < NQ : C | AtS, status: S > NdS ] Conf) |= hasStatus(NQ, S)
+   = true .
+
+  eq St |= P = false [owise print "\n\n|= otherwise: P = " P "\n\n"] .
+
+  vars AtS AtS'      : AttributeSet .
+  vars C C'          : Cid .
+  vars CmdHandle     : CommandHandle .
+  vars Conf          : Config .
+  vars E E'          : Expression .
+  vars ENV           : Environment .
+  vars GAMMA GAMMA'  : Environment .
+  vars Id            : Identifier .
+  vars IdS IdS'      : Set{NeQualified} .
+  vars IFACE         : Configuration .
+  vars MEM           : Configuration .
+  vars NdS NdS' NDS  : Configuration .
+  vars NQ            : NeQualified .
+  vars O             : Outcome .
+  vars Op            : Operation .
+  vars P             : Prop .
+  vars Q Q' Q'' Q''' : Qualified .
+  vars S             : Status .
+  vars St            : State .
+  vars V             : Value .
+endfm

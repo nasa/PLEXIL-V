@@ -1,0 +1,120 @@
+mod TEST--MODEL-CHECKER--UTILS is
+
+pr TEST-BASE .
+
+op test--model-checker--utils : -> TestResults .
+eq test--model-checker--utils =
+
+begin tests
+
+assert "isUniquePrefix fails if it does not exist a node with that name" from
+  testBool(
+    isUniquePrefix(
+      'A,
+      none
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A . 'B,
+      none
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A,
+      < 'B . 'A : list | none >
+      < 'C . 'B . 'A : list | none >
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A . 'B,
+      < 'B . 'A : list | none >
+      < 'C . 'B . 'A : list | none >
+    )
+  )
+reaches
+  testBool(
+    false
+  )
+  testBool(
+    false
+  )
+  testBool(
+    false
+  )
+  testBool(
+    false
+  )
+end
+
+assert "isUniquePrefix succeeds if there is one node with that name" from
+  testBool(
+    isUniquePrefix(
+      'A,
+      < 'A : list | none >
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A . 'B,
+      < 'A . 'B : list | none >
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A,
+      < 'A . 'B : list | none >
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A . 'C,
+      < 'A . 'C . 'B : list | none >
+    )
+  )
+reaches
+  testBool(
+    true
+  )
+  testBool(
+    true
+  )
+  testBool(
+    true
+  )
+  testBool(
+    true
+  )
+end
+
+assert "isUniquePrefix fails if there are two nodes with the same name" from
+  testBool(
+    isUniquePrefix(
+      'A,
+      < 'A : list | none >
+      < 'A . 'B : list | none >
+    )
+  )
+  testBool(
+    isUniquePrefix(
+      'A . 'B,
+      < 'A . 'B : list | none >
+      < 'A . 'B . 'C : list | none >
+    )
+  )
+reaches
+  testBool(
+    false
+  )
+  testBool(
+    false
+  )
+end
+
+
+end tests
+.
+
+endm

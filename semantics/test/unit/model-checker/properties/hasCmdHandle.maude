@@ -1,9 +1,9 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-CMD-HANDLE is
+mod TEST--MODEL-CHECKER--PROPERTIES--HAS-CMD-HANDLE is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--hasCmdHandle? : -> TestResults .
-eq test--model-checker-extensions--properties--hasCmdHandle? =
+op test--model-checker--properties--hasCmdHandle? : -> TestResults .
+eq test--model-checker--properties--hasCmdHandle? =
 begin tests
 
   assert "hasCmdHandle? returns true if there is a command handle" from

@@ -1,9 +1,9 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-NO-CMD-HANDLE is
+mod TEST--MODEL-CHECKER--PROPERTIES--HAS-NO-CMD-HANDLE is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--hasNoCmdHandle? : -> TestResults .
-eq test--model-checker-extensions--properties--hasNoCmdHandle? =
+op test--model-checker--properties--hasNoCmdHandle? : -> TestResults .
+eq test--model-checker--properties--hasNoCmdHandle? =
 begin tests
 
   assert "hasNoCmdHandle? returns true if the command identifier is not fully qualified and thus is cannot be found" from

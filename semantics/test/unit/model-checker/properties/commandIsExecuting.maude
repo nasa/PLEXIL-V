@@ -1,9 +1,9 @@
-mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--COMMAND-IS-EXECUTING is
+mod TEST--MODEL-CHECKER--PROPERTIES--COMMAND-IS-EXECUTING is
 
 pr TEST-BASE .
 
-op test--model-checker-extensions--properties--commandIsExecuting : -> TestResults .
-eq test--model-checker-extensions--properties--commandIsExecuting =
+op test--model-checker--properties--commandIsExecuting : -> TestResults .
+eq test--model-checker--properties--commandIsExecuting =
 begin tests
 
   assert "commandIsExecuting returns true if the command is executing" from

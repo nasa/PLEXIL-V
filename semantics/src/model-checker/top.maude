@@ -1,0 +1,16 @@
+in base.maude
+in id-shortcuts.maude
+in properties.maude
+in preprocessing.maude
+in plexil-model-check.maude
+in counterexamples.maude
+in estimations.maude
+
+fmod PLEXIL-V--MODEL-CHECKER is
+  protecting PLEXIL-V--MODEL-CHECKER--BASE .
+  protecting PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS .
+  protecting PLEXIL-V--MODEL-CHECKER--PROPERTIES .
+  protecting PLEXIL-V--MODEL-CHECKER--PLEXIL-MODEL-CHECK .
+  protecting PLEXIL-V--MODEL-CHECKER--COUNTEREXAMPLES .
+  protecting PLEXIL-V--MODEL-CHECKER--ESTIMATIONS .
+endfm

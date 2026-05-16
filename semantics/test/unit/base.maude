@@ -1,6 +1,7 @@
 mod TEST-BASE is
   pr TEST .
   pr PLEXIL-V .
+  pr MODEL-CHECKER .
 
   subsort Config Bool < SystemUnderTest .
 
@@ -9,7 +10,6 @@ mod TEST-BASE is
   op testAttributes       : AttributeSet     -> Cell .
   op testQualified        : Qualified        -> Cell .
   op testBool             : Bool             -> Cell .
-  op testModelCheckResult : ModelCheckResult -> Cell .
   op testSystem           : GlobalConfig     -> Cell .
   op testOperation        : Operation        -> Cell .
   op testQualifiedId      : Qualified        -> Cell .
@@ -19,6 +19,8 @@ mod TEST-BASE is
   op testValue       : Value          -> Cell .
   op testVariable    : Variable       -> Cell .
   op testGenerator   : InputGenerator -> Cell .
+  op testFormula     : Formula        -> Cell .
+  op testMaybeNeQualified : Maybe{NeQualified} -> Cell .
 
   op anAttributeSet : AttributeSet   -> Cell .
   op aBool          : Bool           -> Cell .
@@ -29,13 +31,17 @@ mod TEST-BASE is
   op anIdentifier   : Identifier     -> Cell .
   op anInputs       : Inputs         -> Cell .
   op anInputsSet    : InputsSet      -> Cell .
+  op anMCResult     : PlexilModelCheckResult -> Cell .
   op aNat           : Nat            -> Cell .
+  op aNeQualified   : NeQualified    -> Cell .
   op somePairs      : List{Pair{Qid,Expression}} -> Cell .
   op aSystem        : GlobalConfig   -> Cell .
   op aValue         : Value          -> Cell .
+  op aFormula       : Formula        -> Cell .
+  op aMaybeNeQualified : Maybe{NeQualified} -> Cell .
 
 
-  ---( Configuration)
+  ---( Configuration )
 
   op aConfiguration    : Configuration -> Cell .
   op testConfiguration : Configuration -> Cell .
@@ -57,6 +63,22 @@ mod TEST-BASE is
   op aNat    : Nat -> Cell .
 
   eq testNat(N:Nat) = aNat(N:Nat) .
+
+
+  ---( Formula )
+
+  op testFormula : Formula -> Cell .
+  op aFormula    : Formula -> Cell .
+
+  eq testFormula(F:Formula) = aFormula(F:Formula) .
+
+
+  ---( Maybe{NeQualified} )
+
+  op testMaybeNeQualified : Maybe{NeQualified} -> Cell .
+  op aMaybeNeQualified    : Maybe{NeQualified} -> Cell .
+
+  eq testMaybeNeQualified(M:Maybe{NeQualified}) = aMaybeNeQualified(M:Maybe{NeQualified}) .
 
 
   ---( Test Stubs )

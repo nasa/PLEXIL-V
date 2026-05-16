@@ -1,0 +1,79 @@
+mod TEST--MODEL-CHECKER--ID-SHORTCUTS is
+  pr TEST-BASE .
+  pr PLEXIL-V--MODEL-CHECKER--ID-SHORTCUTS .
+
+  op test--model-checker--id-shortcuts : -> TestResults .
+  ceq test--model-checker--id-shortcuts =
+  begin tests
+
+    assert "normalize with valid prefix A" from
+      aNeQualified(normalize(prefix('A), nodes))
+    reaches
+      aNeQualified(('A . 'Root))
+    end
+
+    assert "normalize with valid prefix B" from
+      aNeQualified(normalize(prefix('B), nodes))
+    reaches
+      aNeQualified(('B . 'Root))
+    end
+
+    assert "normalize with non-existent prefix" from
+      aNeQualified(normalize(prefix('Missing), nodes))
+    reaches
+      aNeQualified(ERROR(noNodeHasPrefix(prefix('Missing)), 'Missing))
+    end
+
+    assert "normalize with prefix+infix: prefix('A) and infix('Root)" from
+      aNeQualified(normalize(prefix('A, 'Root), nodesNested))
+    reaches
+      aNeQualified(('A . 'Root))
+    end
+
+    assert "normalize with prefix+infix: prefix('Child) and infix('A)" from
+      aNeQualified(normalize(prefix('Child, 'A), nodesNested))
+    reaches
+      aNeQualified(('Child . 'A . 'Root))
+    end
+
+    assert "normalize with prefix+infix: prefix('Child) and infix('Root)" from
+      aNeQualified(normalize(prefix('Child, 'Root), nodesNested))
+    reaches
+      aNeQualified(('Child . 'A . 'Root))
+    end
+
+    assert "normalize with prefix+infix non-existent prefix" from
+      testBool(not (normalize(prefix('Missing, 'A), nodesNested) :: NeQualified))
+    reaches
+      testBool(true)
+    end
+
+    assert "normalize with prefix+infix non-existent infix" from
+      testBool(not (normalize(prefix('Child, 'Missing), nodesNested) :: NeQualified))
+    reaches
+      testBool(true)
+    end
+
+    assert "normalize with prefix+infix ambiguous" from
+      testBool(not (normalize(prefix('X, 'Root), nodesAmbiguous) :: NeQualified))
+    reaches
+      testBool(true)
+    end
+
+  end tests
+  if nodes := getNodes(getConfig(run(compile(
+       list('Root, nilocdecl, (none),
+         (empty('A, nilocdecl, (none))
+          empty('B, nilocdecl, (none))))))))
+  /\ nodesNested := getNodes(getConfig(run(compile(
+       list('Root, nilocdecl, (none),
+         (list('A, nilocdecl, (none), empty('Child, nilocdecl, (none)))
+          empty('B, nilocdecl, (none))))))))
+  /\ nodesAmbiguous := getNodes(getConfig(run(compile(
+       list('Root, nilocdecl, (none),
+         (list('A, nilocdecl, (none), empty('X, nilocdecl, (none)))
+          list('B, nilocdecl, (none), empty('X, nilocdecl, (none))))))))) .
+
+  vars nodes nodesNested nodesAmbiguous : Configuration .
+
+endm

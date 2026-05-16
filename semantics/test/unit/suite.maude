@@ -10,7 +10,7 @@ in ./configuration.maude
 in ./funpred.maude
 in ./generators/test.maude
 in ./interface/test.maude
-in ./model-checker-extensions/test.maude
+in ./model-checker/test.maude
 in ./nodes/test.maude
 in ./reductions/test.maude
 in ./system.maude
@@ -28,7 +28,7 @@ mod TEST-SUITE is
   pr TEST--FUNPRED .
   pr TEST--GENERATORS .
   pr TEST--INTERFACE .
-  pr TEST--MODEL-CHECKER-EXTENSIONS .
+  pr TEST--MODEL-CHECKER .
   pr TEST--NODES .
   pr TEST--REDUCTIONS .
   pr TEST--SYSTEM .
@@ -45,7 +45,7 @@ mod TEST-SUITE is
     + test--generators
     + interface--tests
     + test--legacy-tests
-    + test--model-checker-extensions
+    + test--model-checker
     + test--nodes
     + reductions--tests
     + test--system
