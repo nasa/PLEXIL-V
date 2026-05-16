@@ -3,7 +3,11 @@ default:
 
 before_script:
   - git submodule update --init --recursive
-  - cd $PLEXIL_HOME && (diff -s <(git -C $CI_PROJECT_DIR rev-parse HEAD:plexil) <(git rev-parse HEAD) && echo "The PLEXIL versions of the container and the repository match.") || exit 1
+  - cd $PLEXIL_HOME
+  - git fetch
+  - git checkout $(git -C $CI_PROJECT_DIR rev-parse HEAD:plexil)
+  - git submodule update --init --recursive
+  - make tools -j
   - cd $CI_PROJECT_DIR/plexil2maude
   - cabal v2-install --overwrite-policy=always
   - cd $CI_PROJECT_DIR/plexilog
