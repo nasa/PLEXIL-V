@@ -206,29 +206,6 @@ mod TEST--REDUCTIONS--MACRO is
       )
     end
 
-    assert "Suspended update nodes are unsuspended on macrostep start" from
-      unSuspendMacroNodes(
-        [ nodes : < 'anId : update | suspended: true > ]
-      )
-    reaches
-        [ nodes : < 'anId : update | suspended: false > ]
-    end
-
-    assert "Suspended command nodes are unsuspended on macrostep start" from
-      unSuspendMacroNodes(
-        [ nodes : < 'anId : command | suspended: true > ]
-      )
-    reaches
-        [ nodes : < 'anId : command | suspended: false > ]
-    end
-
-    assert "Suspended assignment nodes are unsuspended on macrostep start" from
-      unSuspendMacroNodes(
-        [ nodes : < 'anId : assignment | suspended: true > ]
-      )
-    reaches
-        [ nodes : < 'anId : assignment | suspended: false > ]
-    end
   end tests
   .
 endm

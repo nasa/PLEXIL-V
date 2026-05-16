@@ -72,7 +72,6 @@ fmod ATOMIC is
   op waiting : Config ~> Config .
  ceq waiting( [ nodes : < A : C | status: waiting,
                                   active: true,
-                                  suspended: false,
                                   skip: SkC,
                                   startc: StC,
                                   pre: PC,
@@ -118,10 +117,10 @@ fmod ATOMIC is
                     evalpar(GAMMA, MEM, getCommandArguments(A, Nds'))
                   )
                 ), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else if C == update
         then [ macroacts : runUpdate(A, evalPairs(GAMMA, MEM, getPairs(A, Nds'))), AS' ]
-             [ microacts : suspend(A),setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
         else if C == library
         then [ macroacts : AS' ]
              [ microacts : callLibrary(A,evalLibraryCallArguments(A,GAMMA, Nds MEM)), setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
@@ -140,12 +139,10 @@ fmod ATOMIC is
       fi
       fi
      )
-  if Nds  := < A : C | status: waiting, active: true,  suspended: false, skip: SkC, startc: StC, pre: PC, exitc: EC, AtS > PS
-  /\ Nds' := < A : C | status: waiting, active: false, suspended: false, skip: SkC, startc: StC, pre: PC, exitc: EC, AtS > PS
+  if Nds  := < A : C | status: waiting, active: true,  skip: SkC, startc: StC, pre: PC, exitc: EC, AtS > PS
+  /\ Nds' := < A : C | status: waiting, active: false, skip: SkC, startc: StC, pre: PC, exitc: EC, AtS > PS
   /\ FinishAS := setStatus(A, finished),setOutcome(A,skipped)
   .
-  eq waiting([ nodes : < A : C | status: waiting, active: true, suspended: true, AtS > PS ] CONF)
-   = [ nodes : < A : C | status: waiting, active: false, suspended: true, AtS > PS ] CONF .
   eq waiting(CONF)
    = CONF [owise] .
 

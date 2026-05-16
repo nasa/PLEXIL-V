@@ -75,7 +75,6 @@ fmod NODE is
  op skip:_          : Expression -> Attribute [ctor gather (&)] .
  op pre:_           : Expression -> Attribute [ctor gather (&)] .
  op inv:_           : Expression -> Attribute [ctor gather (&)] .
- op suspended:_     : Bool -> Attribute [ctor gather (&)] .
 
   *** Interface attributes elements
   op name:_       : Identifier       -> Attribute .
@@ -111,7 +110,6 @@ fmod NODE is
     status: statusdef,
     outcome: outcomedef,
     active: true,
-    suspended: false,
     timepoints: defaultTimepoints
   .
 

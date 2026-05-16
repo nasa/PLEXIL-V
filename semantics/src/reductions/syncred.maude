@@ -95,12 +95,6 @@ eq applyActions'([ nodes : < Q : CC | outcome: O, AtS > PS ]
  = applyActions'([ nodes : < Q : CC | outcome: none, AtS > PS ]
                  [ microacts : AS ]
                  Conf ) [owise] .
-eq applyActions'([ nodes : < Q : CC | suspended: B, AtS > PS ]
-                 [ microacts : suspend(Q),AS ]
-                 Conf )
- = applyActions'([ nodes : < Q : CC | suspended: true, AtS > PS ]
-                 [ microacts : AS ]
-                 Conf ) .
 *** TODO: Logging of transitions should be handled in transparent way through `setStatus`
 ceq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
                  [ nodes : PS ]

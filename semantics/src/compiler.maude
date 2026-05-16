@@ -280,8 +280,6 @@ fmod COMPILER is
     = < NQ : Cd | repeatc: const(val(false)), AtS > .
   eq < NQ : Cd | post: default, AtS >
     = < NQ : Cd | post: const(val(true)), AtS > .
-  eq < NQ : Cd | suspended: default, AtS >
-    = < NQ : Cd | suspended: false, AtS > .
   ---- by-default expressions for each node type
   --- TODO: Improve the default conditions management so that is not necessary to do top-level matching
   eq < NQ : empty | endc: default, AtS >

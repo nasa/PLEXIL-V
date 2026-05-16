@@ -27,9 +27,6 @@ fmod ACTION-BASE is
   op resetMem : Qualified                    -> Action .
   op undoMem  : Qualified                    -> Action .
 
-  *** Synchronous reduction house-keeping
-  op suspend : Qualified -> Action .
-
   *** Logging actions
   op logTransition : Qualified Status Status Nat -> Action .
 endfm

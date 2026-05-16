@@ -50,9 +50,7 @@ fmod MACRO is
     macro |
       executeUpdates(
         executeCommands(
-          unSuspendMacroNodes(
-            Cfg
-          )
+          Cfg
         )
       )
   if Cfg' := incrementCycleCount(Cfg)
@@ -223,40 +221,7 @@ fmod MACRO is
   .
   eq executeCommands([ macroacts : AS ] Conf) = [ macroacts : AS ] Conf [owise] .
 
-  op unSuspendMacroNodes : Config -> Config .
-  eq unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : assignment | suspended: true, AtS > PS ]
-      )
-  =
-    unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : assignment | suspended: false, AtS > PS ]
-      )
-    .
-  eq unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : command | suspended: true, AtS > PS ]
-      )
-  =
-    unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : command | suspended: false, AtS > PS ]
-      )
-    .
-  eq unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : update | suspended: true, AtS > PS ]
-      )
-  =
-    unSuspendMacroNodes(
-      Conf
-      [ nodes : < Q : update | suspended: false, AtS > PS ]
-      )
-    .
-  eq unSuspendMacroNodes(Conf) = Conf [owise] .
-
- op counter : -> Cid .
+  op counter : -> Cid .
  var N : Nat .
  var IFACE : Configuration .
 

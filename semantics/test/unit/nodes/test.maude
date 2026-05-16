@@ -19,8 +19,7 @@ begin tests
         unknown # unknown # unknown # unknown #
         unknown # unknown # unknown # unknown #
         unknown # unknown # unknown # unknown #
-        unknown # unknown),
-      suspended: false
+        unknown # unknown)
     )
   end
 

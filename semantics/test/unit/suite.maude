@@ -441,8 +441,7 @@ begin tests
               post: const(val(true)),
               skip: const(val(false)),
               pre: const(val(true)),
-              inv: const(val(true)),
-              suspended: false > ]
+              inv: const(val(true)) > ]
           )
         )
       )
@@ -471,8 +470,7 @@ begin tests
                 post: const(val(true)),
                 skip: const(val(false)),
                 pre: const(val(true)),
-                inv: const(val(true)),
-                suspended: false > ])
+                inv: const(val(true)) > ])
           )
          ,
             (emptyConfig // [ nodes :
@@ -487,8 +485,7 @@ begin tests
                 post: const(val(true)),
                 skip: const(val(false)),
                 pre: const(val(true)),
-                inv: const(val(true)),
-                suspended: false > ])
+                inv: const(val(true)) > ])
         )
       )
     reaches
