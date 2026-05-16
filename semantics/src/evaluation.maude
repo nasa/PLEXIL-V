@@ -334,12 +334,6 @@ vars AtS AtS' : AttributeSet .
 
 ******** Auxiliary functions
 
-*** Reset memory
- op resetMemory : Configuration -> Configuration .
- eq resetMemory( < Q : memory | initVal: V', actVal: V, Ats > PS )
-  = < Q : memory | initVal: V', actVal: V', Ats > resetMemory(PS) .
- eq resetMemory(PS) = PS [owise] .
-
 *** Do the given set of processes satisfy certain status?
 *** Precondition: Conf does not contain memory nodes
  op processesWithStatus? : Configuration Status -> Bool .
