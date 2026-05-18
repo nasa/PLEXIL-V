@@ -37,6 +37,22 @@ mod TEST--REDUCTIONS--VALUES is
       )
     end
 
+    assert "Assign an unknown to an array, fills the array with unknowns" from
+      getNodesCell(
+        performAssignments(
+          [ memory : < 'id : memory | actVal: array(val(0) # val(1) # unknown # unknown), prevVal: array(unknown # unknown # unknown # unknown) > ]
+          [ microacts : setMem('id,unknown,nothing) ]
+        )
+      )
+    reaches
+      getNodesCell(
+        performAssignments(
+          [ memory : < 'id : memory | actVal: array(unknown # unknown # unknown # unknown), prevVal: array(val(0) # val(1) # unknown # unknown) > ]
+          [ microacts : mtactions ]
+        )
+      )
+    end
+
   end tests .
 
 

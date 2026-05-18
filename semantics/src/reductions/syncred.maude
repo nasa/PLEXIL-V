@@ -141,6 +141,18 @@ eq applyActions'(Conf) = Conf [owise] .
       [ microacts : AS ]
       )
     .
+ eq performAssignments(
+     Conf
+     [ memory : < Q : memory | actVal: array(PArr), prevVal: V'', AtS > PS ]
+     [ microacts : setMem(Q,unknown,nothing), AS ]
+     )
+ =
+   performAssignments(
+     Conf
+     [ memory : < Q : memory | actVal: unknownArray(length(PArr)), prevVal: array(PArr), AtS > PS ]
+     [ microacts : AS ]
+     )
+   .
   eq performAssignments(
       Conf
       [ memory : < Q  : memory-forwarding | target: Q',  AtS  >

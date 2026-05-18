@@ -1,0 +1,8 @@
+Real[4] Lookup TransitionTimes;
+
+lookupArrayDefaults:
+{
+  Real cache[4];
+  End isKnown(cache[0]);
+  cache = Lookup(TransitionTimes);
+}
