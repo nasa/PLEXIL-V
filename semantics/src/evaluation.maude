@@ -193,6 +193,21 @@ eq [eval-forwarded-variable] :
     var(Q)
   )
 = const(V) .
+eq [eval-recursive-forwarding-step] :
+  eval(
+    C,
+    [ < Q  : memory-forwarding | target: Q', AtS  >
+      < Q' : memory-forwarding |             AtS' > PS ],
+    var(Q)
+  )
+=
+  eval(
+    C,
+    [ < Q  : memory-forwarding | target: Q', AtS  >
+      < Q' : memory-forwarding |             AtS' > PS ],
+    var(Q')
+  )
+[owise] .
 
 
 *** On node timepoints
