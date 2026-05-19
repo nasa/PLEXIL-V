@@ -1,13 +1,16 @@
 fmod EXTENDED-EXPRESSION is
- extending VALUE .
- protecting INT .
- protecting STATUS .
- protecting OUTCOME .
- protecting TIMEPOINT .
- protecting QUALIFIED .
- protecting EXPRESSION .
- protecting COMMAND-HANDLE .
- extending FUNCTION .
+
+extending EXPRESSION .
+extending FUNCTION .
+
+protecting COMMAND-HANDLE .
+protecting INT .
+protecting OUTCOME .
+protecting PARAMETER .
+protecting QUALIFIED .
+protecting STATUS .
+protecting TIMEPOINT .
+protecting VALUE .
 
  op _+_           : Expression Expression -> Expression [prec 13 format (o sc o o)] .
  op _-_           : Expression Expression -> Expression [prec 13 format (o sc o o)] .
@@ -34,6 +37,23 @@ fmod EXTENDED-EXPRESSION is
  op hasSkipped?             : NeQualified -> Expression .
  op hasRcvAck?              : NeQualified -> Expression .
 
+op lookup             : NeQualified Parameters       -> Lookup [format (b o)] .
+op lookup             : NeQualified Arguments        -> Lookup [format (b o)] .
+op lookupOnChange     : NeQualified Parameters Value -> Lookup [format (b o)] .
+op lookupOnChange     : NeQualified Arguments  Value -> Lookup [format (b o)] .
+
+vars Q Q' : NeQualified .
+vars V    : Value .
+vars F    : Function .
+vars E    : Expression .
+vars Pars : Parameters .
+
+op qualifyVarNames : Expression NeQualified -> Expression .
+eq qualifyVarNames(const(V),Q) = const(V) .
+eq qualifyVarNames(var(Q'),Q) = var((Q' . Q)) .
+eq qualifyVarNames(lookup(Q',Pars),Q) = lookup(Q',Pars) .
+eq qualifyVarNames(func(F,E),Q) = func(F,qualifyVarNames(E,Q)) .
+eq qualifyVarNames(lookupOnChange(Q',Pars,V),Q) = lookupOnChange(Q',Pars,V) .
 
 *** Function Ids
 **** Absolute value (of integers and reals)

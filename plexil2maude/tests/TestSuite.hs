@@ -301,7 +301,34 @@ testsLegacy =
                       'ASSIGNMENT--0,
                       nilocdecl,
                       ( none ),
-                      (var('r1) := lookup ('r1 , (nilarg)))
+                      (var('r1) := lookup ('r1 , (nilpar)))
+                    )|])
+                ,("A simple assignment node II",
+                  [r|
+                     <Node ColNo="2" LineNo="26" NodeType="Assignment">
+                       <NodeId generated="1">ASSIGNMENT__0</NodeId>
+                       <NodeBody>
+                         <Assignment ColNo="2" LineNo="26">
+                           <BooleanVariable>initial_drag</BooleanVariable>
+                           <BooleanRHS>
+                             <LookupNow epx="Lookup">
+                               <Name>
+                                 <StringValue>InitialDrag</StringValue>
+                               </Name>
+                               <Arguments>
+                                 <IntegerVariable>SatId</IntegerVariable>
+                               </Arguments>
+                             </LookupNow>
+                           </BooleanRHS>
+                         </Assignment>
+                       </NodeBody>
+                     </Node>|],
+                  [r|
+                    assignment(
+                      'ASSIGNMENT--0,
+                      nilocdecl,
+                      (none),
+                      (var( 'initial_drag ) := lookup('InitialDrag,(var('SatId))))
                     )|])
                 ,("A simple array assignment node",
                   [r|
@@ -479,7 +506,7 @@ testsLegacy =
                          </NumericRHS>
                        </Assignment>
                      </NodeBody>|],
-                  "(var('r1) := lookup ('r1 , (nilarg)))")
+                  "(var('r1) := lookup ('r1 , (nilpar)))")
                 ]
         ,testGroup "Parse a command" $
             map (testify'' elementVisitor)
@@ -1025,12 +1052,44 @@ testsParseNodeCondition =
 testLookups :: TestTree
 testLookups =
   testGroup "Lookups" $
-    map (testify'' elementVisitor)
-      [("LookupOnChange wo args",
+    testParser elementVisitor
+      [("Simple lookup wo args ",
+        [r|
+        <LookupNow>
+          <Name>
+            <StringValue>r1</StringValue>
+          </Name>
+        </LookupNow>
+        |], "lookup ('r1 , (nilpar))")
+      ,("Simple lookup with integer argument",
+        [r|
+        <LookupNow>
+          <Name>
+            <StringValue>r1</StringValue>
+          </Name>
+          <Arguments ColNo="23" LineNo="15">
+              <IntegerValue>1</IntegerValue>
+          </Arguments>
+        </LookupNow>
+        |],
+        "lookup ('r1 , (const(val(1))))")
+      ,("Simple lookup with variable argument ",
+        [r|
+          <LookupNow epx="Lookup">
+            <Name>
+              <StringValue>InitialDrag</StringValue>
+            </Name>
+            <Arguments>
+              <IntegerVariable>SatId</IntegerVariable>
+            </Arguments>
+          </LookupNow>
+        |],
+        "lookup ('InitialDrag , (var('SatId)))")
+      ,("LookupOnChange wo args",
         [r|
         <LookupOnChange epx="Lookup"><Name><StringValue>inConflict</StringValue></Name></LookupOnChange>
         |],
-        "lookupOnChange('inConflict, (nilarg), val(0.0))")
+        "lookupOnChange('inConflict, (nilpar), val(0.0))")
       ,("LookupOnChange 1 arg",
         [r|
         <LookupOnChange>
@@ -1042,7 +1101,7 @@ testLookups =
             </Arguments>
         </LookupOnChange>
         |],
-        [r|lookupOnChange('A, (val(1)), val(0.0))|])
+        [r|lookupOnChange('A, (const(val(1))), val(0.0))|])
       ,("LookupOnChange 2 arg",
         [r|
         <LookupOnChange>
@@ -1055,7 +1114,7 @@ testLookups =
             </Arguments>
         </LookupOnChange>
         |],
-        [r|lookupOnChange('A,(val("is") val("isnot")), val(0.0))|])
+        [r|lookupOnChange('A,(const(val("is")) const(val("isnot"))), val(0.0))|])
       ,("LookupOnChange tolerance",
         [r|
         <LookupOnChange>
@@ -1070,7 +1129,7 @@ testLookups =
             </Arguments>
         </LookupOnChange>
         |],
-        [r|lookupOnChange('A,(val("is")), val(1))|])
+        [r|lookupOnChange('A,(const(val("is"))), val(1))|])
         ,("LookupOnChange 2 arg + tolerance",
         [r|
         <LookupOnChange>
@@ -1086,7 +1145,7 @@ testLookups =
             </Arguments>
         </LookupOnChange>
         |],
-        [r|lookupOnChange('A, (val("is") val("isnot")) , val(1))|])
+        [r|lookupOnChange('A, (const(val("is")) const(val("isnot"))) , val(1))|])
         ,("LookupOnChange name+tolerance, no args",
         [r|
         <LookupOnChange>
@@ -1098,7 +1157,7 @@ testLookups =
             </Tolerance>
         </LookupOnChange>
         |],
-        [r|lookupOnChange('time,(nilarg),val (0.1))|])
+        [r|lookupOnChange('time,(nilpar),val (0.1))|])
       ]
 
 testArithmeticExpressions :: TestTree
@@ -1243,7 +1302,7 @@ testUpdate =
             </Pair>
           </Update>
           |],
-        "(< 'lookup ; lookup ('someValue, (nilarg)) >)")
+        "(< 'lookup ; lookup ('someValue, (nilpar)) >)")
     , ("UpdateVariable",
         [r|
           <Update>

@@ -13,6 +13,7 @@ load round.maude
 load trunc.maude
 load real_to_int.maude
 load equ.maude
+load lookup.maude
 
 mod TEST--EVALUATION is
 
@@ -34,6 +35,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--TRUNC .
   pr TEST--EVALUATION--REAL-TO-INT .
   pr TEST--EVALUATION--EQU .
+  pr TEST--EVALUATION--LOOKUP .
 
   op test--evaluation : -> TestResults .
   eq test--evaluation =
@@ -52,6 +54,7 @@ mod TEST--EVALUATION is
        test--evaluation--trunc +
        test--evaluation--real-to-int +
        test--evaluation--equ +
+       test--evaluation--lookup +
 
 begin tests
 

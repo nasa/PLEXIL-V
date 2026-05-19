@@ -1,0 +1,63 @@
+mod TEST--EVALUATION--LOOKUP is
+
+pr TEST-BASE .
+
+vars Cfg : Configuration .
+vars Env : Environment .
+
+op  test--evaluation--lookup : -> TestResults .
+ceq test--evaluation--lookup =
+begin tests
+
+assert "lookup wo arguments" from
+  testExpression(
+    eval(
+      Env,
+      Cfg,
+      lookup('state1,nilarg)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "lookup with arguments" from
+  testExpression(
+    eval(
+      Env,
+      Cfg,
+      lookup('state2,var('A))
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "lookupOnChange currently mimics lookup" from
+  testExpression(
+    eval(
+      Env,
+      Cfg,
+      lookupOnChange('state2,var('A),val(1))
+    )
+  )
+reaches
+  testExpression(
+    eval(
+      Env,
+      Cfg,
+      lookup('state2,var('A))
+    )
+  )
+end
+
+end tests
+if Cfg := < 'A : memory | actVal: val(4) >
+/\ Env := ( 'state1(nilarg): val(false), 'state2(val(4)): val(true) )
+.
+
+endm

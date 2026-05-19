@@ -7,26 +7,29 @@ fmod EVAL is
  op eval : Environment Nodes         Expression ~> Expression . *** TODO: refactor to be ... -> Value
  op eval : Environment Configuration Expression -> Expression . *** TODO: remove dependency from Nodes above
 
- vars NA  Ats  : AttributeSet .
- vars B B'     : Bool .
- vars Cfg      : Config .
- var Cd        : Cid .
- vars PS PS'   : Configuration .
- var C         : Environment .
- var Sigma     : Environment .
- vars E E' E'' : Expression .
- var Fa        : FailureType .
- vars F F'     : Float .
- var iD        : Identifier .
- vars I I'     : Int .
- vars Q Q'     : NeQualified .
- vars O O'     : Outcome .
- var PL        : Nodes .
- vars S S'     : Status .
- var Tp        : Timepoint .
- var R R'      : String .
- vars V V'     : Value .
- vars Args Args' : Arguments .
+vars NA  Ats    : AttributeSet .
+vars B B'       : Bool .
+vars Cfg        : Config .
+vars Cd         : Cid .
+vars PS PS'     : Configuration .
+vars C          : Environment .
+vars Gamma      : Environment .
+vars Sigma      : Environment .
+vars E E' E''   : Expression .
+vars Fa         : FailureType .
+vars F F'       : Float .
+vars iD         : Identifier .
+vars I I'       : Int .
+vars Q Q'       : NeQualified .
+vars O O'       : Outcome .
+vars PL         : Nodes .
+vars S S'       : Status .
+vars Tp         : Timepoint .
+vars R R'       : String .
+vars V V'       : Value .
+vars Args Args' : Arguments .
+vars P          : Parameters .
+vars Pars Pars' : Parameters .
 
  eq eval(C, PS, E)
   = eval(C, [ PS ], E) .
@@ -214,14 +217,25 @@ eq [eval-recursive-forwarding-step] :
  eq eval(C,[ < Q : CC:Cid | timepoints: TPS:Timepoints, AtS > PS ],timepoint(Q,S,Tp))
    = const(lookupTimepoint(TPS:Timepoints, S, Tp)) .
 
-*** On context variables
- eq eval((new(Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)               .
- eq eval((   (Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)       [owise] .
- eq eval((                 C), PL, new(lookup(Q,Args))) = const(unknown) [owise] .
- eq eval(((Q(Args) : V),C), PL, lookup(Q,Args)) = const(V) . --- [print "lookup(" Q "," Args ") = const(" V ")"] .
- eq eval(C, PL, lookup(Q,Args)) = const(unknown) [owise] . --- print "lookup(" Q "," Args ") = const(unknown)"] .
- eq eval(((Q(Args) : V),C), PL, lookupOnChange(Q,Args,V')) = const(V) . --- [print "lookupOnChange(" Q "," Args ") = const(" V ")"] .
- eq eval(C, PL, lookupOnChange(Q,Args,V')) = const(unknown) [owise] . --- print "lookupOnChange(" Q "," Args ") = const(unknown)"] .
+*** On Lookups (external variables)
+--- Core implementation
+eq eval(C, [ PS ],         lookup(Q,Pars)  ) = eval(C, [ PS ], lookup(Q,evalpar(C,PS,Pars))) .
+eq eval(C, [ PS ], lookupOnChange(Q,Pars,V)) = eval(C, [ PS ], lookup(Q,evalpar(C,PS,Pars))) . --- TODO: LookupOnChange should be properly implemented
+eq eval(((Q(Args) : V),C), PL, lookup(Q,Args)) = const(V)               .
+eq eval(C                , PL, lookup(Q,Args)) = const(unknown) [owise] .
+--- `new`-lookup variant --- TODO: Review its usage and deprecate if necessary
+eq eval((new(Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)               .
+eq eval((   (Q(Args) : V),C), PL, new(lookup(Q,Args))) = const(V)       [owise] .
+eq eval((                 C), PL, new(lookup(Q,Args))) = const(unknown) [owise] .
+
+*** Expression to Value
+op expToVal : Expression ~> Value .
+eq expToVal(const(V)) = V .
+
+*** Evaluate parameters
+op evalpar : Environment Configuration Parameters ~> Arguments .
+eq evalpar(Gamma, PS, nilpar) = nilarg .
+eq evalpar(Gamma, PS, (E P)) = expToVal(eval(Gamma, PS, E)) evalpar(Gamma, PS, P) .
 
 *** On functions
 **** Case by case

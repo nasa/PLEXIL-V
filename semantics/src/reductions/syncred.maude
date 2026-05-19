@@ -105,7 +105,7 @@ ceq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
                  [ environment : ENV ]
                  Conf)
  if < Q : CC | timepoints: TPS, AtS > PS' := PS
- /\ CurrentTime := expToVal(eval(ENV, PS, lookupOnChange('time, nilarg, val(0.0))))
+ /\ CurrentTime := expToVal(eval(ENV, PS, lookupOnChange('time, nilpar, val(0.0))))
  /\ PS'' := < Q : CC | timepoints: updateTimepoint(updateTimepoint(TPS, S, end, CurrentTime), T, start, CurrentTime), AtS > PS'
  .
 eq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]

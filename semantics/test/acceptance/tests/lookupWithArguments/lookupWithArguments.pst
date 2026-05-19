@@ -1,0 +1,6 @@
+initial-state {
+  state InitialDrag (1 : int) = false : bool;
+}
+
+script {
+}

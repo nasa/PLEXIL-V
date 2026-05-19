@@ -184,9 +184,15 @@ fmod COMPILER is
   eq sanitizeIds(arrayVar(I . Q)                    , NQ, Cfg) = arrayVar(getFullyQualifiedVariableId(I, Q . NQ, Cfg)) .
   eq sanitizeIds(const(varForwarding(I . Q))        , NQ, Cfg) = const(varForwarding(getFullyQualifiedVariableId(I, Q . NQ, Cfg))) .
   eq sanitizeIds(const(V)                           , NQ, Cfg) = const(V) [owise] .
-  eq sanitizeIds(lookup(I,Args)                     , NQ, Cfg) = lookup(I,Args) .
-  eq sanitizeIds(lookupOnChange(I,Args,V)           , NQ, Cfg) = lookupOnChange(I,Args,V) .
+  eq sanitizeIds(lookup(I,Params)                   , NQ, Cfg) = lookup(I,sanitizeIdsOnParams(Params,NQ,Cfg)) .
+  eq sanitizeIds(lookupOnChange(I,Params,V)         , NQ, Cfg) = lookupOnChange(I,sanitizeIdsOnParams(Params,NQ,Cfg),V) .
   eq sanitizeIds(timepoint(I . Q, Status, Timepoint), NQ, Cfg) = timepoint(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Status, Timepoint) .
+
+  ceq sanitizeIds(E, NQ, Cfg) = Err:[Expression]
+  if Err:[Expression] := ERROR{sanitizeIds.Expression: E}
+  [owise print Err:[Expression]] .
+
+  op ERROR{sanitizeIds.Expression:_} : [Expression] -> [Expression] [ctor] .
 
 
   ********************************************************************************
@@ -328,7 +334,7 @@ fmod COMPILER is
   vars Pgm            : Plexil .
   vars PL             : Plexil .
   vars PLL            : PrePlexilList .
-  vars Ps             : Parameters .
+  vars Ps Params      : Parameters .
   vars Pairs          : List{Pair{Qid,Expression}} .
   vars Q Q' Q''       : Qualified .
   vars Soup Soup'     : Config .

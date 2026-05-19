@@ -541,24 +541,72 @@ begin tests
     assert "A `lookup` expression returns itself" from
         testExpression(
             sanitizeIds(
-                lookup(I,nilarg),
+                lookup(I,nilpar),
                 Q,
                 Cfg
             )
         )
         testExpression(
             sanitizeIds(
-                lookup('state,nilarg),
+                lookup('state,nilpar),
                 Q,
                 Cfg
             )
         )
         reaches
         testExpression(
-            lookup('state,nilarg)
+            lookup('state,nilpar)
         )
         testExpression(
-            lookup(I,nilarg)
+            lookup(I,nilpar)
+        )
+    end
+
+    assert "A `lookup` expression with parameters propagates the sanitization" from
+        testExpression(
+            sanitizeIds(
+                lookup('state,var(V)),
+                Q,
+                Cfg
+            )
+        )
+        testExpression(
+            sanitizeIds(
+                lookupOnChange('state,var(V),val(1)),
+                Q,
+                Cfg
+            )
+        )
+        reaches
+        testExpression(
+            lookup('state,var(QV))
+        )
+        testExpression(
+            lookupOnChange('state,var(QV),val(1))
+        )
+    end
+
+    assert "A `lookup` expression with values are considered errors for sanitization" from
+        testExpression(
+            sanitizeIds(
+                lookup('state,nilarg),
+                'Q,
+                none
+            )
+        )
+        testExpression(
+            sanitizeIds(
+                lookupOnChange('state,val(1),val(1)),
+                'Q,
+                Cfg
+            )
+        )
+        reaches
+        testExpression(
+            ERROR{sanitizeIds.Expression: lookup('state, nilarg)}
+        )
+        testExpression(
+            ERROR{sanitizeIds.Expression: lookupOnChange('state,val(1),val(1))}
         )
     end
 
