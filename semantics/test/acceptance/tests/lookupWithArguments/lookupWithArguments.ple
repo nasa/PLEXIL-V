@@ -1,0 +1,12 @@
+Boolean Lookup InitialDrag(Integer SatId);
+
+lookupWithArguments: Concurrence
+{
+  Integer SatId = 1;
+  Boolean initial_drag;
+  Exit initial_drag == false;
+
+  theAssignment: {
+    initial_drag = Lookup(InitialDrag(SatId));
+  }
+}

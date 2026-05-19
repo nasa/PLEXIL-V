@@ -648,7 +648,7 @@ parseLookupOnChange cursor = do
                           <|> (uniqueChildElement cursor >>= \(name') -> do
                                   return (name', PP.empty, PP.empty))
     let vDoc = either (error . show) text $ parseNameFromStringValue name
-        argsDoc = if args == PP.empty then "nilarg" else args
+        argsDoc = if args == PP.empty then "nilpar" else args
         tolDoc = if tol == PP.empty then "val(0.0)" else tol
     return $ "lookupOnChange" <> parens (hcat $ punctuate comma [vDoc, parens argsDoc, tolDoc])
   where
@@ -668,16 +668,14 @@ parseLookupNow cursor = do
                           <|> (uniqueChildElement cursor >>= \(name') -> do
                                   return (name', PP.empty))
     let vDoc = either (error . show) text $ parseNameFromStringValue name
-        argsDoc = if args == PP.empty then "nilarg" else args
+        argsDoc = if args == PP.empty then "nilpar" else args
     return $ "lookup" <> parens (hcat $ punctuate comma [vDoc, parens argsDoc])
 
 parseLookupArguments :: Cursor -> ParseError Doc
 parseLookupArguments cursor = do
     checkThisElement "Arguments" cursor
-    let args = map parseSimpleValue $ (child >=> anyElement) cursor
-    case sequence args of
-        Left error -> Left error
-        Right t' -> Right $ hcat $ punctuate space t'
+    let args = map elementVisitor $ (child >=> anyElement) cursor
+    Right $ hcat $ punctuate space args
 
 helper :: Element -> [Doc] -> Doc
 helper el children =

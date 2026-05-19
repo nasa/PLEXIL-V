@@ -113,18 +113,6 @@ fmod FUNPRED is
     eq waitingOrFinished( PS )
      = true [owise] .
 
-  *** Expression to Value
-  op expToVal : Expression ~> Value .
-  eq expToVal(const(V))
-   = V .
-
-  *** Evaluate parameters
-  op evalpar : Environment Configuration Parameters -> Arguments .
-  eq evalpar(Gamma, PS, nilpar)
-   = nilarg .
-  eq evalpar(Gamma, PS, (E P))
-   = (expToVal(eval(Gamma, PS, E)) evalpar(Gamma, PS, P)) .
-
   *** Evaluate lists of pairs
   op evalPairs : Environment Configuration List{Pair{Qid,Expression}} -> List{Pair{Qid,Expression}} .
   eq evalPairs(Gamma, PS, (nil).List{Pair{Qid,Expression}})

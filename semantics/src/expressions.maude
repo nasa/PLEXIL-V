@@ -18,27 +18,13 @@ fmod EXPRESSION is
  op var                : NeQualified            -> VariableExpression [format (b o)] .
  op arrayVar           : NeQualified            -> AssignmentTarget [format (b o)] .
  op arrayVar           : NeQualified Expression -> AssignmentTarget [format (b o)] .
- op lookup             : NeQualified Arguments  -> Lookup [format (b o)] .
  op func               : Function Expression    -> Expression [format (b o)] . *** TODO: Review
- op lookupOnChange     : NeQualified Arguments Value   -> Lookup [format (b o)] .
  op name               : NeQualified         -> Expression [format (b o)] .
  op default            :                     -> Expression [format (b o)] .
  op parameter          :                     -> Expression [format (b o)] .
 
  op new : Lookup -> Expression [ctor format (b o)] .
 
- vars Q Q' : NeQualified .
- var V : Value .
- var F : Function .
- var E : Expression .
- vars Args : Arguments .
-
- op qualifyVarNames : Expression NeQualified -> Expression .
- eq qualifyVarNames(const(V),Q) = const(V) .
- eq qualifyVarNames(var(Q'),Q) = var((Q' . Q)) .
- eq qualifyVarNames(lookup(Q',Args),Q) = lookup(Q',Args) .
- eq qualifyVarNames(func(F,E),Q) = func(F,qualifyVarNames(E,Q)) .
- eq qualifyVarNames(lookupOnChange(Q',Args,V),Q) = lookupOnChange(Q',Args,V) .
 endfm
 
 view Expression from TRIV to EXPRESSION is
