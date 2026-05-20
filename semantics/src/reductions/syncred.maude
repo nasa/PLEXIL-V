@@ -29,7 +29,7 @@ vars Target      : NeQualified .
 vars QID         : Qid .
 vars S S' T T'   : Status .
 var Str          : String .
-vars TPS         : Timepoints .
+vars Tps Tps'    : Timepoints .
 var Tr           : Trace .
 var TL           : TraceList .
 var TS           : TransitionSet .
@@ -104,9 +104,13 @@ ceq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
                  [ nodes : PS'' ]
                  [ environment : ENV ]
                  Conf)
- if < Q : CC | timepoints: TPS, AtS > PS' := PS
+ if < Q : CC | timepoints: Tps, AtS > PS' := PS
  /\ CurrentTime := expToVal(eval(ENV, PS, lookupOnChange('time, nilpar, val(0.0))))
- /\ PS'' := < Q : CC | timepoints: updateTimepoint(updateTimepoint(TPS, S, end, CurrentTime), T, start, CurrentTime), AtS > PS'
+ /\ Tps' := if T == S
+            then Tps
+            else updateTimepoint(updateTimepoint(Tps, S, end, CurrentTime), T, start, CurrentTime)
+            fi
+ /\ PS'' := < Q : CC | timepoints: Tps', AtS > PS'
  .
 eq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
                  Conf )

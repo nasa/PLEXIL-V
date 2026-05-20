@@ -1,0 +1,5 @@
+timepointEndOnStaleStateIsNotUpdated:
+{
+  Skip isKnown(timepointEndOnStaleStateIsNotUpdated.WAITING.END);
+  Start timepointEndOnStaleStateIsNotUpdated.WAITING.START >= 1.0;
+}
