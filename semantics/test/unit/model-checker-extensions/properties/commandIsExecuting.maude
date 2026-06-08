@@ -1,0 +1,36 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--COMMAND-IS-EXECUTING is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--commandIsExecuting : -> TestResults .
+eq test--model-checker-extensions--properties--commandIsExecuting =
+begin tests
+
+  assert "commandIsExecuting returns true if the command is executing" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | none > ]
+      ) |= commandIsExecuting('C)
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "commandIsExecuting returns false if the command is not executing" from
+    testBool(
+      ( stop |
+        [ interface : < 'D : command-on-execution | none > ]
+      ) |= commandIsExecuting('C)
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+end tests .
+
+endm

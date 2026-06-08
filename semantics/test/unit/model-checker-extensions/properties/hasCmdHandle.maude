@@ -1,0 +1,50 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-CMD-HANDLE is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--hasCmdHandle? : -> TestResults .
+eq test--model-checker-extensions--properties--hasCmdHandle? =
+begin tests
+
+  assert "hasCmdHandle? returns true if there is a command handle" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | handle: just(CommandSuccess) > ]
+      ) |= hasCmdHandle?('C . 'N, CommandSuccess)
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "hasCmdHandle? returns false if there is no command handle" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | handle: nothing > ]
+      ) |= hasCmdHandle?('C . 'N, CommandSuccess)
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "hasCmdHandle? returns false if it has not started executing (and thus there cannot be a handle)" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : none ]
+      ) |= hasCmdHandle?('C . 'N, CommandSuccess)
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+end tests .
+
+endm

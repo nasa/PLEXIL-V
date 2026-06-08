@@ -1,0 +1,54 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-UNKNOWN is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--isUnknown? : -> TestResults .
+eq test--model-checker-extensions--properties--isUnknown? =
+begin tests
+  assert "isUnknown? returns true if the expression evaluates to unknown" from
+    testBool(
+      ( stop |
+        [ memory : none ]
+        [ interface : none ]
+        [ nodes : none ]
+        [ environment : mtenvironment ]
+      ) |= isUnknown?(const(unknown) < const(val(9.2)))
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "isUnknown? returns false if the expression evaluates to a concrete value" from
+    testBool(
+      ( stop |
+        [ memory : none ]
+        [ interface : none ]
+        [ nodes : none ]
+        [ environment : mtenvironment ]
+      ) |= isUnknown?(const(val(6.3)) < const(val(9.2)))
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "isUnknown? accepts expressions depending on nodes" from
+    testBool(
+      ( stop |
+        [ memory : none ]
+        [ nodes : < 'A : empty | outcome: skipped > ]
+        [ interface : none ]
+        [ environment : mtenvironment ]
+      ) |= isUnknown?(isOutcome?('A,success) or const(unknown))
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+end tests .
+
+endm

@@ -1,0 +1,24 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-FALSE is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--isFalse? : -> TestResults .
+eq test--model-checker-extensions--properties--isFalse? =
+begin tests
+  assert "isFalse? accepts expressions depending on nodes" from
+    testBool(
+      ( stop |
+        [ memory : none ]
+        [ nodes : < 'A : empty | outcome: skipped > ]
+        [ interface : none ]
+        [ environment : mtenvironment ]
+      ) |= isFalse?(isOutcome?('A,success))
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+end tests .
+
+endm

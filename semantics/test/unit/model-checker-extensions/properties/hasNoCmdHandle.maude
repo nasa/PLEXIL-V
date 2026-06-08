@@ -1,0 +1,63 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-NO-CMD-HANDLE is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--hasNoCmdHandle? : -> TestResults .
+eq test--model-checker-extensions--properties--hasNoCmdHandle? =
+begin tests
+
+  assert "hasNoCmdHandle? returns true if the command identifier is not fully qualified and thus is cannot be found" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | handle: nothing > ]
+      ) |= hasNoCmdHandle?('C)
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "hasNoCmdHandle? returns false if there is a command handle" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | handle: just(CommandSuccess) > ]
+      ) |= hasNoCmdHandle?('C . 'N)
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "hasNoCmdHandle? returns true if the command has started executing and there is no command handle" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : < 'C . 'N : command-on-execution | handle: nothing > ]
+      ) |= hasNoCmdHandle?('C . 'N)
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "hasNoCmdHandle? returns true if the command has not started executing (and thus there cannot be a handle)" from
+    testBool(
+      ( stop |
+        [ nodes : < 'N : command | status: executing > ]
+        [ interface : none ]
+      ) |= hasNoCmdHandle?('C . 'N)
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+end tests .
+
+endm

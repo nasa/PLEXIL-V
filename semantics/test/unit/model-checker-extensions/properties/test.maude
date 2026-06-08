@@ -1,0 +1,31 @@
+in checkConditions.maude
+in commandIsExecuting.maude
+in hasCmdHandle.maude
+in hasNoCmdHandle.maude
+in isTrue.maude
+in isFalse.maude
+in isUnknown.maude
+
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES is
+
+pr TEST-BASE .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--CHECK-CONDITIONS .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--COMMAND-IS-EXECUTING .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-CMD-HANDLE .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--HAS-NO-CMD-HANDLE .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-TRUE .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-FALSE .
+pr TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--IS-UNKNOWN .
+
+op test--model-checker-extensions--properties : -> TestResults .
+eq test--model-checker-extensions--properties
+  = test--model-checker-extensions--properties--checkConditions
+  + test--model-checker-extensions--properties--commandIsExecuting
+  + test--model-checker-extensions--properties--hasCmdHandle?
+  + test--model-checker-extensions--properties--hasNoCmdHandle?
+  + test--model-checker-extensions--properties--isTrue?
+  + test--model-checker-extensions--properties--isFalse?
+  + test--model-checker-extensions--properties--isUnknown?
+.
+
+endm

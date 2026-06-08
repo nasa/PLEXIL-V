@@ -1,0 +1,332 @@
+mod TEST--MODEL-CHECKER-EXTENSIONS--PROPERTIES--CHECK-CONDITIONS is
+
+pr TEST-BASE .
+
+op test--model-checker-extensions--properties--checkConditions : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions
+  = test--model-checker-extensions--properties--checkConditions--empty
+  + test--model-checker-extensions--properties--checkConditions--single-node
+  + test--model-checker-extensions--properties--checkConditions--multiple-nodes
+  + test--model-checker-extensions--properties--checkConditions--mixed-failures
+  + test--model-checker-extensions--properties--checkConditions--other-failures
+.
+
+*** Test with empty configuration (no nodes)
+op test--model-checker-extensions--properties--checkConditions--empty : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions--empty =
+begin tests
+
+  assert "checkConditions returns true when there are no nodes" from
+    testBool(
+      ( stop |
+        [ nodes : none ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+end tests .
+
+*** Test with single node having various outcomes
+op test--model-checker-extensions--properties--checkConditions--single-node : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions--single-node =
+begin tests
+
+  assert "checkConditions returns false when a single node has preconditionFailed" from
+    testBool(
+      ( stop |
+        [ nodes : < 'A : empty | outcome: failure(preconditionFailed) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns false when a single node has invariantFailed" from
+    testBool(
+      ( stop |
+        [ nodes : < 'B : empty | outcome: failure(invariantFailed) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns false when a single node has postconditionFailed" from
+    testBool(
+      ( stop |
+        [ nodes : < 'C : empty | outcome: failure(postconditionFailed) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns true when a single node has success outcome" from
+    testBool(
+      ( stop |
+        [ nodes : < 'D : empty | outcome: success > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns true when a single node has skipped outcome" from
+    testBool(
+      ( stop |
+        [ nodes : < 'E : empty | outcome: skipped > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns true when a single node has none outcome" from
+    testBool(
+      ( stop |
+        [ nodes : < 'F : empty | outcome: none > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+end tests .
+
+*** Test with multiple nodes
+op test--model-checker-extensions--properties--checkConditions--multiple-nodes : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions--multiple-nodes =
+begin tests
+
+  assert "checkConditions returns true when all nodes have success outcome" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: success >
+          < 'C : empty | outcome: success >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns false when one of multiple nodes has preconditionFailed" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: failure(preconditionFailed) >
+          < 'C : empty | outcome: success >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns false when one of multiple nodes has invariantFailed" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: success >
+          < 'C : empty | outcome: failure(invariantFailed) >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns false when one of multiple nodes has postconditionFailed" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: failure(postconditionFailed) >
+          < 'C : empty | outcome: success >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns true when nodes have mixed non-failure outcomes" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: skipped >
+          < 'C : empty | outcome: none >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+end tests .
+
+*** Test with multiple condition failures
+op test--model-checker-extensions--properties--checkConditions--mixed-failures : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions--mixed-failures =
+begin tests
+
+  assert "checkConditions returns false when multiple nodes have different condition failures" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: failure(preconditionFailed) >
+          < 'B : empty | outcome: failure(invariantFailed) >
+          < 'C : empty | outcome: failure(postconditionFailed) >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns false when some nodes succeed but at least one has a condition failure" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: success >
+          < 'B : empty | outcome: success >
+          < 'C : empty | outcome: success >
+          < 'D : empty | outcome: success >
+          < 'E : empty | outcome: failure(invariantFailed) >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+end tests .
+
+*** Test with other failure types (not condition-related)
+op test--model-checker-extensions--properties--checkConditions--other-failures : -> TestResults .
+eq test--model-checker-extensions--properties--checkConditions--other-failures =
+begin tests
+
+  assert "checkConditions returns true when a node has failure(exited)" from
+    testBool(
+      ( stop |
+        [ nodes : < 'A : empty | outcome: failure(exited) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns true when a node has failure(parentExited)" from
+    testBool(
+      ( stop |
+        [ nodes : < 'B : empty | outcome: failure(parentExited) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns true when a node has failure(parentFailed)" from
+    testBool(
+      ( stop |
+        [ nodes : < 'C : empty | outcome: failure(parentFailed) > ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns true when nodes have mixed failure types (non-condition)" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: failure(exited) >
+          < 'B : empty | outcome: failure(parentExited) >
+          < 'C : empty | outcome: failure(parentFailed) >
+          < 'D : empty | outcome: success >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+  assert "checkConditions returns false when there are both condition and non-condition failures" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: failure(exited) >
+          < 'B : empty | outcome: failure(preconditionFailed) >
+          < 'C : empty | outcome: success >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      false
+    )
+  end
+
+  assert "checkConditions returns true when only non-condition failures exist" from
+    testBool(
+      ( stop |
+        [ nodes :
+          < 'A : empty | outcome: failure(exited) >
+          < 'B : empty | outcome: failure(parentExited) >
+          < 'C : empty | outcome: failure(parentFailed) >
+        ]
+      ) |= checkConditions
+    )
+  reaches
+    testBool(
+      true
+    )
+  end
+
+end tests .
+
+endm

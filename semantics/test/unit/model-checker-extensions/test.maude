@@ -1,4 +1,4 @@
-in properties.maude
+in properties/test.maude
 
 mod TEST--MODEL-CHECKER-EXTENSIONS is
 

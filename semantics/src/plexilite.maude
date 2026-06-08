@@ -42,6 +42,7 @@ endm
 in model-checker.maude
 
 mod PLEXILITE-PREDS is
+  pr SET{NeQualified} .
   pr PLEXILITE .
   inc MODEL-CHECKER .
   subsort GlobalConfig < State .
@@ -141,6 +142,27 @@ mod PLEXILITE-PREDS is
   op hasStatus : NeQualified Status -> Prop .
   eq (Op | [ nodes : < Id . Q : C | AtS, status: S > NdS ] Conf) |= hasStatus(Id . Q, S)
     = true .
+
+  op checkConditions : -> Prop .
+ ceq (Op | [ nodes : NdS ] Conf) |= checkConditions
+    = true
+  if IdS := getAllIds(NdS)
+  /\ checkConditions'(IdS, NdS) .
+
+    op getAllIds : Configuration -> Set{NeQualified} .
+    eq getAllIds(NdS) = getAllIdsAcc(NdS, empty) .
+
+    op getAllIdsAcc : Configuration Set{NeQualified} -> Set{NeQualified} .
+    eq getAllIdsAcc(< Q : C | AtS > NdS, IdS) = getAllIdsAcc(NdS, (Q, IdS)) .
+    eq getAllIdsAcc(                NdS, IdS) = IdS [owise] .
+
+    op checkConditions' : Set{NeQualified} Configuration -> Bool .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(preconditionFailed) , AtS > NdS) = false .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(invariantFailed)    , AtS > NdS) = false .
+    eq checkConditions'((Q,IdS), < Q : C | outcome: failure(postconditionFailed), AtS > NdS) = false .
+    eq checkConditions'(IdS, NdS) = true [owise] .
+
+  vars IdS IdS' : Set{NeQualified} .
 
   eq St |= P = false [owise] .
 
