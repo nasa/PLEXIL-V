@@ -1,0 +1,12 @@
+fmod GENERATORS--REPEAT is
+  protecting SYSTEM .
+
+  op repeat : InputsSet -> InputGenerator [ctor] .
+  eq generate(repeat(InS),Cfg) = InS .
+  eq update(repeat(InS),Cfg,In) = repeat(InS) .
+  eq cardinality(repeat(InS)) = Cardinality(countPerStep : | InS |, numberOfSteps : infinity) .
+
+  vars In : Inputs .
+  vars InS : InputsSet .
+  vars Cfg : Config .
+endfm

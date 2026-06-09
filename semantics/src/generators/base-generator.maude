@@ -1,3 +1,3 @@
 fmod GENERATORS--BASE-GENERATOR is
-  protecting GENERATOR{Config} * (sort Generator{Config} to InputGenerator) .
+  protecting GENERATORS--GENERATOR{Config} * (sort Generator{Config} to InputGenerator) .
 endfm

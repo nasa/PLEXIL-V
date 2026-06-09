@@ -1,4 +1,4 @@
-fmod FILTER-GENERATOR is
+fmod GENERATORS--FILTER is
 
   protecting SYSTEM .
   protecting EVAL .

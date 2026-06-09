@@ -61,7 +61,7 @@ begin tests
     )
   reaches
     aCardinality(
-      Cardinality(countPerStep : 1, numberOfSteps : 0)
+      Cardinality(countPerStep : 1, numberOfSteps : 1)
     )
   end
 
@@ -71,7 +71,7 @@ begin tests
     )
   reaches
     aCardinality(
-      Cardinality(countPerStep : 1, numberOfSteps : 1)
+      Cardinality(countPerStep : 1, numberOfSteps : 2)
     )
   end
 

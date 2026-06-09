@@ -1,5 +1,11 @@
 sload interface.maude
+sload sequence.maude
+sload command-ack.maude
 sload filter.maude
-sload if-then-else.maude
 sload inputs-filter.maude
-sload generators.maude
+sload if-then-else.maude
+sload cross-product.maude
+sload repeat.maude
+sload zero.maude
+sload empty.maude
+sload basic.maude

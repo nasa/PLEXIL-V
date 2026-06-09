@@ -1,4 +1,4 @@
-fmod GENERATORS--ZERO-GENERATOR is
+fmod GENERATORS--ZERO is
   pr GENERATORS--BASE-GENERATOR .
 
   op noEnvGen : -> InputGenerator .

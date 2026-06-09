@@ -1,4 +1,4 @@
-fmod GENERATORS--EMPTY-GENERATOR is
+fmod GENERATORS--EMPTY is
   pr GENERATORS--BASE-GENERATOR .
 
   vars Conf : Config .

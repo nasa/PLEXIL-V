@@ -1,10 +1,10 @@
 sload generator.maude
 sload base-generator.maude
-sload zero-generator.maude
-sload empty-generator.maude
+sload zero.maude
+sload empty.maude
 
 fmod GENERATORS--INTERFACE is
-  pr GENERATORS--ZERO-GENERATOR .
-  pr GENERATORS--EMPTY-GENERATOR .
+  pr GENERATORS--ZERO .
+  pr GENERATORS--EMPTY .
   pr INPUTS-LIST .
 endfm
