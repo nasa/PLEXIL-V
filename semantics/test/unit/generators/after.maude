@@ -1,0 +1,214 @@
+mod TEST--GENERATORS--AFTER is
+
+pr TEST-BASE .
+
+op zeroStateful : Nat -> InputGenerator .
+eq generate(zeroStateful(N:Nat),Conf:Config) = empty .
+eq update(zeroStateful(N:Nat),Conf:Config,EI:Inputs) = zeroStateful(s N:Nat) .
+eq isConsumed?(zeroStateful(N:Nat),Conf:Config) = true .
+eq cardinality(zeroStateful(N:Nat)) = Cardinality(countPerStep : 0 , numberOfSteps : 0) .
+
+op test--generators--after : -> TestResults .
+eq test--generators--after
+  = test--generators--after--generate
+  + test--generators--after--update
+  + test--generators--after--cardinality
+  + test--generators--after--isConsumed
+.
+
+op test--generators--after--generate : -> TestResults .
+eq test--generators--after--generate =
+  begin tests
+
+  assert "after uses first generator when not consumed" from
+    anInputsSet(
+      generate(after(sequence(stateLookup('A, nilarg, val(1))),
+                     sequence(stateLookup('B, nilarg, val(2)))),
+               mtsoup)
+    )
+  reaches
+    anInputsSet(
+      stateLookup('A, nilarg, val(1))
+    )
+  end
+
+  assert "after uses second generator when first is consumed" from
+    anInputsSet(
+      generate(after(zero,
+                     sequence(stateLookup('B, nilarg, val(2)))),
+               mtsoup)
+    )
+  reaches
+    anInputsSet(
+      stateLookup('B, nilarg, val(2))
+    )
+  end
+
+  assert "after generates empty when both are consumed" from
+    anInputsSet(
+      generate(after(zero, zero), mtsoup)
+    )
+  reaches
+    anInputsSet(
+      empty
+    )
+  end
+
+  end tests
+.
+
+op test--generators--after--update : -> TestResults .
+eq test--generators--after--update =
+  begin tests
+
+  assert "after update is stateless" from
+    aGenerator(
+      update(after(zero,zero),
+             mtsoup,
+             noInputs)
+    )
+  reaches
+    aGenerator(
+      after(zero,zero)
+    )
+  end
+
+  assert "after updates its first generator if it is not consumed" from
+    aGenerator(
+      update(after(sequence(stateLookup('A, nilarg, val(1))),
+                   sequence(stateLookup('B, nilarg, val(2)))),
+             mtsoup,
+             noInputs)
+    )
+  reaches
+    aGenerator(
+      after(update(sequence(stateLookup('A, nilarg, val(1))), mtsoup, noInputs),
+            sequence(stateLookup('B, nilarg, val(2))))
+    )
+  end
+
+  assert "after updates its first generator if it is not consumed but the second generator is consumed" from
+    aGenerator(
+      update(after(sequence(stateLookup('A, nilarg, val(1))),
+                   zero),
+             mtsoup,
+             noInputs)
+    )
+  reaches
+    aGenerator(
+      after(update(sequence(stateLookup('A, nilarg, val(1))), mtsoup, noInputs),
+            zero)
+    )
+  end
+
+  assert "after updates its second generator if its first one is consumed" from
+    aGenerator(
+      update(after(zero,
+                   sequence(stateLookup('B, nilarg, val(2)))),
+             mtsoup,
+             noInputs)
+    )
+  reaches
+    aGenerator(
+      after(zero,
+            update(sequence(stateLookup('B, nilarg, val(2))), mtsoup, noInputs))
+    )
+  end
+
+  assert "after does not update if both of its generators are consumed" from
+    aGenerator(
+      update(after(zeroStateful(0),
+                   zeroStateful(0)),
+             mtsoup,
+             noInputs)
+    )
+  reaches
+    aGenerator(
+      after(zeroStateful(0),
+            zeroStateful(0))
+    )
+  end
+
+  end tests
+.
+
+op test--generators--after--cardinality : -> TestResults .
+eq test--generators--after--cardinality =
+  begin tests
+
+  assert "cardinality of sequence generator " from
+    aCardinality(
+      cardinality(sequence(stateLookup('A, nilarg, val(1))))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 1, numberOfSteps : 1)
+    )
+  end
+
+  assert "after cardinality uses upperBound of both generators" from
+    aCardinality(
+      cardinality(after(sequence(stateLookup('A, nilarg, val(1))),
+                        sequence(stateLookup('B, nilarg, val(2)))))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 1, numberOfSteps : 2)
+    )
+  end
+
+  assert "after with infinite second generator has infinite cardinality" from
+    aCardinality(
+      cardinality(after(zero, repeat((noInputs, empty))))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 1, numberOfSteps : infinity)
+    )
+  end
+
+  end tests
+.
+
+op test--generators--after--isConsumed : -> TestResults .
+eq test--generators--after--isConsumed =
+  begin tests
+
+  assert "after is not consumed when first is not consumed" from
+    aBool(
+      isConsumed?(after(sequence(stateLookup('A, nilarg, val(1))),
+                        zero),
+                  mtsoup)
+    )
+  reaches
+    aBool(
+      false
+    )
+  end
+
+  assert "after is not consumed when only first is consumed" from
+    aBool(
+      isConsumed?(after(zero,
+                        sequence(stateLookup('B, nilarg, val(2)))),
+                  mtsoup)
+    )
+  reaches
+    aBool(
+      false
+    )
+  end
+
+  assert "after is consumed when both are consumed" from
+    aBool(
+      isConsumed?(after(zero, zero), mtsoup)
+    )
+  reaches
+    aBool(
+      true
+    )
+  end
+
+  end tests
+.
+
+endm

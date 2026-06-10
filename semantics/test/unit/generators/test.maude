@@ -1,3 +1,4 @@
+load after.maude
 load command-ack.maude
 load command-abort-ack.maude
 load delay.maude
@@ -11,6 +12,7 @@ load sequence.maude
 load x.maude
 
 mod TEST--GENERATORS is
+  protecting TEST--GENERATORS--AFTER .
   protecting TEST--GENERATORS--COMMAND-ACK .
   protecting TEST--GENERATORS--COMMAND-ABORT-ACK .
   protecting TEST--GENERATORS--DELAY .
@@ -26,6 +28,7 @@ mod TEST--GENERATORS is
   op test--generators : -> TestResults .
   eq test--generators =
     AllTestsPassed
+    + test--generators--after
     + test--generators--command-ack
     + test--generators--command-abort-ack
     + test--generators--delay

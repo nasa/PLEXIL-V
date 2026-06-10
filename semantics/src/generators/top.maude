@@ -7,6 +7,7 @@ sload if-then-else.maude
 sload cross-product.maude
 sload delay.maude
 sload delay-lazy.maude
+sload after.maude
 sload repeat.maude
 sload zero.maude
 sload empty.maude
