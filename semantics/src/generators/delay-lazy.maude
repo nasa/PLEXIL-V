@@ -1,0 +1,66 @@
+fmod GENERATORS--DELAY-LAZY is
+  protecting SYSTEM .
+  protecting MICRO .
+  protecting INTERFACE .
+
+  ***
+  *** The `delayLazy` generator is a variant of `delay` that conditionally adds
+  *** `noInputs` as an option based on whether delaying would cause a state change.
+  ***
+  *** Key differences from `delay`:
+  ***
+  *** 1. **Conditional `noInputs` addition**: Before adding `noInputs` to the
+  ***    `InputsSet`, it performs a micro-step simulation with `noInputs` on the
+  ***    current configuration. If the simulation results in any node state change,
+  ***    then `noInputs` is added as an option. Otherwise, only the embedded
+  ***    generator's options are provided.
+  ***
+  *** 2. **Error handling**: If the micro-step simulation fails to produce a valid
+  ***    configuration, an `ERROR` term is returned at the kind level with a
+  ***    descriptive message and the problematic configuration for debugging.
+  ***
+  *** 3. **Consumption semantics**: Unlike `delay` which is always infinite,
+  ***    `delayLazy` can become consumed when it generates `empty`, meaning neither
+  ***    the embedded generator nor a productive delay are available.
+  ***
+  *** 4. **Cardinality and updates**: Similar to `delay`, it has infinite steps
+  ***    and propagates updates to the embedded generator.
+  ***
+  *** This generator is useful for avoiding unnecessary delays when `noInputs`
+  *** would not advance the execution state, thus pruning the search space in
+  *** model checking scenarios.
+  ***
+
+  op delayLazy : InputGenerator -> InputGenerator [ctor] .
+  ceq generate(delayLazy(Gen), Cfg) = InS
+  if InS' := generate(Gen, Cfg)
+  /\ BadConf := microNoLog(Cfg)
+  /\ InS := if BadConf :: Config
+            then if equalNodes?(BadConf, Cfg)
+                 then InS'
+                 else (noInputs, InS')
+                 fi
+            else ERROR("micro-step failed during `generate(delayLazy(Gen),Cfg)` with `Cfg`", Cfg)
+            fi
+  .
+
+  eq update(delayLazy(Gen), Cfg, In) = delayLazy(update(Gen, Cfg, In)) .
+
+  ceq cardinality(delayLazy(Gen)) =
+    Cardinality(
+      countPerStep : s CPS,
+      numberOfSteps : infinity
+    )
+  if Cardinality(countPerStep : CPS, numberOfSteps : NoS) := cardinality(Gen)
+  .
+
+  eq isConsumed?(delayLazy(Gen), Cfg) = generate(delayLazy(Gen),Cfg) == empty .
+
+  vars Cfg Conf Conf' : Config .
+  vars BadConf : [Config] .
+  vars Gen : InputGenerator .
+  vars In : Inputs .
+  vars InS InS' : InputsSet .
+  vars CPS : Nat .
+  vars NoS : ExNat .
+endfm

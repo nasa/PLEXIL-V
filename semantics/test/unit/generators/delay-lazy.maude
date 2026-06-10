@@ -1,0 +1,196 @@
+mod TEST--GENERATORS--DELAY-LAZY is
+
+pr TEST-BASE .
+
+op test--generators--delay-lazy : -> TestResults .
+eq test--generators--delay-lazy
+  = test--generators--delay-lazy--generate
+  + test--generators--delay-lazy--update
+  + test--generators--delay-lazy--cardinality
+  + test--generators--delay-lazy--isConsumed
+.
+
+op test--generators--delay-lazy--generate : -> TestResults .
+eq test--generators--delay-lazy--generate =
+  begin tests
+
+  assert "delayLazy does not add noInputs when it causes no state change" from
+    anInputsSet(
+      generate(delayLazy(sequence(stateLookup('C, nilarg, val(0)))),
+               emptyConfig // [ nodes :
+                  < 'id2 : empty |
+                    status: finished,
+                    outcome: success,
+                    active: false,
+                    repeatc: const(val(false)),
+                    startc: const(val(true)),
+                    endc: const(val(true)),
+                    exitc: const(val(false)),
+                    post: const(val(true)),
+                    skip: const(val(false)),
+                    pre: const(val(true)),
+                    inv: const(val(true)) > ])
+    )
+  reaches
+    anInputsSet(
+      stateLookup('C, nilarg, val(0))
+    )
+  end
+
+  assert "delayLazy adds noInputs when it would cause state change" from
+    anInputsSet(
+      generate(delayLazy(sequence(stateLookup('C, nilarg, val(0)))),
+               (emptyConfig // [ nodes :
+                  < 'id2 : empty |
+                    status: waiting,
+                    outcome: none,
+                    active: false,
+                    repeatc: const(val(false)),
+                    startc: const(val(true)),
+                    endc: const(val(true)),
+                    exitc: const(val(false)),
+                    post: const(val(true)),
+                    skip: const(val(false)),
+                    pre: const(val(true)),
+                    inv: const(val(true)) > ]))
+    )
+  reaches
+    anInputsSet(
+      (noInputs, stateLookup('C, nilarg, val(0)))
+    )
+  end
+
+  assert "delayLazy with empty generator on finished nodes" from
+    anInputsSet(
+      generate(delayLazy(zero),
+               emptyConfig // [ nodes :
+                  < 'id2 : empty |
+                    status: finished,
+                    outcome: success,
+                    active: false,
+                    repeatc: const(val(false)),
+                    startc: const(val(true)),
+                    endc: const(val(true)),
+                    exitc: const(val(false)),
+                    post: const(val(true)),
+                    skip: const(val(false)),
+                    pre: const(val(true)),
+                    inv: const(val(true)) > ])
+    )
+  reaches
+    anInputsSet(
+      empty
+    )
+  end
+
+  assert "delayLazy with empty generator on waiting nodes" from
+    anInputsSet(
+      generate(delayLazy(zero),
+               emptyConfig // [ nodes :
+                  < 'id2 : empty |
+                    status: waiting,
+                    outcome: none,
+                    active: false,
+                    repeatc: const(val(false)),
+                    startc: const(val(true)),
+                    endc: const(val(true)),
+                    exitc: const(val(false)),
+                    post: const(val(true)),
+                    skip: const(val(false)),
+                    pre: const(val(true)),
+                    inv: const(val(true)) > ])
+    )
+  reaches
+    anInputsSet(
+      noInputs
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay-lazy--update : -> TestResults .
+eq test--generators--delay-lazy--update =
+  begin tests
+
+  assert "delayLazy update is stateless" from
+    aGenerator(
+      update(delayLazy(zero), mtsoup, noInputs)
+    )
+  reaches
+    aGenerator(
+      delayLazy(update(zero, mtsoup, noInputs))
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay-lazy--cardinality : -> TestResults .
+eq test--generators--delay-lazy--cardinality =
+  begin tests
+
+  assert "delayLazy has infinite cardinality" from
+    aCardinality(
+      cardinality(delayLazy(repeat((noInputs, empty))))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 2, numberOfSteps : infinity)
+    )
+  end
+
+  assert "delayLazy has infinite cardinality even with empty gen" from
+    aCardinality(
+      cardinality(delayLazy(zero))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 1, numberOfSteps : infinity)
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay-lazy--isConsumed : -> TestResults .
+eq test--generators--delay-lazy--isConsumed =
+  begin tests
+
+  assert "delayLazy is consumed if it does not generate inputs" from
+    aBool(
+      isConsumed?(delayLazy(zero), emptyConfig)
+    )
+  reaches
+    aBool(
+      true
+    )
+  end
+
+  assert "delayLazy is not consumed if it does generate inputs" from
+    aBool(
+      isConsumed?(delayLazy(zero),
+                  emptyConfig // [ nodes :
+                    < 'id2 : empty |
+                      status: waiting,
+                      outcome: none,
+                      active: false,
+                      repeatc: const(val(false)),
+                      startc: const(val(true)),
+                      endc: const(val(true)),
+                      exitc: const(val(false)),
+                      post: const(val(true)),
+                      skip: const(val(false)),
+                      pre: const(val(true)),
+                      inv: const(val(true)) > ])
+    )
+  reaches
+    aBool(
+      false
+    )
+  end
+
+  end tests
+.
+
+endm

@@ -41,7 +41,7 @@ fmod GENERATORS--SEQUENCE is
  ceq [test51] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') =
       if BadConf :: Config
       then
-        if equal?(BadConf, Conf'')
+        if equalNodes?(BadConf, Conf'')
         then nilEInputsList
         else noInputs
         fi
@@ -64,9 +64,6 @@ fmod GENERATORS--SEQUENCE is
 
   eq isConsumed?(sequenceGenerator(EInput # EIL,GS:GeneratorStatus,Conf,Conf'),Conf'') = false .
   eq isConsumed?(sequenceGenerator(EIL,GS:GeneratorStatus,Conf,Conf'),Conf'') = true [owise] .
-
-  op equal? : Config Config -> Bool .
-  eq equal?(Conf,Conf') = getNodes(Conf) == getNodes(Conf') .
 
     op removeInterfaceHistory : Config -> Config .
     eq removeInterfaceHistory( Conf [ interface-history : EIns:EInputsList] ) =  Conf .
