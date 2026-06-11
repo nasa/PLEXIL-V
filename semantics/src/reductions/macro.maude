@@ -27,7 +27,8 @@ fmod MACRO is
   vars InSet : InputsSet .
 
   op cleanTrace : Config -> Config .
-  eq cleanTrace( [ trace : T:TraceList ] Cfg ) = [ trace : niltrace ] Cfg .
+  eq cleanTrace( [ trace : T:TraceList ] Cfg ) = [ trace : niltrace ] Cfg         .
+  eq cleanTrace(                         Cfg ) =                      Cfg [owise] .
 
   ceq [MACRO-relation] :
     macro | [ generator : EG  ] Cfg
