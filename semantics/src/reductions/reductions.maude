@@ -2,9 +2,9 @@ mod REDUCTIONS is
   protecting MACRO .
 
   eq [start] :
-    start | [ generator : GEN                              ] Cfg
+    start | Cfg
     =
-    macro | [ generator : update(GEN,Cfg,noInputs) ] Cfg
+    macro | Cfg
   .
 
   op run : GlobalConfig -> GlobalConfig .

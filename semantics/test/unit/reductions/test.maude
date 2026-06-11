@@ -1,5 +1,6 @@
 in micro.maude
 in macro.maude
+in reductions.maude
 in syncred.maude
 in values.maude
 
@@ -7,6 +8,7 @@ mod TEST--REDUCTIONS is
 
   pr TEST--REDUCTIONS--MICRO .
   pr TEST--REDUCTIONS--MACRO .
+  pr TEST--REDUCTIONS--REDUCTIONS .
   pr TEST--REDUCTIONS--SYNCRED .
   pr TEST--REDUCTIONS--VALUES .
 
@@ -14,9 +16,10 @@ mod TEST--REDUCTIONS is
 
   eq reductions--tests =
     micro--reductions--tests
-    + values--reductions--tests
     + test--reductions--macro
+    + test--reductions--reductions
     + test--reductions--syncred
+    + values--reductions--tests
     .
 
 endm

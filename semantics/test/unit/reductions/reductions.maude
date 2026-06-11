@@ -1,0 +1,32 @@
+mod TEST--REDUCTIONS--REDUCTIONS is
+
+protecting TEST-BASE .
+protecting REDUCTIONS .
+
+op test--reductions--reductions : -> TestResults .
+eq test--reductions--reductions =
+  begin tests
+
+  assert "test empty sequence at the system level" from
+    aSystem(
+      start | [ generator : sequence(nilEInputsList) ]
+    )
+  reaches
+    aSystem(
+      stop | [ generator : sequence(nilEInputsList) ]
+    )
+  end
+
+  assert "test 1-step sequence at the system level" from
+    aSystem(
+      start | [ generator : sequence(noInputs # noInputs) ]
+    )
+  reaches
+    aSystem(
+      NDChoice(noInputs) | [ generator : sequence(noInputs # noInputs) ]
+    )
+  end
+
+  end tests .
+
+endm
