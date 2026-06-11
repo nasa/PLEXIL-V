@@ -1,8 +1,6 @@
 fmod GENERATORS--SEQUENCE is
   pr SYSTEM .
   pr INPUTS-LIST .
-  pr MICRO .
-  pr INTERFACE .
 
   op sequence : EInputsList -> InputGenerator [ctor] .
 
@@ -20,76 +18,4 @@ fmod GENERATORS--SEQUENCE is
   vars Cfg : Config .
   vars In In' : Inputs .
   vars InL : EInputsList .
-
-  vars Q          : NeQualified .
-  vars CId        : Cid .
-  vars PS         : Configuration .
-  vars Ats        : AttributeSet .
-
-  sort GeneratorStatus .
-  ops firstIteration started cleaning : -> GeneratorStatus .
-
-  op sequenceGenerator : EInputsList -> InputGenerator .
-  eq sequenceGenerator(EIL) = sequenceGenerator(EIL,started,emptyConfig,emptyConfig) .
-
-  op sequenceGenerator : EInputsList GeneratorStatus Config Config -> InputGenerator [ctor] .
-
-  eq [test4] : generate(sequenceGenerator(EInput # EIL, started, Conf, Conf'), Conf'') = EInput .
- ceq [test5] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') = nilEInputsList
-  if allNodesFinished(getNodes(Conf''))
-  .
- ceq [test51] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') =
-      if BadConf :: Config
-      then
-        if equalNodes?(BadConf, Conf'')
-        then nilEInputsList
-        else noInputs
-        fi
-      else
-        generationError(generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf''))
-     fi
-  if BadConf := microNoLog(updateGenerator(updateInterface(Conf'',noInputs),noInputs))
-  [owise] .
-
-  op generationError : EInputsList ~> EInputsList [ctor strat (0)] .
-
- ceq [test5] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') = generationError(generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf''))
-    if BadConf := micro(updateGenerator(updateInterface(Conf'',noInputs),noInputs)) [owise print "ERROR: could not execute micro"] .
-  eq [test6] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') = nilEInputsList [owise] .
-
-  eq [test2] : update(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'', EI) =
-    sequenceGenerator(nilEInputsList,started,Conf',removeInterfaceHistory(removeGenerator(Conf''))) .
-  eq [test3] : update(sequenceGenerator(EInput # EIL, started, Conf, Conf'), Conf'', EInput) =
-    sequenceGenerator(EIL,started,Conf',removeInterfaceHistory(removeGenerator(Conf''))) .
-
-  eq isConsumed?(sequenceGenerator(EInput # EIL,GS:GeneratorStatus,Conf,Conf'),Conf'') = false .
-  eq isConsumed?(sequenceGenerator(EIL,GS:GeneratorStatus,Conf,Conf'),Conf'') = true [owise] .
-
-    op removeInterfaceHistory : Config -> Config .
-    eq removeInterfaceHistory( Conf [ interface-history : EIns:EInputsList] ) =  Conf .
-    eq removeInterfaceHistory( Conf ) = Conf [owise] .
-
-    op removeGenerator : Config -> Config .
-    eq removeGenerator( Conf [ generator : GEN:InputGenerator] ) =  Conf .
-    eq removeGenerator( Conf ) = Conf [owise] .
-
-    op allNodesFinished : Configuration -> Bool .
-    eq allNodesFinished( < Q : CId | status: inactive, Ats > PS ) = false .
-    eq allNodesFinished( < Q : CId | status: waiting, Ats > PS ) = false .
-    eq allNodesFinished( < Q : CId | status: executing, Ats > PS ) = false .
-    eq allNodesFinished( < Q : CId | status: finishing, Ats > PS ) = false .
-    eq allNodesFinished( < Q : CId | status: iterationEnded, Ats > PS ) = false .
-    eq allNodesFinished( < Q : CId | status: failing, Ats > PS ) = false .
-    eq allNodesFinished( PS ) = true [owise] .
-
-  vars Conf Conf' Conf'' Conf''' Conf'''' : Config .
-  vars BadConf : [Config] .
-  vars EInput EInput' EInput'' EInput''' : Inputs .
-  vars EIL   : EInputsList .
-  vars NeEIL : NeEInputsList .
-  vars EI    : Inputs .
-  vars EL    : EnvironmentList .
-  vars GenStatus : GeneratorStatus .
-  vars EIns : EInputsList .
-  vars GEN : InputGenerator .
 endfm

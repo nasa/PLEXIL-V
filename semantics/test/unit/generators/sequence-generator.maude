@@ -1,0 +1,216 @@
+mod TEST--GENERATORS--SEQUENCE-GENERATOR is
+  protecting TEST-BASE .
+
+  op test--generators--sequence-generator : -> TestResults .
+  eq test--generators--sequence-generator =
+begin tests
+
+  assert "Sequence Generator 1" from
+    anInputsSet(
+      generate(
+        sequenceGenerator(nilEInputsList)
+       ,emptyConfig
+      )
+    )
+  reaches
+    anInputsSet(
+      empty
+    )
+  end
+
+  assert "Sequence Generator 2" from
+    anInputsSet(
+      generate(
+        sequenceGenerator(noInputs)
+       ,mtsoup
+      )
+    )
+  reaches
+    anInputsSet(
+      noInputs
+    )
+  end
+
+  assert "Sequence Generator 3" from
+    anInputsSet(
+      generate(
+        sequenceGenerator(stateLookup('id,nilarg, val(1)))
+       ,mtsoup
+      )
+    )
+  reaches
+    anInputsSet(
+      stateLookup('id,nilarg, val(1))
+    )
+  end
+
+  assert "Sequence Generator 4" from
+    anInputsSet(
+      generate(
+        sequenceGenerator(nilEInputsList),
+        (emptyConfig // [ nodes :
+          < 'id2 : empty |
+            status: waiting,
+            outcome: none,
+            active: false,
+            repeatc: const(val(false)),
+            startc: const(val(true)),
+            endc: const(val(true)),
+            exitc: const(val(false)),
+            post: const(val(true)),
+            skip: const(val(false)),
+            pre: const(val(true)),
+            inv: const(val(true)) > ]
+        )
+      )
+    )
+  reaches
+    anInputsSet(
+      noInputs
+    )
+  end
+
+  assert "Sequence Generator 5" from
+    anInputsSet(
+      generate(
+        sequenceGenerator(nilEInputsList)
+       ,
+          (emptyConfig // [ nodes :
+            < 'id2 : empty |
+              status: waiting,
+              outcome: none,
+              active: false,
+              repeatc: const(val(false)),
+              startc: const(val(false)),
+              endc: const(val(true)),
+              exitc: const(val(false)),
+              post: const(val(true)),
+              skip: const(val(false)),
+              pre: const(val(true)),
+              inv: const(val(true)) > ])
+      )
+    )
+  reaches
+    anInputsSet(
+      empty
+    )
+  end
+
+  assert "Sequence Generator Update 1" from
+    aGenerator(
+      update(
+        sequenceGenerator(nilEInputsList)
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(nilEInputsList)
+    )
+  end
+
+  assert "Sequence Generator Update 2" from
+    aGenerator(
+      update(
+        sequenceGenerator(noInputs)
+       ,(emptyConfig // [ nodes :
+            < 'id2 : empty |
+              status: waiting,
+              outcome: none,
+              active: false,
+              repeatc: const(val(false)),
+              startc: const(val(false)),
+              endc: const(val(true)),
+              exitc: const(val(false)),
+              post: const(val(true)),
+              skip: const(val(false)),
+              pre: const(val(true)),
+              inv: const(val(true)) > ])
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(nilEInputsList)
+    )
+  end
+
+  assert "Sequence Generator Update 3" from
+    aGenerator(
+      update(
+        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(stateLookup('id,nilarg, val(1)))
+    )
+  end
+
+  assert "Sequence Generator Update ignores generators 1" from
+    aGenerator(
+      update(
+        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+        [ generator : zero ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(stateLookup('id,nilarg, val(1)))
+    )
+  end
+
+  assert "Sequence Generator Update ignores generators 2" from
+    aGenerator(
+      update(
+        sequenceGenerator(nilEInputsList)
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+        [ generator : zero ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(nilEInputsList)
+    )
+  end
+
+  assert "Sequence Generator Update ignores interface-history 1" from
+    aGenerator(
+      update(
+        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+        [ interface-history : nilEInputsList ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(stateLookup('id,nilarg, val(1)))
+    )
+  end
+
+  assert "Sequence Generator Update ignores interface-history 2" from
+    aGenerator(
+      update(
+        sequenceGenerator(nilEInputsList)
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+        [ interface-history : nilEInputsList ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      sequenceGenerator(nilEInputsList)
+    )
+  end
+
+end tests
+.
+
+endm

@@ -1,0 +1,15 @@
+fmod GENERATORS--SEQUENCE-GENERATOR is
+  pr SYSTEM .
+  pr INPUTS-LIST .
+  pr MICRO .
+  pr INTERFACE .
+  pr GENERATORS--AFTER .
+  pr GENERATORS--SEQUENCE .
+  pr GENERATORS--DELAY-LAZY .
+  pr GENERATORS--ZERO .
+
+  op sequenceGenerator : EInputsList -> InputGenerator .
+  eq sequenceGenerator(EIL) = after(sequence(EIL),delayLazy(zero)) .
+
+  vars EIL : EInputsList .
+endfm
