@@ -48,9 +48,9 @@ begin tests
   assert "generate _x_ InputGenerator combinator with sequences" from
     anInputsSet(
       generate(
-        sequenceGenerator(A # B, started, mtsoup, mtsoup)
+        sequenceGenerator(A # B)
         x
-        sequenceGenerator(C # D, started, mtsoup, mtsoup)
+        sequenceGenerator(C # D)
         ,
         mtsoup
       )

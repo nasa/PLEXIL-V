@@ -616,31 +616,6 @@ begin tests
       )
     end
 
-    assert "Sequence Generator Update ignores generators 3" from
-      testGenerator(
-        update(
-          sequenceGenerator(
-            nilEInputsList,
-            uninitialized,
-            mtsoup,
-            mtsoup
-          )
-         ,[ nodes : < 'id3 : list | status: inactive > ]
-          [ generator : noEnvGen ]
-         ,noInputs
-        )
-      )
-    reaches
-      testGenerator(
-        sequenceGenerator(
-          nilEInputsList,
-          started,
-          mtsoup,
-          [ nodes : < 'id3 : list | status: inactive > ]
-        )
-      )
-    end
-
     assert "Sequence Generator Update ignores interface-history 1" from
       testGenerator(
         update(
@@ -687,55 +662,6 @@ begin tests
           [ nodes : < 'id2 : list | status: inactive > ],
           [ nodes : < 'id3 : list | status: inactive > ]
         )
-      )
-    end
-
-    assert "Sequence Generator Update ignores interface-history 3" from
-      testGenerator(
-        update(
-          sequenceGenerator(
-            nilEInputsList,
-            uninitialized,
-            mtsoup,
-            mtsoup
-          )
-         ,[ nodes : < 'id3 : list | status: inactive > ]
-          [ interface-history : nilEInputsList ]
-         ,noInputs
-        )
-      )
-    reaches
-      testGenerator(
-        sequenceGenerator(
-          nilEInputsList,
-          started,
-          mtsoup,
-          [ nodes : < 'id3 : list | status: inactive > ]
-        )
-      )
-    end
-
-    assert "Uninitialized sequence generator 1" from
-      testGenerator(
-        update(
-          sequenceGenerator(
-            noInputs,
-            uninitialized,
-            [ nodes : < 'id1 : list | status: inactive > ],
-            [ nodes : < 'id2 : list | status: inactive > ]
-          )
-         ,[ nodes : < 'id3 : list | status: inactive > ]
-         ,noInputs
-        )
-      )
-    reaches
-    testGenerator(
-      sequenceGenerator(
-            noInputs,
-            started,
-            [ nodes : < 'id2 : list | status: inactive > ],
-            [ nodes : < 'id3 : list | status: inactive > ]
-          )
       )
     end
 

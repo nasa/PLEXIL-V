@@ -27,10 +27,10 @@ fmod GENERATORS--SEQUENCE is
   vars Ats        : AttributeSet .
 
   sort GeneratorStatus .
-  ops uninitialized firstIteration started cleaning : -> GeneratorStatus .
+  ops firstIteration started cleaning : -> GeneratorStatus .
 
   op sequenceGenerator : EInputsList -> InputGenerator .
-  eq sequenceGenerator(EIL) = sequenceGenerator(EIL,uninitialized,mtsoup,mtsoup) .
+  eq sequenceGenerator(EIL) = sequenceGenerator(EIL,started,emptyConfig,emptyConfig) .
 
   op sequenceGenerator : EInputsList GeneratorStatus Config Config -> InputGenerator [ctor] .
 
@@ -57,8 +57,6 @@ fmod GENERATORS--SEQUENCE is
     if BadConf := micro(updateGenerator(updateInterface(Conf'',noInputs),noInputs)) [owise print "ERROR: could not execute micro"] .
   eq [test6] : generate(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'') = nilEInputsList [owise] .
 
-  eq [test1] : update(sequenceGenerator(EIL, uninitialized, Conf, Conf'), Conf'', EI) =
-    sequenceGenerator(EIL, started, Conf', removeInterfaceHistory(removeGenerator(Conf''))) .
   eq [test2] : update(sequenceGenerator(nilEInputsList, started, Conf, Conf'), Conf'', EI) =
     sequenceGenerator(nilEInputsList,started,Conf',removeInterfaceHistory(removeGenerator(Conf''))) .
   eq [test3] : update(sequenceGenerator(EInput # EIL, started, Conf, Conf'), Conf'', EInput) =

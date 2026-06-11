@@ -1,5 +1,7 @@
 fmod GENERATORS--COMMAND-ACK is
-  protecting GENERATORS--SEQUENCE .
+  extending GENERATORS--SEQUENCE .
+
+  ops uninitialized : -> GeneratorStatus .
 
   op command-ack : CommandHandle -> InputGenerator [ctor] .
   eq generate(command-ack(CH),Cfg) = genCommandAcks(Cfg,CH) .
