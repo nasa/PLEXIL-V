@@ -1,0 +1,101 @@
+mod TEST--GENERATORS--DELAY is
+
+pr TEST-BASE .
+
+op test--generators--delay : -> TestResults .
+eq test--generators--delay
+  = test--generators--delay--generate
+  + test--generators--delay--update
+  + test--generators--delay--cardinality
+  + test--generators--delay--isConsumed
+.
+
+op test--generators--delay--generate : -> TestResults .
+eq test--generators--delay--generate =
+  begin tests
+
+  assert "delay adds noInputs to an empty generator" from
+    anInputsSet(
+      generate(delay(zero), mtsoup)
+    )
+  reaches
+    anInputsSet(
+      noInputs
+    )
+  end
+
+  assert "delay adds noInputs to the embedded generator options" from
+    anInputsSet(
+      generate(delay(sequence(stateLookup('C,nilarg, val(0)))), mtsoup)
+    )
+  reaches
+    anInputsSet(
+      (noInputs, stateLookup('C,nilarg, val(0)))
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay--update : -> TestResults .
+eq test--generators--delay--update =
+  begin tests
+
+  assert "delay update is stateless" from
+    aGenerator(
+      update(delay(zero), mtsoup, noInputs)
+    )
+  reaches
+    aGenerator(
+      delay(update(zero, mtsoup, noInputs))
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay--cardinality : -> TestResults .
+eq test--generators--delay--cardinality =
+  begin tests
+
+  assert "delay has infinite cardinality" from
+    aCardinality(
+      cardinality(delay(repeat((noInputs, empty))))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 2, numberOfSteps : infinity)
+    )
+  end
+
+  assert "delay has infinite cardinality" from
+    aCardinality(
+      cardinality(delay(zero))
+    )
+  reaches
+    aCardinality(
+      Cardinality(countPerStep : 1, numberOfSteps : infinity)
+    )
+  end
+
+  end tests
+.
+
+op test--generators--delay--isConsumed : -> TestResults .
+eq test--generators--delay--isConsumed =
+  begin tests
+
+  assert "delay is never consumed" from
+    aBool(
+      isConsumed?(delay(zero), mtsoup)
+    )
+  reaches
+    aBool(
+      false
+    )
+  end
+
+  end tests
+.
+
+endm

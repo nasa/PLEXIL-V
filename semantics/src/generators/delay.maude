@@ -1,0 +1,50 @@
+fmod GENERATORS--DELAY is
+  protecting SYSTEM .
+
+  ***
+  *** The `delay` generator wraps another generator and augments its behavior by:
+  ***
+  *** 1. Adding `noInputs` as an option to every generated `InputsSet`. This allows
+  ***    the system to "wait" or "delay" instead of proceeding with one of the
+  ***    embedded generator's inputs.
+  ***
+  *** 2. Making the generator infinite: regardless of the embedded generator's
+  ***    cardinality, `delay(Gen)` can always provide `noInputs`, so it never becomes
+  ***    consumed and has infinite steps.
+  ***
+  *** 3. Propagating updates to the embedded generator: when an input is chosen,
+  ***    the embedded generator is updated accordingly.
+  ***
+  *** 4. Incrementing the `countPerStep` cardinality by 1 to account for the added
+  ***    `noInputs` option.
+  ***
+  *** This generator is useful for modeling environments where progress can be
+  *** delayed or paused without terminating the execution.
+  ***
+
+  op delay : InputGenerator -> InputGenerator [ctor] .
+
+  ceq generate(delay(Gen), Cfg) = InS
+  if InS' := generate(Gen, Cfg)
+  /\ InS := (noInputs, InS')
+  .
+
+  eq update(delay(Gen), Cfg, In) = delay(update(Gen, Cfg, In)) .
+
+  ceq cardinality(delay(Gen)) =
+    Cardinality(
+      countPerStep : s CPS,
+      numberOfSteps : infinity
+    )
+  if Cardinality(countPerStep : CPS, numberOfSteps : NoS) := cardinality(Gen)
+  .
+
+  eq isConsumed?(delay(Gen), Cfg) = false .
+
+  vars Cfg      : Config         .
+  vars Gen      : InputGenerator .
+  vars In       : Inputs         .
+  vars InS InS' : InputsSet      .
+  vars CPS      : Nat            .
+  vars NoS      : ExNat          .
+endfm

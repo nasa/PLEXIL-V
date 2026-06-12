@@ -1,5 +1,6 @@
 load command-ack.maude
 load command-abort-ack.maude
+load delay.maude
 load filter.maude
 load generator.maude
 load if-then-else.maude
@@ -11,6 +12,7 @@ load x.maude
 mod TEST--GENERATORS is
   protecting TEST--GENERATORS--COMMAND-ACK .
   protecting TEST--GENERATORS--COMMAND-ABORT-ACK .
+  protecting TEST--GENERATORS--DELAY .
   protecting TEST--GENERATORS--FILTER .
   protecting TEST--GENERATORS--GENERATOR .
   protecting TEST--GENERATORS--IF-THEN-ELSE .
@@ -24,6 +26,7 @@ mod TEST--GENERATORS is
     AllTestsPassed
     + test--generators--command-ack
     + test--generators--command-abort-ack
+    + test--generators--delay
     + test--generators--filter
     + test--generators--generator--cardinality
     + test--generators--if-then-else

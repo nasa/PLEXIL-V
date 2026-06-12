@@ -5,6 +5,7 @@ sload filter.maude
 sload inputs-filter.maude
 sload if-then-else.maude
 sload cross-product.maude
+sload delay.maude
 sload repeat.maude
 sload zero.maude
 sload empty.maude
