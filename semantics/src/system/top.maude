@@ -23,7 +23,7 @@ fmod CONFIG is
     [ macroacts   : mtactions     ]
     [ trace       : niltrace      ]
     [ interface   : none          ]
-    [ generator   : noEnvGen      ]
+    [ generator   : zero          ]
   .
 
   *** Modifiers

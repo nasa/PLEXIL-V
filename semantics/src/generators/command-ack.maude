@@ -84,7 +84,7 @@ fmod GENERATORS--COMMAND-ACK is
     .
   eq update(commandAckGeneratorEx(EInput,EInput',Ites,It,cleaning),Conf,EI:Inputs) =
       if Ites == s It
-      then noEnvGen
+      then zero
       else commandAckGeneratorEx(EInput,EInput',Ites,s It,cleaning)
       fi
     [owise]

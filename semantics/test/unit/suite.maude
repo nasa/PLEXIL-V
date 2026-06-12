@@ -576,7 +576,7 @@ begin tests
             [ nodes : < 'id2 : list | status: inactive > ]
           )
          ,[ nodes : < 'id3 : list | status: inactive > ]
-          [ generator : noEnvGen ]
+          [ generator : zero ]
          ,noInputs
         )
       )
@@ -601,7 +601,7 @@ begin tests
             [ nodes : < 'id2 : list | status: inactive > ]
           )
          ,[ nodes : < 'id3 : list | status: inactive > ]
-          [ generator : noEnvGen ]
+          [ generator : zero ]
          ,noInputs
         )
       )

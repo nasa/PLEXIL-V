@@ -1,11 +1,14 @@
 fmod GENERATORS--ZERO is
   pr GENERATORS--BASE-GENERATOR .
 
-  op noEnvGen : -> InputGenerator .
+  op zero : -> InputGenerator [ctor] .
 
-    eq generate(noEnvGen,Conf:Config) = empty .
+  eq generate(zero,Conf:Config) = empty .
 
-    eq update(noEnvGen,Conf:Config,EI:Inputs) = noEnvGen .
+  eq update(zero,Conf:Config,EI:Inputs) = zero .
 
-    eq isConsumed?(noEnvGen,Conf:Config) = true .
+  eq isConsumed?(zero,Conf:Config) = true .
+
+  eq cardinality(zero) = Cardinality(countPerStep : 0 , numberOfSteps : 0) .
+
 endfm
