@@ -1,0 +1,21 @@
+fmod GENERATORS--SEQUENCE is
+  pr SYSTEM .
+  pr INPUTS-LIST .
+
+  op sequence : EInputsList -> InputGenerator [ctor] .
+
+  eq generate(sequence(nilEInputsList),Cfg) = empty .
+  eq generate(sequence(In # InL),Cfg) = In .
+
+  eq update(sequence(nilEInputsList),Cfg,In) = sequence(nilEInputsList) .
+  eq update(sequence(In # InL),Cfg,In') = sequence(InL) .
+
+  eq cardinality(sequence(IL:EInputsList)) = Cardinality(countPerStep : 1, numberOfSteps : length(IL:EInputsList)) .
+
+  eq isConsumed?(sequence(nilEInputsList), Cfg) = true .
+  eq isConsumed?(sequence(In # InL), Cfg) = false .
+
+  vars Cfg : Config .
+  vars In In' : Inputs .
+  vars InL : EInputsList .
+endfm

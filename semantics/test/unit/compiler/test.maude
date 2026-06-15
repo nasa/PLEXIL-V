@@ -78,7 +78,7 @@ begin tests
     assert "compiler__compile(PL) generates a configuration similar to emptyConfig" from
       getConfig(
         compile(anEmptyNode)
-      ) / ([ nodes : none ] [ generator : noEnvGen ])
+      ) / ([ nodes : none ] [ generator : zero ])
     reaches
       emptyConfig
     end

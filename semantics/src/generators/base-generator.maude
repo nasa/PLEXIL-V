@@ -1,3 +1,11 @@
 fmod GENERATORS--BASE-GENERATOR is
-  protecting GENERATOR{Config} * (sort Generator{Config} to InputGenerator) .
+  protecting GENERATORS--GENERATOR{Config} * (sort Generator{Config} to InputGenerator) .
+
+  ***
+  *** `ERROR` term for reporting generator errors at the kind level.
+  *** Used when a generator encounters an invalid state or configuration.
+  *** The `String` parameter provides an error message, and the `Config`
+  *** parameter captures the problematic configuration for debugging.
+  ***
+  op ERROR : String Config -> [InputsSet] [ctor strat (0)] .
 endfm

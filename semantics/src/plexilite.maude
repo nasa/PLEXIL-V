@@ -36,7 +36,7 @@ mod PLEXILITE is
   pr COMPILER .
   pr INTERFACE .
   pr REDUCTIONS .
-  pr BASIC-GENERATORS .
+  pr GENERATORS--BASIC .
 endm
 
 in model-checker.maude

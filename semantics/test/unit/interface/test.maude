@@ -16,7 +16,7 @@ mod TEST--INTERFACE is
           [ environment : mtenvironment ]
           [ interface : none ]
           [ memory : none ]
-          [ generator : noEnvGen ]
+          [ generator : zero ]
           , noInputs
         )
         )
@@ -25,11 +25,11 @@ mod TEST--INTERFACE is
           [ interface : none ]
           [ memory : none ]
           [ generator : update(
-                          noEnvGen,
+                          zero,
                           [ environment : mtenvironment ]
                           [ interface : none ]
                           [ memory : none ]
-                          [ generator : noEnvGen ],
+                          [ generator : zero ],
                           noInputs
                         ) ]
       end

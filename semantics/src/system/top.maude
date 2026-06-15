@@ -23,7 +23,7 @@ fmod CONFIG is
     [ macroacts   : mtactions     ]
     [ trace       : niltrace      ]
     [ interface   : none          ]
-    [ generator   : noEnvGen      ]
+    [ generator   : zero          ]
   .
 
   *** Modifiers
@@ -114,9 +114,11 @@ fmod SYSTEM is
   op getOperation : GlobalConfig -> Operation .
   eq getOperation(Op | Conf) = Op .
 
-  vars Conf : Config .
-  vars Op   : Operation .
+  op equalNodes? : Config Config -> Bool .
+  eq equalNodes?(Conf, Conf') = getNodes(Conf) == getNodes(Conf') .
 
+  vars Conf Conf' : Config    .
+  vars Op         : Operation .
 
   ************************************************************
   *** DEBUGGING: operators to detect errors

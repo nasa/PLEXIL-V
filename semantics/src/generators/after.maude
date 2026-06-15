@@ -1,0 +1,60 @@
+fmod GENERATORS--AFTER is
+  protecting SYSTEM .
+
+  ***
+  *** The `after` generator sequentially composes two generators: it uses the first
+  *** generator until it becomes consumed, then switches to the second generator.
+  ***
+  *** Key behaviors:
+  ***
+  *** 1. **Sequential execution**: `generate(after(Gen1, Gen2), Cfg)` produces inputs
+  ***    from `Gen1` while `Gen1` is not consumed. Once `Gen1` is consumed, it
+  ***    switches to producing inputs from `Gen2`.
+  ***
+  *** 2. **Independent consumption**: Each generator's consumption is tracked
+  ***    independently. `after(Gen1, Gen2)` is only consumed when both `Gen1` and
+  ***    `Gen2` are consumed.
+  ***
+  *** 3. **Stateless updates**: The `update` operation propagates the consumed input
+  ***    to whichever generator is currently active (not yet consumed). If `Gen1` is
+  ***    consumed, updates go to `Gen2`; otherwise, updates go to `Gen1`.
+  ***
+  *** 4. **Upper-bound cardinality**: The cardinality is the upper bound of the two
+  ***    generators' cardinalities, representing the worst-case total number of steps.
+  ***
+  *** This combinator is useful for creating test scenarios that follow a specific
+  *** sequence (using `Gen1`) and then transition to a different behavior (using `Gen2`),
+  *** such as playing back a fixed sequence followed by indefinite delays.
+  ***
+
+  op after : InputGenerator InputGenerator -> InputGenerator [ctor] .
+
+  --- Generate: use first generator until consumed, then use second
+ ceq generate(after(Gen1, Gen2), Cfg) = InS
+  if InS := if isConsumed?(Gen1, Cfg)
+            then generate(Gen2, Cfg)
+            else generate(Gen1, Cfg)
+            fi
+  .
+
+  --- Update: stateless, updates the generator that is going to be consumed
+ ceq update(after(Gen1, Gen2), Cfg, In) = after(                 Gen1,                  Gen2)
+  if isConsumed?(Gen1,Cfg)
+  /\ isConsumed?(Gen2,Cfg)         .
+ ceq update(after(Gen1, Gen2), Cfg, In) = after(                 Gen1, update(Gen2, Cfg, In))
+  if isConsumed?(Gen1,Cfg) [owise] .
+  eq update(after(Gen1, Gen2), Cfg, In) = after(update(Gen1, Cfg, In),                  Gen2) [owise] .
+
+ ceq cardinality(after(Gen1, Gen2)) = upperBound(Card1, Card2)
+  if Card1 := cardinality(Gen1)
+  /\ Card2 := cardinality(Gen2)
+  .
+
+  eq isConsumed?(after(Gen1, Gen2), Cfg) = isConsumed?(Gen1, Cfg) and isConsumed?(Gen2, Cfg) .
+
+  vars Cfg         : Config         .
+  vars Gen1 Gen2   : InputGenerator .
+  vars In          : Inputs         .
+  vars InS         : InputsSet      .
+  vars Card1 Card2 : Cardinality    .
+endfm

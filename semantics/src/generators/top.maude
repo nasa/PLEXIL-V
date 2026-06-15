@@ -1,5 +1,15 @@
 sload interface.maude
+sload sequence.maude
+sload after.maude
+sload zero.maude
+sload delay-lazy.maude
+sload plexiltest.maude
+sload command-ack.maude
 sload filter.maude
-sload if-then-else.maude
 sload inputs-filter.maude
-sload generators.maude
+sload if-then-else.maude
+sload cross-product.maude
+sload delay.maude
+sload repeat.maude
+sload empty.maude
+sload basic.maude

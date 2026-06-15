@@ -48,9 +48,9 @@ begin tests
   assert "generate _x_ InputGenerator combinator with sequences" from
     anInputsSet(
       generate(
-        sequenceGenerator(A # B, started, mtsoup, mtsoup)
+        plexiltest(A # B)
         x
-        sequenceGenerator(C # D, started, mtsoup, mtsoup)
+        plexiltest(C # D)
         ,
         mtsoup
       )
@@ -137,7 +137,7 @@ begin tests
     )
   reaches
     aCardinality(
-      Cardinality(countPerStep : 3, numberOfSteps : 1)
+      Cardinality(countPerStep : 3, numberOfSteps : 2)
     )
   end
 
@@ -151,7 +151,7 @@ begin tests
     )
   reaches
     aCardinality(
-      Cardinality(countPerStep : 5, numberOfSteps : 0)
+      Cardinality(countPerStep : 5, numberOfSteps : 1)
     )
   end
 
@@ -179,7 +179,7 @@ begin tests
     )
   reaches
     aCardinality(
-      Cardinality(countPerStep : 1, numberOfSteps : 1)
+      Cardinality(countPerStep : 1, numberOfSteps : 2)
     )
   end
 

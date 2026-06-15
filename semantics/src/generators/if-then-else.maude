@@ -1,4 +1,4 @@
-fmod IF-THEN-ELSE-GENERATOR is
+fmod GENERATORS--IF-THEN-ELSE is
   protecting SYSTEM .
   protecting EVAL .
 
@@ -28,6 +28,6 @@ fmod IF-THEN-ELSE-GENERATOR is
 
   vars Cfg : Config .
   vars Cond : Expression .
-  vars Gen1 Gen2  : InputGenerator .
+  vars Gen1 Gen2 : InputGenerator .
   vars In : Inputs .
 endfm

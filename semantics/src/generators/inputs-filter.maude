@@ -1,4 +1,4 @@
-fmod INPUTS-FILTER-GENERATOR is
+fmod GENERATORS--INPUTS-FILTER is
   protecting SYSTEM .
   protecting EVAL .
   protecting INTERFACE .

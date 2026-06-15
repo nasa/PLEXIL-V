@@ -1,4 +1,4 @@
-fmod STATE-SPACE-CARDINALITY is
+fmod GENERATORS--STATE-SPACE-CARDINALITY is
   protecting NAT .
 
   sort ExNat .
@@ -55,8 +55,8 @@ fmod STATE-SPACE-CARDINALITY is
 
 endfm
 
-fmod GENERATOR{X :: TRIV} is
-  protecting STATE-SPACE-CARDINALITY .
+fmod GENERATORS--GENERATOR{X :: TRIV} is
+  protecting GENERATORS--STATE-SPACE-CARDINALITY .
   protecting INPUTS-SET .
   sort Generator{X} .
 

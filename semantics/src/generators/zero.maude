@@ -1,0 +1,14 @@
+fmod GENERATORS--ZERO is
+  pr GENERATORS--BASE-GENERATOR .
+
+  op zero : -> InputGenerator [ctor] .
+
+  eq generate(zero,Conf:Config) = empty .
+
+  eq update(zero,Conf:Config,EI:Inputs) = zero .
+
+  eq isConsumed?(zero,Conf:Config) = true .
+
+  eq cardinality(zero) = Cardinality(countPerStep : 0 , numberOfSteps : 0) .
+
+endfm

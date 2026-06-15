@@ -1,0 +1,25 @@
+fmod GENERATORS--CROSS-PRODUCT is
+  protecting SYSTEM .
+
+  op _x_ : InputGenerator InputGenerator -> InputGenerator [ctor] .
+  ceq generate(G1 x G2, Cfg) = InS
+  if InS1 := generate(G1,Cfg)
+  /\ InS2 := generate(G2,Cfg)
+  /\ InS := InS1 x InS2
+  .
+  eq update(G1 x G2, Cfg, In) = update(G1,Cfg,In) x update(G2,Cfg,In) .
+
+  ceq cardinality(G1 x G2) =
+    Cardinality(
+      countPerStep : cps1:Nat * cps2:Nat,
+      numberOfSteps : min(nOfS1:ExNat,nOfS2:ExNat)
+    )
+  if Cardinality(countPerStep : cps1:Nat, numberOfSteps : nOfS1:ExNat) := cardinality(G1)
+  /\ Cardinality(countPerStep : cps2:Nat, numberOfSteps : nOfS2:ExNat) := cardinality(G2)
+  .
+
+  vars Cfg : Config .
+  vars G1 G2 : InputGenerator .
+  vars In : Inputs .
+  vars InS InS1 InS2 : InputsSet .
+endfm
