@@ -1,14 +1,14 @@
-mod TEST--GENERATORS--SEQUENCE-GENERATOR is
+mod TEST--GENERATORS--PLEXILTEST is
   protecting TEST-BASE .
 
-  op test--generators--sequence-generator : -> TestResults .
-  eq test--generators--sequence-generator =
+  op test--generators--plexiltest : -> TestResults .
+  eq test--generators--plexiltest =
 begin tests
 
-  assert "Sequence Generator 1" from
+  assert "plexiltest 1" from
     anInputsSet(
       generate(
-        sequenceGenerator(nilEInputsList)
+        plexiltest(nilEInputsList)
        ,emptyConfig
       )
     )
@@ -18,10 +18,10 @@ begin tests
     )
   end
 
-  assert "Sequence Generator 2" from
+  assert "plexiltest 2" from
     anInputsSet(
       generate(
-        sequenceGenerator(noInputs)
+        plexiltest(noInputs)
        ,mtsoup
       )
     )
@@ -31,10 +31,10 @@ begin tests
     )
   end
 
-  assert "Sequence Generator 3" from
+  assert "plexiltest 3" from
     anInputsSet(
       generate(
-        sequenceGenerator(stateLookup('id,nilarg, val(1)))
+        plexiltest(stateLookup('id,nilarg, val(1)))
        ,mtsoup
       )
     )
@@ -44,10 +44,10 @@ begin tests
     )
   end
 
-  assert "Sequence Generator 4" from
+  assert "plexiltest 4" from
     anInputsSet(
       generate(
-        sequenceGenerator(nilEInputsList),
+        plexiltest(nilEInputsList),
         (emptyConfig // [ nodes :
           < 'id2 : empty |
             status: waiting,
@@ -70,10 +70,10 @@ begin tests
     )
   end
 
-  assert "Sequence Generator 5" from
+  assert "plexiltest 5" from
     anInputsSet(
       generate(
-        sequenceGenerator(nilEInputsList)
+        plexiltest(nilEInputsList)
        ,
           (emptyConfig // [ nodes :
             < 'id2 : empty |
@@ -96,24 +96,24 @@ begin tests
     )
   end
 
-  assert "Sequence Generator Update 1" from
+  assert "plexiltest Update 1" from
     aGenerator(
       update(
-        sequenceGenerator(nilEInputsList)
+        plexiltest(nilEInputsList)
        ,[ nodes : < 'id3 : list | status: inactive > ]
        ,noInputs
       )
     )
   reaches
     aGenerator(
-      sequenceGenerator(nilEInputsList)
+      plexiltest(nilEInputsList)
     )
   end
 
-  assert "Sequence Generator Update 2" from
+  assert "plexiltest Update 2" from
     aGenerator(
       update(
-        sequenceGenerator(noInputs)
+        plexiltest(noInputs)
        ,(emptyConfig // [ nodes :
             < 'id2 : empty |
               status: waiting,
@@ -132,43 +132,28 @@ begin tests
     )
   reaches
     aGenerator(
-      sequenceGenerator(nilEInputsList)
+      plexiltest(nilEInputsList)
     )
   end
 
-  assert "Sequence Generator Update 3" from
+  assert "plexiltest Update 3" from
     aGenerator(
       update(
-        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
+        plexiltest(noInputs # stateLookup('id,nilarg, val(1)))
        ,[ nodes : < 'id3 : list | status: inactive > ]
        ,noInputs
       )
     )
   reaches
     aGenerator(
-      sequenceGenerator(stateLookup('id,nilarg, val(1)))
+      plexiltest(stateLookup('id,nilarg, val(1)))
     )
   end
 
-  assert "Sequence Generator Update ignores generators 1" from
+  assert "plexiltest Update ignores generators 1" from
     aGenerator(
       update(
-        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
-       ,[ nodes : < 'id3 : list | status: inactive > ]
-        [ generator : zero ]
-       ,noInputs
-      )
-    )
-  reaches
-    aGenerator(
-      sequenceGenerator(stateLookup('id,nilarg, val(1)))
-    )
-  end
-
-  assert "Sequence Generator Update ignores generators 2" from
-    aGenerator(
-      update(
-        sequenceGenerator(nilEInputsList)
+        plexiltest(noInputs # stateLookup('id,nilarg, val(1)))
        ,[ nodes : < 'id3 : list | status: inactive > ]
         [ generator : zero ]
        ,noInputs
@@ -176,14 +161,29 @@ begin tests
     )
   reaches
     aGenerator(
-      sequenceGenerator(nilEInputsList)
+      plexiltest(stateLookup('id,nilarg, val(1)))
     )
   end
 
-  assert "Sequence Generator Update ignores interface-history 1" from
+  assert "plexiltest Update ignores generators 2" from
     aGenerator(
       update(
-        sequenceGenerator(noInputs # stateLookup('id,nilarg, val(1)))
+        plexiltest(nilEInputsList)
+       ,[ nodes : < 'id3 : list | status: inactive > ]
+        [ generator : zero ]
+       ,noInputs
+      )
+    )
+  reaches
+    aGenerator(
+      plexiltest(nilEInputsList)
+    )
+  end
+
+  assert "plexiltest Update ignores interface-history 1" from
+    aGenerator(
+      update(
+        plexiltest(noInputs # stateLookup('id,nilarg, val(1)))
        ,[ nodes : < 'id3 : list | status: inactive > ]
         [ interface-history : nilEInputsList ]
        ,noInputs
@@ -191,14 +191,14 @@ begin tests
     )
   reaches
     aGenerator(
-      sequenceGenerator(stateLookup('id,nilarg, val(1)))
+      plexiltest(stateLookup('id,nilarg, val(1)))
     )
   end
 
-  assert "Sequence Generator Update ignores interface-history 2" from
+  assert "plexiltest Update ignores interface-history 2" from
     aGenerator(
       update(
-        sequenceGenerator(nilEInputsList)
+        plexiltest(nilEInputsList)
        ,[ nodes : < 'id3 : list | status: inactive > ]
         [ interface-history : nilEInputsList ]
        ,noInputs
@@ -206,7 +206,7 @@ begin tests
     )
   reaches
     aGenerator(
-      sequenceGenerator(nilEInputsList)
+      plexiltest(nilEInputsList)
     )
   end
 

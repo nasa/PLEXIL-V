@@ -3,7 +3,7 @@ sload sequence.maude
 sload after.maude
 sload zero.maude
 sload delay-lazy.maude
-sload sequence-generator.maude
+sload plexiltest.maude
 sload command-ack.maude
 sload filter.maude
 sload inputs-filter.maude

@@ -1,0 +1,29 @@
+fmod GENERATORS--PLEXILTEST is
+  pr SYSTEM .
+  pr INPUTS-LIST .
+  pr MICRO .
+  pr INTERFACE .
+  pr GENERATORS--AFTER .
+  pr GENERATORS--SEQUENCE .
+  pr GENERATORS--DELAY-LAZY .
+  pr GENERATORS--ZERO .
+
+  ***
+  *** The `plexiltest` generator simulates a test environment by playing back
+  *** a predefined sequence of inputs followed by lazy delays. This mimics the
+  *** behavior of the `plexiltest` tool.
+  ***
+  *** After exhausting the input sequence, the generator uses `delayLazy` to
+  *** conditionally provide `noInputs` only when it would cause node state changes,
+  *** preventing unnecessary delays in model checking scenarios.
+  ***
+
+  op plexiltest : EInputsList -> InputGenerator .
+  eq plexiltest(EIL) = after(sequence(EIL),delayLazy(zero)) .
+
+  *** DEPRECATED: Use `plexiltest` instead
+  op sequenceGenerator : EInputsList -> InputGenerator .
+  eq sequenceGenerator(EIL) = plexiltest(EIL) .
+
+  vars EIL : EInputsList .
+endfm

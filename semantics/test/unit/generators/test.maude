@@ -9,7 +9,7 @@ load if-then-else.maude
 load inputs-filter.maude
 load repeat.maude
 load sequence.maude
-load sequence-generator.maude
+load plexiltest.maude
 load x.maude
 
 mod TEST--GENERATORS is
@@ -24,7 +24,7 @@ mod TEST--GENERATORS is
   protecting TEST--GENERATORS--INPUTS-FILTER .
   protecting TEST--GENERATORS--REPEAT .
   protecting TEST--GENERATORS--SEQUENCE .
-  protecting TEST--GENERATORS--SEQUENCE-GENERATOR .
+  protecting TEST--GENERATORS--PLEXILTEST .
   protecting TEST--GENERATORS--X .
 
   op test--generators : -> TestResults .
@@ -41,7 +41,7 @@ mod TEST--GENERATORS is
     + test--generators--inputs-filter
     + test--generators--repeat
     + test--generators--sequence
-    + test--generators--sequence-generator
+    + test--generators--plexiltest
     + test--generators--x
     .
 

@@ -1,7 +1,6 @@
 mod TEST-BASE is
   pr TEST .
   pr PLEXIL-V .
-  pr PLEXIL-V .
 
   subsort Config Bool < SystemUnderTest .
 

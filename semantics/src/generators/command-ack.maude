@@ -1,6 +1,6 @@
 fmod GENERATORS--COMMAND-ACK is
-  extending GENERATORS--SEQUENCE-GENERATOR .
-
+  extending GENERATORS--BASE-GENERATOR .
+  protecting SYSTEM .
 
   sort GeneratorStatus .
   op firstIteration : -> GeneratorStatus [ctor] .
