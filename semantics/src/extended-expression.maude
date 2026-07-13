@@ -48,13 +48,6 @@ vars F    : Function .
 vars E    : Expression .
 vars Pars : Parameters .
 
-op qualifyVarNames : Expression NeQualified -> Expression .
-eq qualifyVarNames(const(V),Q) = const(V) .
-eq qualifyVarNames(var(Q'),Q) = var((Q' . Q)) .
-eq qualifyVarNames(lookup(Q',Pars),Q) = lookup(Q',Pars) .
-eq qualifyVarNames(func(F,E),Q) = func(F,qualifyVarNames(E,Q)) .
-eq qualifyVarNames(lookupOnChange(Q',Pars,V),Q) = lookupOnChange(Q',Pars,V) .
-
 *** Function Ids
 **** Absolute value (of integers and reals)
  op absp    : -> Function .
