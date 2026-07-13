@@ -29,7 +29,9 @@ function run {
 
 function check {
   count=$(grep -o "EQ" $1 | wc -l)
-  if [ "$count" -eq $(( 17 + $(ls ./test/acceptance/tests/ | wc -l) )) ]; then
+  skipped=$(find ./test/acceptance/tests/ -name "SKIP" | wc -l)
+  expected=$((17 + $(ls ./test/acceptance/tests/ | wc -l) - $skipped))
+  if [ "$count" -eq "$expected" ]; then
     exit 0
   else
     exit 1

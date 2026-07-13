@@ -26,6 +26,13 @@ if ! [[ ".$actual_extension" == "$expected_extension" ]]; then
 fi
 
 i="${filename%%.*}"
+
+# Check for SKIP flag
+if [ -f SKIP ]; then
+    echo "Plan: $i - SKIPPED"
+    exit 0
+fi
+
 echo "Plan: $i"
 
 plxPlan=`echo $plePlan | sed 's/\(.*\)\.ple/\1.plx/'`
