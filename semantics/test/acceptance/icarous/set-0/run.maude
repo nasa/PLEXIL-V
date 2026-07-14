@@ -2,7 +2,7 @@ set print attribute on .
 set print color on .
 
 mod PLAN-SIMULATION is
-    protecting TRAFFIC-RESOLUTION-PLAN .
+    protecting TRAFFIC_RESOLUTION-PLAN .
     protecting INPUT .
 endm
 

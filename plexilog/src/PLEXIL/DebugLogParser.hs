@@ -99,10 +99,7 @@ idParser :: Parsec String () String
 idParser = fmap maudifyLabel $ (:) <$> (letter <|> char '\'') <*> many (alphaNum <|> oneOf ['_', '-'] <?> "identifier")
 
 maudifyLabel :: String -> String
-maudifyLabel label = ('\'' :) $ map underscore2hyphen label
-  where
-    underscore2hyphen '_' = '-'
-    underscore2hyphen c = c
+maudifyLabel = ('\'' :)
 
 spaceEOL :: Parsec String () Char
 spaceEOL = optional (try nonEOLSpaces) *> endOfLine

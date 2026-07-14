@@ -112,7 +112,7 @@ spec = do
   describe "parseMicro" $ do
     it "should parse a PLEXIL v4 entry" $
       let logEntry = "[PlexilExec:step][1:0:0] Transitioning node TRAFFIC_RESOLUTION 0x6e3dc0 from INACTIVE to WAITING\n"
-       in parseMicro logEntry `shouldBe` Right (Micro $ Set.fromList [Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting])
+       in parseMicro logEntry `shouldBe` Right (Micro $ Set.fromList [Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting])
 
     it "should parse many PLEXIL v4 entries" $
       let logEntry =
@@ -123,7 +123,7 @@ spec = do
             `shouldBe` Right
               ( Micro $
                   Set.fromList
-                    [ Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting,
+                    [ Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting,
                       Transition (Id "'Example7") Inactive Waiting
                     ]
               )
@@ -134,7 +134,7 @@ spec = do
 [PlexilExec:step][1:1:0] Transitioning node Example7 0x19c3370 from INACTIVE to WAITING
 |]
        in parseMicro logEntry
-            `shouldBe` Right (Micro $ Set.fromList [Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting])
+            `shouldBe` Right (Micro $ Set.fromList [Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting])
 
     it "should parse a PLEXIL v6 entry" $
       let logEntry = "[PlexilExec:step][1:0:0] Transitioning Command node commandabort1 0x139704910 from INACTIVE to WAITING\n"
@@ -157,7 +157,7 @@ spec = do
   describe "transitionParserWithId" $ do
     it "should parse a log entry that has a compatible micro step identifier" $
       let logEntry = "[PlexilExec:step][1:0:1] Transitioning node TRAFFIC_RESOLUTION 0x6e3dc0 from INACTIVE to WAITING\n"
-       in parse (transitionParserWithId [1, 0]) "transition" logEntry `shouldBe` (Right ([1, 0, 1], Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting))
+       in parse (transitionParserWithId [1, 0]) "transition" logEntry `shouldBe` (Right ([1, 0, 1], Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting))
 
     it "should not parse a log entry that has an incompatible micro step identifier" $
       let logEntry = "[PlexilExec:step][1:0:1] Transitioning node TRAFFIC_RESOLUTION 0x6e3dc0 from INACTIVE to WAITING\n"
@@ -170,7 +170,7 @@ spec = do
   describe "parseTransition" $ do
     it "should parse a PLEXIL v4 entry" $
       let logEntry = "[PlexilExec:step][1:0:0] Transitioning node TRAFFIC_RESOLUTION 0x6e3dc0 from INACTIVE to WAITING\n"
-       in parseTransition logEntry `shouldBe` (Right $ Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting)
+       in parseTransition logEntry `shouldBe` (Right $ Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting)
 
     it "should parse a PLEXIL v6 entry" $
       let logEntry = "[PlexilExec:step][1:0:0] Transitioning Command node commandabort1 0x139704910 from INACTIVE to WAITING\n"
@@ -185,7 +185,7 @@ spec = do
        in map parseTransition logEntries
             `shouldBe` [ Right $ Transition (Id "'Example7") Inactive Waiting,
                          Right $ Transition (Id "'Example7") Waiting Executing,
-                         Right $ Transition (Id "'TRAFFIC-RESOLUTION") Inactive Waiting
+                         Right $ Transition (Id "'TRAFFIC_RESOLUTION") Inactive Waiting
                        ]
 
   describe "isKeyEntry" $ do

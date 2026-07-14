@@ -151,7 +151,7 @@ testsLegacy =
                        <NodeFailureValue>POST_CONDITION_FAILED</NodeFailureValue>
                      </EQInternal>
                       |],
-                  [r|isFailure?('ep2cp-IfTest,postconditionFailed)|])]
+                  [r|isFailure?('ep2cp_IfTest,postconditionFailed)|])]
         ,testGroup "Parse variable declarations" $
             map (testify'' elementVisitor)
                 [("A simple real variable declaration",
@@ -273,7 +273,7 @@ testsLegacy =
                      </Node>|],
                   [r|
                     empty(
-                      'ep2cp-IfTest,
+                      'ep2cp_IfTest,
                       nilocdecl,
                       ((post: (_>=_(var('speedPref),const(val(0))))))
                     )|])]
@@ -298,7 +298,7 @@ testsLegacy =
                      </Node>|],
                   [r|
                     assignment(
-                      'ASSIGNMENT--0,
+                      'ASSIGNMENT__0,
                       nilocdecl,
                       ( none ),
                       (var('r1) := lookup ('r1 , (nilpar)))
@@ -325,7 +325,7 @@ testsLegacy =
                      </Node>|],
                   [r|
                     assignment(
-                      'ASSIGNMENT--0,
+                      'ASSIGNMENT__0,
                       nilocdecl,
                       (none),
                       (var( 'initial_drag ) := lookup('InitialDrag,(var('SatId))))
@@ -448,7 +448,7 @@ testsLegacy =
                       'Printer0,
                       nilocdecl,
                       ( (startc: (const(val(false)))),
-                        (endc: (_and_(isStatus?('TestReal--2,finished),isStatus?('TestVars1,finished))))
+                        (endc: (_and_(isStatus?('TestReal__2,finished),isStatus?('TestVars1,finished))))
                       ),
                       ( ('pprint) / ( const(val("r1:")) var('r1) const(val("r2:")) var('r2) ) / nothing )
                     )|])
@@ -470,7 +470,7 @@ testsLegacy =
                       </Node>|],
                   [r|
                     command(
-                      'BLOCK--0,
+                      'BLOCK__0,
                       nilocdecl,
                       (none),
                       ( ('complexCommand) / (var('ret)) / just('ret) )
@@ -679,7 +679,7 @@ testsParseNodeStateVariable :: TestTree
 testsParseNodeStateVariable =
     testGroup "parseNodeStateVariable" $
         map (testify' parseNodeStateVariable)
-            [("Simple child identifier", "<NodeStateVariable><NodeRef dir=\"child\">Node__Identifier</NodeRef></NodeStateVariable>", "Node--Identifier")
+            [("Simple child identifier", "<NodeStateVariable><NodeRef dir=\"child\">Node__Identifier</NodeRef></NodeStateVariable>", "Node__Identifier")
             ,("Other stuff", "<NodeStateValue>FAILING</NodeStateValue>", "")
             ]
 
@@ -796,7 +796,7 @@ testsParseBooleanExpression =
                 <Finished>
                   <NodeRef dir="sibling">ASSIGNMENT__0</NodeRef>
                 </Finished>|],
-              "(isFinished?(sibling('ASSIGNMENT--0)))")
+              "(isFinished?(sibling('ASSIGNMENT__0)))")
             ,("Finished2",
               [r|
                 <Finished ColNo="15" LineNo="10">
@@ -808,21 +808,21 @@ testsParseBooleanExpression =
                 <Succeeded>
                   <NodeRef dir="sibling">ep2cp_IfTest</NodeRef>
                 </Succeeded>|],
-              "hasSucceeded?(sibling('ep2cp-IfTest))")
+              "hasSucceeded?(sibling('ep2cp_IfTest))")
             ,("PostconditionFailed",
               [r|
                 <PostconditionFailed>
                   <NodeRef dir="sibling">ep2cp_IfTest</NodeRef>
                 </PostconditionFailed>
                |],
-              "hasPostconditionFailed?(sibling('ep2cp-IfTest))")
+              "hasPostconditionFailed?(sibling('ep2cp_IfTest))")
             ,("Skipped",
               [r|
                 <Skipped>
                   <NodeRef dir="sibling">ep2cp_ElseIf-1</NodeRef>
                 </Skipped>
                |],
-              "hasSkipped?(sibling('ep2cp-ElseIf-1))")
+              "hasSkipped?(sibling('ep2cp_ElseIf-1))")
 
 
             ]

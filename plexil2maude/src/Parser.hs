@@ -1188,9 +1188,7 @@ maudifyNodeType str =
       where lowStr = map toLower str
 
 maudifyLabel :: String -> String
-maudifyLabel label = map underscore2hyphen label
-    where underscore2hyphen '_' = '-'
-          underscore2hyphen   c = c
+maudifyLabel = id
 
 parseNodeCondition :: Cursor -> ParseError Doc
 parseNodeCondition cursor =
