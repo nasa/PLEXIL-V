@@ -1158,6 +1158,44 @@ testLookups =
         </LookupOnChange>
         |],
         [r|lookupOnChange('time,(nilpar),val (0.1))|])
+      ,("LookupNow with StringVariable name",
+        [r|
+        <LookupNow>
+          <Name>
+            <StringVariable>state_name</StringVariable>
+          </Name>
+        </LookupNow>
+        |], "lookup (var('state_name) , (nilpar))")
+      ,("LookupNow with StringVariable name and args",
+        [r|
+        <LookupNow>
+          <Name>
+            <StringVariable>lookup_name</StringVariable>
+          </Name>
+          <Arguments>
+            <IntegerValue>42</IntegerValue>
+          </Arguments>
+        </LookupNow>
+        |], "lookup (var('lookup_name) , (const(val(42))))")
+      ,("LookupOnChange with StringVariable name",
+        [r|
+        <LookupOnChange>
+          <Name>
+            <StringVariable>state_name</StringVariable>
+          </Name>
+        </LookupOnChange>
+        |], "lookupOnChange(var('state_name), (nilpar), val(0.0))")
+      ,("LookupOnChange with StringVariable name and tolerance",
+        [r|
+        <LookupOnChange>
+          <Name>
+            <StringVariable>state_name</StringVariable>
+          </Name>
+          <Tolerance>
+            <RealValue>0.5</RealValue>
+          </Tolerance>
+        </LookupOnChange>
+        |], "lookupOnChange(var('state_name),(nilpar),val (0.5))")
       ]
 
 testArithmeticExpressions :: TestTree

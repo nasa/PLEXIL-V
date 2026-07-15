@@ -647,7 +647,7 @@ parseLookupOnChange cursor = do
                                   return (name', PP.empty, args''))
                           <|> (uniqueChildElement cursor >>= \(name') -> do
                                   return (name', PP.empty, PP.empty))
-    let vDoc = either (error . show) text $ parseNameFromStringValue name
+    let vDoc = either (error . show) id $ parseLookupName name
         argsDoc = if args == PP.empty then "nilpar" else args
         tolDoc = if tol == PP.empty then "val(0.0)" else tol
     return $ "lookupOnChange" <> parens (hcat $ punctuate comma [vDoc, parens argsDoc, tolDoc])
@@ -667,7 +667,7 @@ parseLookupNow cursor = do
                                   return (name', args''))
                           <|> (uniqueChildElement cursor >>= \(name') -> do
                                   return (name', PP.empty))
-    let vDoc = either (error . show) text $ parseNameFromStringValue name
+    let vDoc = either (error . show) id $ parseLookupName name
         argsDoc = if args == PP.empty then "nilpar" else args
     return $ "lookup" <> parens (hcat $ punctuate comma [vDoc, parens argsDoc])
 
@@ -1002,6 +1002,19 @@ parseNameFromStringVariable cursor =
        child <- uniqueChildElement cursor
        qid <- toQID <$> T.unpack <$> getUniqueTextContent (element "StringVariable") child
        return $ "cmdId(var(" ++ qid ++ "))"
+
+parseLookupName :: Cursor -> ParseError Doc
+parseLookupName cursor =
+    do checkThisElement "Name" cursor
+       child <- uniqueChildElement cursor
+       -- Try StringValue first (literal string)
+       case getUniqueTextContent (element "StringValue") child of
+           Right txt -> return $ text $ toQID $ T.unpack txt
+           Left _ ->
+               -- Try StringVariable (variable reference)
+               case getUniqueTextContent (element "StringVariable") child of
+                   Right txt -> return $ "var" <> parens (text (toQID $ T.unpack txt))
+                   Left err -> Left err
 
 parseInitialSimpleValue :: Cursor -> ParseError Doc
 parseInitialSimpleValue cursor =
