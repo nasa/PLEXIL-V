@@ -74,13 +74,20 @@ instance Pretty State where
           ]
       )
     where
-      arrayValues = text "array" <> parens (hcat $ punctuate (text " # ") $ map wrapVal $ map text $ map unValue stValue)
-      otherValues = text "val" <> parens (text $ unValue $ head stValue)
-      stringValues = text "val" <> parens (doubleQuotes $ text $ unValue $ head stValue)
+      arrayValues = text "array" <> parens (hcat $ punctuate (text " # ") $ map wrapValOrUnknown $ map unValue stValue)
+      otherValues = case unValue $ head stValue of
+        "Plexil_Unknown" -> text "unknown"
+        val -> text "val" <> parens (text val)
+      stringValues = case unValue $ head stValue of
+        "Plexil_Unknown" -> text "unknown"
+        val -> text "val" <> parens (doubleQuotes $ text val)
       prettyParams params = case params of
         [] -> text "nilarg"
         _  -> prettyList params
       prettyList params = parens $ hsep $ map (pretty) params
+      wrapValOrUnknown str = case str of
+        "Plexil_Unknown" -> text "unknown"
+        _ -> wrapVal (text str)
 
 
 
@@ -196,7 +203,10 @@ instance Pretty CommandHandle where
   pretty CommandInterfaceError = text "CommandInterfaceError"
 
 instance Pretty Value where
-  pretty (Value str) = text str
+  pretty (Value str) =
+    case str of
+      "Plexil_Unknown" -> text "unknown"
+      _ -> text str
   pretty (TypedValue (TVBoolArray bs)) = text "array" <> parens values
     where
       values = hcat $ punctuate (text " # ") $
@@ -209,7 +219,9 @@ instance Pretty Value where
     where
       values = hcat $ punctuate (text " # ") $
         map
-          (\s -> text "val" <> parens (doubleQuotes $ text s))
+          (\s -> case s of
+                   "Plexil_Unknown" -> text "unknown"
+                   _ -> text "val" <> parens (doubleQuotes $ text s))
           ss
   pretty (TypedValue (TVIntArray is)) = text "array" <> parens values
     where
@@ -224,7 +236,10 @@ instance Pretty Value where
           (\r -> text "val" <> parens (text $ show r))
           rs
   pretty (TypedValue (TVBool b)) = text "val" <> parens (text $ if b then "true" else "false")
-  pretty (TypedValue (TVString s)) = text "val" <> parens (doubleQuotes $ text s)
+  pretty (TypedValue (TVString s)) =
+    case s of
+      "Plexil_Unknown" -> text "unknown"
+      _ -> text "val" <> parens (doubleQuotes $ text s)
   pretty (TypedValue (TVInt i)) = text "val" <> parens (text $ show i)
   pretty (TypedValue (TVReal r)) = text "val" <> parens (text $ show r)
   pretty x = error $ "unimplemented pretty for value " ++ show x

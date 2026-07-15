@@ -96,6 +96,9 @@ testPrettyPrint = testGroup "Pretty Printer"
     , Command "c4" [] (Result $ TypedValue (TVReal 1.1)) PXReal
         `testPrettiesAs`
            "commandResult('c4,nilarg,val(1.1))"
+    , Command "c5" [] (Result $ TypedValue (TVString "Plexil_Unknown")) PXString
+        `testPrettiesAs`
+           "commandResult('c5,nilarg,unknown)"
     , Command "ac1" [] (Result $ TypedValue (TVIntArray [1,2,3])) PXIntArray
         `testPrettiesAs`
            "commandResult('ac1,nilarg,array(val(1) # val(2) # val(3)))"
@@ -108,6 +111,9 @@ testPrettyPrint = testGroup "Pretty Printer"
     , Command "ac4" [] (Result $ TypedValue (TVRealArray [1.1,2.2,3.3])) PXRealArray
         `testPrettiesAs`
            "commandResult('ac4,nilarg,array(val(1.1) # val(2.2) # val(3.3)))"
+    , Command "ac5" [] (Result $ TypedValue (TVStringArray ["Plexil_Unknown","normal","Plexil_Unknown"])) PXStringArray
+        `testPrettiesAs`
+           "commandResult('ac5,nilarg,array(unknown # val(\"normal\") # unknown))"
     ]
   , testGroup "UpdateAck"
     [ UpdateAck "u1" True
@@ -326,6 +332,21 @@ testValue = testGroup "Value"
       [r|<Value>UNKNOWN</Value>|]
         `testItParsesAs`
           Value { unValue = "UNKNOWN" }
+    , [r|<Value>Plexil_Unknown</Value>|]
+        `testItParsesAs`
+          Value { unValue = "Plexil_Unknown" }
+    ]
+  , testGroup "Pretty printing"
+    [
+      Value { unValue = "Plexil_Unknown" }
+        `testValuePrettiesAs`
+          "unknown"
+    , TypedValue (TVString "Plexil_Unknown")
+        `testValuePrettiesAs`
+          "unknown"
+    , TypedValue (TVStringArray ["Plexil_Unknown", "normal", "Plexil_Unknown"])
+        `testValuePrettiesAs`
+          "array(unknown # val(\"normal\") # unknown)"
     ]
   ]
   where
@@ -334,6 +355,13 @@ testValue = testGroup "Value"
 
   testItPicklesAs :: Value -> String -> TestTree
   testItPicklesAs cmd str = testCase (show cmd) $ cmd `isPickledAs` str
+
+  testValuePrettiesAs :: Value -> String -> TestTree
+  testValuePrettiesAs v str =
+    testCase (show v) $
+      assertEqual "is not pretty printed as"
+        (text str)
+        (pretty v)
 
 testState :: TestTree
 testState = testGroup "State"
@@ -362,6 +390,18 @@ testState = testGroup "State"
           State "st" [Parameter "1" PXReal ,Parameter "10" PXInt] [ Value { unValue = "one" }, Value { unValue = "two" }] PXString
             `testPrettiesAs`
                [r|stateLookup('st,(val(float(1)) val(10)),val("one"))|]
+    ,
+          State "st" [] [ Value { unValue = "Plexil_Unknown" }] PXString
+            `testPrettiesAs`
+               "stateLookup('st,nilarg,unknown)"
+    ,
+          State "st" [] [ Value { unValue = "Plexil_Unknown" }] PXInt
+            `testPrettiesAs`
+               "stateLookup('st,nilarg,unknown)"
+    ,
+          State "st" [] [ Value { unValue = "1" }, Value { unValue = "Plexil_Unknown" }, Value { unValue = "3" }] PXIntArray
+            `testPrettiesAs`
+              "stateLookup('st,nilarg,array(val(1) # unknown # val(3)))"
     ]
   ]
   where
