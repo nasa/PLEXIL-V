@@ -65,6 +65,7 @@ instance Pretty State where
           [ text "'" <> text stName
           , prettyParams stParams
           , case stType of
+              PXBool        -> boolValues
               PXBoolArray   -> arrayValues
               PXIntArray    -> arrayValues
               PXRealArray   -> arrayValues
@@ -75,6 +76,11 @@ instance Pretty State where
       )
     where
       arrayValues = text "array" <> parens (hcat $ punctuate (text " # ") $ map wrapValOrUnknown $ map unValue stValue)
+      boolValues = case unValue $ head stValue of
+        "Plexil_Unknown" -> text "unknown"
+        "0" -> text "val" <> parens (text "false")
+        "1" -> text "val" <> parens (text "true")
+        val -> text "val" <> parens (text val)
       otherValues = case unValue $ head stValue of
         "Plexil_Unknown" -> text "unknown"
         val -> text "val" <> parens (text val)

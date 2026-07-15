@@ -402,6 +402,14 @@ testState = testGroup "State"
           State "st" [] [ Value { unValue = "1" }, Value { unValue = "Plexil_Unknown" }, Value { unValue = "3" }] PXIntArray
             `testPrettiesAs`
               "stateLookup('st,nilarg,array(val(1) # unknown # val(3)))"
+    ,
+          State "continue" [] [ Value { unValue = "0" }] PXBool
+            `testPrettiesAs`
+               "stateLookup('continue,nilarg,val(false))"
+    ,
+          State "continue" [] [ Value { unValue = "1" }] PXBool
+            `testPrettiesAs`
+               "stateLookup('continue,nilarg,val(true))"
     ]
   ]
   where
