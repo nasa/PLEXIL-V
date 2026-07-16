@@ -338,6 +338,10 @@ var FT FT' : FailureType .
   = eval(C, [ PS ], isOutcome?(Q,success) and isStatus?(Q,finished)) .
  eq eval(C, [ PS ], hasSkipped?(Q))
   = eval(C, [ PS ], isOutcome?(Q,skipped)) .
+ eq eval(C, [ < Q : (X:Cid) | NA, status: iterationEnded > PS ], hasIterationEnded?(Q))
+  = const(val(true)) .
+ eq eval(C, [ PS ], hasIterationEnded?(Q))
+  = const(val(false)) [owise] .
 
  eq eval(C, [ < Q : (X:Cid) | NA, ack: true > PS ], hasRcvAck?(Q) )
   = const(val(true)) .

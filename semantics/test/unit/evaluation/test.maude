@@ -14,6 +14,7 @@ load trunc.maude
 load real_to_int.maude
 load equ.maude
 load lookup.maude
+load node-predicates.maude
 
 mod TEST--EVALUATION is
 
@@ -36,6 +37,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--REAL-TO-INT .
   pr TEST--EVALUATION--EQU .
   pr TEST--EVALUATION--LOOKUP .
+  pr TEST--EVALUATION--NODE-PREDICATES .
 
   op test--evaluation : -> TestResults .
   eq test--evaluation =
@@ -55,6 +57,7 @@ mod TEST--EVALUATION is
        test--evaluation--real-to-int +
        test--evaluation--equ +
        test--evaluation--lookup +
+       test--evaluation--node-predicates +
 
 begin tests
 

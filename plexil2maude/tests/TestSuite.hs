@@ -823,6 +823,34 @@ testsParseBooleanExpression =
                 </Skipped>
                |],
               "hasSkipped?(sibling('ep2cp_ElseIf-1))")
+            ,("IterationEnded with sibling",
+              [r|
+                <IterationEnded>
+                  <NodeRef dir="sibling">LoopNode</NodeRef>
+                </IterationEnded>
+               |],
+              "hasIterationEnded?(sibling('LoopNode))")
+            ,("IterationEnded with child",
+              [r|
+                <IterationEnded>
+                  <NodeRef dir="child">ChildLoop</NodeRef>
+                </IterationEnded>
+               |],
+              "hasIterationEnded?(child('ChildLoop))")
+            ,("IterationEnded with NodeId",
+              [r|
+                <IterationEnded>
+                  <NodeId>RepeatTest</NodeId>
+                </IterationEnded>
+               |],
+              "hasIterationEnded?('RepeatTest)")
+            ,("IterationEnded with self",
+              [r|
+                <IterationEnded>
+                  <NodeRef dir="self"/>
+                </IterationEnded>
+               |],
+              "hasIterationEnded?(self)")
 
 
             ]

@@ -786,18 +786,39 @@ helper el children =
             "Succeeded" ->
                 errorize $
                     do  (ref, dir) <- parseRelativeNodeReference cursor
-                        let refText = if null ref then text "" else parens (text ref)
-                        return $ text "hasSucceeded?" <> parens (text dir <> refText)
+                        let refText = if null dir
+                                        then text ref   -- NodeId case: just the ref
+                                        else if null ref
+                                               then text dir   -- self case: just "self"
+                                               else text dir <> parens (text ref)  -- NodeRef case: dir('ref)
+                        return $ text "hasSucceeded?" <> parens refText
             "PostconditionFailed" ->
                 errorize $
                     do  (ref,dir) <- parseRelativeNodeReference cursor
-                        let refText = if null ref then text "" else parens (text ref)
-                        return $ text "hasPostconditionFailed?" <> parens (text dir <> refText)
+                        let refText = if null dir
+                                        then text ref
+                                        else if null ref
+                                               then text dir
+                                               else text dir <> parens (text ref)
+                        return $ text "hasPostconditionFailed?" <> parens refText
+            "IterationEnded" ->
+                errorize $
+                    do  (ref,dir) <- parseRelativeNodeReference cursor
+                        let refText = if null dir
+                                        then text ref
+                                        else if null ref
+                                               then text dir
+                                               else text dir <> parens (text ref)
+                        return $ text "hasIterationEnded?" <> parens refText
             "Skipped" ->
                 errorize $
                     do  (ref,dir) <- parseRelativeNodeReference cursor
-                        let refText = if null ref then text "" else parens (text ref)
-                        return $ text "hasSkipped?" <> parens (text dir <> refText)
+                        let refText = if null dir
+                                        then text ref
+                                        else if null ref
+                                               then text dir
+                                               else text dir <> parens (text ref)
+                        return $ text "hasSkipped?" <> parens refText
 
 
 

@@ -610,6 +610,102 @@ begin tests
         )
     end
 
+    assert "A `hasPostconditionFailed?` expression with qualified id computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasPostconditionFailed?('B),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasPostconditionFailed?('B . 'A)
+        )
+    end
+
+    assert "A `hasPostconditionFailed?` expression with sibling reference computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasPostconditionFailed?(sibling('C)),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasPostconditionFailed?('C . 'A)
+        )
+    end
+
+    assert "A `hasSkipped?` expression with qualified id computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasSkipped?('B),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasSkipped?('B . 'A)
+        )
+    end
+
+    assert "A `hasSkipped?` expression with sibling reference computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasSkipped?(sibling('C)),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasSkipped?('C . 'A)
+        )
+    end
+
+    assert "A `hasIterationEnded?` expression with qualified id computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasIterationEnded?('B),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasIterationEnded?('B . 'A)
+        )
+    end
+
+    assert "A `hasIterationEnded?` expression with sibling reference computes its fully qualified node id" from
+        testExpression(
+            sanitizeIds(
+                hasIterationEnded?(sibling('C)),
+                'B . 'A,
+                < 'C . 'B . 'A : list   | none >
+                <      'B . 'A : list   | none >
+                <           'A : list   | none >
+            )
+        )
+        reaches
+        testExpression(
+            hasIterationEnded?('C . 'A)
+        )
+    end
+
 end tests
 if
     Cfg :=  < 'C . 'B . 'A : list   | none >

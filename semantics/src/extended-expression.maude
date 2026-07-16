@@ -35,6 +35,7 @@ protecting VALUE .
  op hasSucceeded?           : NeQualified -> Expression .
  op hasPostconditionFailed? : NeQualified -> Expression .
  op hasSkipped?             : NeQualified -> Expression .
+ op hasIterationEnded?      : NeQualified -> Expression .
  op hasRcvAck?              : NeQualified -> Expression .
 
 op lookup             : NeQualified Parameters       -> Lookup [format (b o)] .

@@ -172,8 +172,12 @@ fmod COMPILER is
   eq sanitizeIds(hasSucceeded?(sibling(I))          , NQ, Cfg) = hasSucceeded?(getFullyQualifiedNodeId(self,I . tailQualified(NQ),Cfg)) .
   eq sanitizeIds(hasSucceeded?(I . Q)               , NQ, Cfg) = hasSucceeded?(getFullyQualifiedNodeId(I . Q,NQ,Cfg)) .
   eq sanitizeIds(hasPostconditionFailed?(sibling(I)), NQ, Cfg) = hasPostconditionFailed?(getFullyQualifiedNodeId(self,I . tailQualified(NQ),Cfg)) .
+  eq sanitizeIds(hasPostconditionFailed?(I . Q)     , NQ, Cfg) = hasPostconditionFailed?(getFullyQualifiedNodeId(I . Q,NQ,Cfg)) .
   eq sanitizeIds(hasSkipped?(self)                  , NQ, Cfg) = hasSkipped?(getFullyQualifiedNodeId(self, NQ, Cfg)) .
   eq sanitizeIds(hasSkipped?(sibling(I))            , NQ, Cfg) = hasSkipped?(getFullyQualifiedNodeId(self,I . tailQualified(NQ),Cfg)) .
+  eq sanitizeIds(hasSkipped?(I . Q)                 , NQ, Cfg) = hasSkipped?(getFullyQualifiedNodeId(I . Q,NQ,Cfg)) .
+  eq sanitizeIds(hasIterationEnded?(sibling(I))     , NQ, Cfg) = hasIterationEnded?(getFullyQualifiedNodeId(self,I . tailQualified(NQ),Cfg)) .
+  eq sanitizeIds(hasIterationEnded?(I . Q)          , NQ, Cfg) = hasIterationEnded?(getFullyQualifiedNodeId(I . Q,NQ,Cfg)) .
   eq sanitizeIds(isStatus?(I . Q,Status)            , NQ, Cfg) = isStatus?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Status) .
   eq sanitizeIds(isOutcome?(I . Q,Out)              , NQ, Cfg) = isOutcome?(getFullyQualifiedNodeId(I, Q . NQ, Cfg), Out) .
   eq sanitizeIds(isOutcomeFailure?(I . Q)           , NQ, Cfg) = isOutcomeFailure?(getFullyQualifiedNodeId(I, Q . NQ, Cfg)) .

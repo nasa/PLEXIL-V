@@ -1,0 +1,218 @@
+mod TEST--EVALUATION--NODE-PREDICATES is
+
+pr TEST-BASE .
+
+op  test--evaluation--node-predicates : -> TestResults .
+eq test--evaluation--node-predicates =
+begin tests
+
+---( hasIterationEnded? Tests )---
+
+assert "hasIterationEnded? returns true when node has iterationEnded status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeA : list | status: iterationEnded >,
+      hasIterationEnded?('NodeA)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "hasIterationEnded? returns false when node has waiting status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeA : list | status: waiting >,
+      hasIterationEnded?('NodeA)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasIterationEnded? returns false when node has executing status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeA : list | status: executing >,
+      hasIterationEnded?('NodeA)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasIterationEnded? returns false when node has finished status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeA : list | status: finished >,
+      hasIterationEnded?('NodeA)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasIterationEnded? returns false when node has inactive status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeA : list | status: inactive >,
+      hasIterationEnded?('NodeA)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasIterationEnded? works with fully qualified node id" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'Parent . 'Child : list | status: iterationEnded >,
+      hasIterationEnded?('Parent . 'Child)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+---( isFinished? Tests )---
+
+assert "isFinished? returns true when node has finished status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeB : list | status: finished >,
+      isFinished?('NodeB)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "isFinished? returns false when node has executing status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeB : list | status: executing >,
+      isFinished?('NodeB)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+---( hasSucceeded? Tests )---
+
+assert "hasSucceeded? returns true when node has success outcome and finished status" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeC : list | status: finished, outcome: success >,
+      hasSucceeded?('NodeC)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "hasSucceeded? returns false when node has success outcome but not finished" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeC : list | status: executing, outcome: success >,
+      hasSucceeded?('NodeC)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+---( hasPostconditionFailed? Tests )---
+
+assert "hasPostconditionFailed? returns true when node has postconditionFailed outcome" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeD : list | status: finished, outcome: failure(postconditionFailed) >,
+      hasPostconditionFailed?('NodeD)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "hasPostconditionFailed? returns false when node has success outcome" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeD : list | status: finished, outcome: success >,
+      hasPostconditionFailed?('NodeD)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+---( hasSkipped? Tests )---
+
+assert "hasSkipped? returns true when node has skipped outcome" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeE : list | status: finished, outcome: skipped >,
+      hasSkipped?('NodeE)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "hasSkipped? returns false when node has success outcome" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'NodeE : list | status: finished, outcome: success >,
+      hasSkipped?('NodeE)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+end tests
+.
+
+endm

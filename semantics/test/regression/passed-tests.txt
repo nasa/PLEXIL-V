@@ -2,6 +2,8 @@ ArrayAssignmentWithFailure.maude
 AssignToParentExit.maude
 AssignmentFailureTest.maude
 EmptyString1.maude
+FailureType1.maude
+FailureType2.maude
 FailureType3.maude
 FailureType4.maude
 NoChildFailedTest.maude
@@ -43,12 +45,14 @@ modulo1.maude
 repeat1.maude
 repeat2.maude
 repeat3.maude
+repeat4.maude
 simple-closedloop-command-a1.maude
 simple-closedloop-command-a3.maude
 simple-openloop-command-a1.maude
 simple-openloop-command-a3.maude
 simple-openloop-command-nopost.maude
 skip1.maude
+skip2.maude
 variables1.maude
 whitespace1.maude
 ChangeLookupTest.maude
@@ -71,3 +75,4 @@ repeat5.maude
 repeat7.maude
 repeat8.maude
 unknown_lookup.maude
+IterationEnded1.maude
