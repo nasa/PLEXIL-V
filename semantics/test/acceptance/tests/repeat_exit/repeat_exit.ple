@@ -5,7 +5,7 @@
 
    The plan:
    - Creates an infinite loop with an exit condition dependent on the external environment.
-   - Repeateadly increments a counter to force reading updates from the environment.
+   - Repeateadly prints to force reading updates from the environment.
    The script:
    - Initializes time to 0.
    - Updates for time to 1 for the next macro.
@@ -23,12 +23,10 @@ Real Lookup time;
 
 repeat_exit:
 {
-   Real counter = 0;
-
    Repeat true;
    Exit Lookup(time) > 0;
 
-   assignment: {
-      counter = counter + 1;
+   printer: {
+      pprint("");
    }
 }

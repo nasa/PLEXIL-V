@@ -4,4 +4,5 @@ initial-state  {
 
 script {
   state time () = 1 : real;
+  delay;
 }
