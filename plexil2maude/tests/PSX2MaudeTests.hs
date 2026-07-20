@@ -411,6 +411,40 @@ testState = testGroup "State"
             `testPrettiesAs`
                "stateLookup('continue,nilarg,val(true))"
     ]
+  , testGroup "Real values wrapping"
+    [ State "temperature" [] [ Value { unValue = "25.5" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temperature,nilarg,val(25.5))"
+    , State "pressure" [] [ Value { unValue = "100" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('pressure,nilarg,val(float(100)))"
+    , State "temp" [] [ Value { unValue = "0.0" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temp,nilarg,val(0.0))"
+    , State "temp" [] [ Value { unValue = "0" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temp,nilarg,val(float(0)))"
+    , State "temp" [] [ Value { unValue = "-5.5" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temp,nilarg,val(-5.5))"
+    , State "temp" [] [ Value { unValue = "-5" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temp,nilarg,val(float(-5)))"
+    , State "temp" [] [ Value { unValue = "Plexil_Unknown" }] PXReal
+        `testPrettiesAs`
+          "stateLookup('temp,nilarg,unknown)"
+    ]
+  , testGroup "Real array values wrapping"
+    [ State "temps" [] [ Value { unValue = "1.5" }, Value { unValue = "2" }, Value { unValue = "3.0" }, Value { unValue = "4" }] PXRealArray
+        `testPrettiesAs`
+          "stateLookup('temps,nilarg,array(val(1.5) # val(float(2)) # val(3.0) # val(float(4))))"
+    , State "temps" [] [ Value { unValue = "1.0" }, Value { unValue = "Plexil_Unknown" }, Value { unValue = "3" }] PXRealArray
+        `testPrettiesAs`
+          "stateLookup('temps,nilarg,array(val(1.0) # unknown # val(float(3))))"
+    , State "temps" [] [ Value { unValue = "0" }, Value { unValue = "0.0" }] PXRealArray
+        `testPrettiesAs`
+          "stateLookup('temps,nilarg,array(val(float(0)) # val(0.0)))"
+    ]
   ]
   where
     testPrettiesAs :: forall a. (Pretty a,Show a) => a -> String -> TestTree

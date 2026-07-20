@@ -68,19 +68,26 @@ instance Pretty State where
               PXBool        -> boolValues
               PXBoolArray   -> arrayValues
               PXIntArray    -> arrayValues
-              PXRealArray   -> arrayValues
+              PXRealArray   -> realArrayValues
               PXStringArray -> arrayValues
               PXString      -> stringValues
+              PXReal        -> realValues
               _             -> otherValues
           ]
       )
     where
       arrayValues = text "array" <> parens (hcat $ punctuate (text " # ") $ map wrapValOrUnknown $ map unValue stValue)
+      realArrayValues = text "array" <> parens (hcat $ punctuate (text " # ") $ map wrapRealValOrUnknown $ map unValue stValue)
       boolValues = case unValue $ head stValue of
         "Plexil_Unknown" -> text "unknown"
         "0" -> text "val" <> parens (text "false")
         "1" -> text "val" <> parens (text "true")
         val -> text "val" <> parens (text val)
+      realValues = case unValue $ head stValue of
+        "Plexil_Unknown" -> text "unknown"
+        val -> if isNumberWithDot val
+                 then text "val" <> parens (text val)
+                 else text "val" <> parens (text "float" <> parens (text val))
       otherValues = case unValue $ head stValue of
         "Plexil_Unknown" -> text "unknown"
         val -> text "val" <> parens (text val)
@@ -94,6 +101,16 @@ instance Pretty State where
       wrapValOrUnknown str = case str of
         "Plexil_Unknown" -> text "unknown"
         _ -> wrapVal (text str)
+      wrapRealValOrUnknown str = case str of
+        "Plexil_Unknown" -> text "unknown"
+        val -> if isNumberWithDot val
+                 then wrapVal (text val)
+                 else text "val" <> parens (text "float" <> parens (text val))
+      isNumberWithDot :: String -> Bool
+      isNumberWithDot valueStr =
+        case reads valueStr of
+          [(v :: Double,"")] -> '.' `elem` valueStr
+          _                  -> error $ "Cannot parse as number: " ++ show valueStr
 
 
 
