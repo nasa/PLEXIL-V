@@ -1,26 +1,45 @@
+***( GENERATORS--DELAY
+
+  Implements a generator wrapper that adds the option to delay (produce no inputs)
+  at every step, making the generator infinite.
+
+  KEY DESIGN DECISIONS:
+
+    - **Adds noInputs as an option**: At every step, 'delay(Gen)' produces the union
+      of 'noInputs' and whatever inputs 'Gen' would produce. This allows the system
+      to choose between waiting (no inputs) or proceeding with one of the embedded
+      generator's inputs.
+
+    - **Makes generator infinite**: Regardless of the embedded generator's cardinality,
+      'delay(Gen)' can always provide 'noInputs', so it never becomes consumed and
+      has infinite steps. This transforms any finite generator into an infinite one.
+
+    - **Transparent updates**: When an input is selected, the update is propagated to
+      the embedded generator, allowing it to track its own state independently.
+
+    - **Incremental cardinality**: The 'countPerStep' is incremented by 1 to account
+      for the added 'noInputs' option, while 'numberOfSteps' becomes 'infinity'.
+
+  ENTRY POINTS:
+
+    - 'delay(Gen)' - wraps a generator with delay capability
+
+  IMPORTANT BEHAVIORS:
+
+    - **Always offers noInputs**: At every generation step, 'noInputs' is added to
+      the input set, even if the embedded generator is consumed or produces empty.
+
+    - **Never consumed**: The 'isConsumed?' predicate always returns 'false' because
+      'noInputs' is always available as an option.
+
+    - **Use case**: Modeling environments where progress can be delayed or paused
+      indefinitely without terminating execution. Contrast with 'delayLazy', which
+      only adds 'noInputs' when it would cause state changes.
+
+)***
+
 fmod GENERATORS--DELAY is
   protecting SYSTEM .
-
-  ***
-  *** The `delay` generator wraps another generator and augments its behavior by:
-  ***
-  *** 1. Adding `noInputs` as an option to every generated `InputsSet`. This allows
-  ***    the system to "wait" or "delay" instead of proceeding with one of the
-  ***    embedded generator's inputs.
-  ***
-  *** 2. Making the generator infinite: regardless of the embedded generator's
-  ***    cardinality, `delay(Gen)` can always provide `noInputs`, so it never becomes
-  ***    consumed and has infinite steps.
-  ***
-  *** 3. Propagating updates to the embedded generator: when an input is chosen,
-  ***    the embedded generator is updated accordingly.
-  ***
-  *** 4. Incrementing the `countPerStep` cardinality by 1 to account for the added
-  ***    `noInputs` option.
-  ***
-  *** This generator is useful for modeling environments where progress can be
-  *** delayed or paused without terminating the execution.
-  ***
 
   op delay : InputGenerator -> InputGenerator [ctor] .
 

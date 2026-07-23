@@ -1,3 +1,47 @@
+***( GENERATORS--INPUTS-FILTER
+
+  Implements a generator that filters individual inputs from a generated input set
+  based on a boolean expression, removing inputs that don't satisfy the condition.
+
+  KEY DESIGN DECISIONS:
+
+    - **Per-input filtering**: Unlike 'filter' (which filters entire generation steps),
+      'inputs-filter' evaluates the expression for each individual input in the set and
+      removes those that don't satisfy the condition.
+
+    - **Lookup wrapping**: Before evaluating the filter expression, lookup inputs are
+      wrapped with 'new(...)' via 'wrapWithNew', ensuring they are treated as fresh
+      values in the expression evaluation context.
+
+    - **Environment-based evaluation**: The filter expression is evaluated in a temporary
+      environment updated with the candidate input's lookups, allowing the expression
+      to reference lookup values.
+
+    - **Fallback to noInputs**: If all inputs are filtered out (result is 'empty'), the
+      generator produces 'noInputs' instead, preventing termination and allowing the
+      system to progress without inputs.
+
+  ENTRY POINTS:
+
+    - 'inputs-filter(Gen, Expr)' - constructs an input-filtering generator
+
+  IMPORTANT BEHAVIORS:
+
+    - **Two-level filtering**: The 'filter-inputs-set' operator iterates through the
+      input set, accumulating inputs that satisfy the expression (evaluate to 'true').
+
+    - **Expression evaluation context**: Each input is evaluated by:
+      1. Extracting lookups from the input
+      2. Wrapping them with 'new(...)' markers
+      3. Updating a temporary environment with these lookups
+      4. Evaluating the expression in this environment
+      5. Including the input if the result is 'const(val(true))'
+
+    - **Cardinality preservation**: The cardinality matches the embedded generator,
+      as the filter doesn't change the number of generation steps.
+
+)***
+
 fmod GENERATORS--INPUTS-FILTER is
   protecting SYSTEM .
   protecting EVAL .

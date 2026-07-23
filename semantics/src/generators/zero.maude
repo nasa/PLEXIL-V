@@ -1,3 +1,34 @@
+***( GENERATORS--ZERO
+
+  Implements a trivial generator that is immediately consumed and produces no inputs.
+
+  KEY DESIGN DECISIONS:
+
+    - **Immediate termination**: The 'zero' generator always produces 'empty' (signaling
+      termination) and is always consumed, representing an environment that provides
+      no inputs from the start.
+
+    - **Identity for sequential composition**: In the algebra of generators, 'zero'
+      acts as the identity for the 'after' combinator when placed as the second argument,
+      since 'after(Gen, zero)' behaves like 'Gen' followed by immediate termination.
+
+    - **Zero cardinality**: The generator has both 'countPerStep = 0' and 'numberOfSteps = 0',
+      correctly representing its lack of state space.
+
+  ENTRY POINTS:
+
+    - 'zero' - the unique zero generator (nullary constructor)
+
+  IMPORTANT BEHAVIORS:
+
+    - **Always consumed**: Calling 'isConsumed?(zero, Config)' always returns 'true',
+      regardless of the configuration.
+
+    - **Immutable**: The 'update' operation returns 'zero' unchanged, as there are no
+      inputs to process.
+
+)***
+
 fmod GENERATORS--ZERO is
   pr GENERATORS--BASE-GENERATOR .
 

@@ -1,3 +1,48 @@
+***( GENERATORS--BASIC
+
+  Aggregates all basic generator modules into a single import point, providing the
+  complete library of generator constructors and combinators.
+
+  KEY DESIGN DECISIONS:
+
+    - **Complete library export**: This module imports and re-exports all generator
+      modules, making it the primary entry point for users who want access to the
+      full generator library.
+
+    - **No additional definitions**: This is a pure aggregation module with no new
+      operators or equations, serving only to collect imports.
+
+  AVAILABLE GENERATORS:
+
+    Sequential composition:
+    - 'sequence(inputList)' - deterministic playback of a list
+    - 'after(Gen1, Gen2)' - Gen1 followed by Gen2
+
+    Parallel composition:
+    - 'Gen1 x Gen2' - cross-product of two generators
+
+    Conditional/filtering:
+    - 'if-then-else(Gen1, Gen2, Cond)' - dynamic branching
+    - 'filter(Gen, Expr)' - conditional suppression
+    - 'inputs-filter(Gen, Expr)' - per-input filtering
+
+    Delay variants:
+    - 'delay(Gen)' - adds noInputs to every step
+    - 'delayLazy(Gen)' - adds noInputs only when productive
+
+    Infinite generators:
+    - 'repeat(inputSet)' - repeats the same choices indefinitely
+    - 'command-ack(handle)' - acknowledges commands with given handle
+
+    Finite generators:
+    - 'zero' - immediately consumed
+    - 'emptyEnvGen(N)' - N steps of noInputs
+
+    Test generators:
+    - 'plexiltest(inputList)' - sequence followed by lazy delays
+
+)***
+
 fmod GENERATORS--BASIC is
   pr GENERATORS--AFTER .
   pr GENERATORS--COMMAND-ACK .

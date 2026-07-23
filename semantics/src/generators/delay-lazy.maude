@@ -1,3 +1,43 @@
+***( GENERATORS--DELAY-LAZY
+
+  Implements a lazy variant of the 'delay' generator that only offers 'noInputs' when
+  doing so would cause a state change, avoiding unproductive delays.
+
+  KEY DESIGN DECISIONS:
+
+    - **State-change detection**: Before adding 'noInputs' to the input set, the
+      generator performs a micro-step simulation with 'noInputs' and checks if any
+      node states would change (via 'equalNodes?'). Only if a change would occur is
+      'noInputs' included as an option.
+
+    - **Search space pruning**: This optimization significantly reduces the state space
+      during model checking by eliminating paths where delays are unproductive (i.e.,
+      when the system is waiting for inputs but no internal progress can be made).
+
+    - **Conditional consumption**: Unlike 'delay' (which is always infinite), 'delayLazy'
+      can become consumed when both the embedded generator is exhausted AND no productive
+      delay is available (producing 'empty' in this case).
+
+    - **Error handling**: If the micro-step simulation fails, an 'ERROR' term is returned
+      at the kind level with diagnostic information.
+
+  ENTRY POINTS:
+
+    - 'delayLazy(Gen)' - wraps a generator with lazy delay behavior
+
+  IMPORTANT BEHAVIORS:
+
+    - **Micro-step simulation**: Uses 'microNoLog(Cfg)' to simulate a step with 'noInputs'
+      without recording it in the trace, testing whether the system would advance.
+
+    - **Node comparison**: The 'equalNodes?' predicate compares node configurations
+      before and after the simulated step to detect state changes.
+
+    - **Consumption semantics**: The generator is consumed when 'generate' returns 'empty',
+      which occurs when the embedded generator is exhausted and no productive delay exists.
+
+)***
+
 fmod GENERATORS--DELAY-LAZY is
   protecting SYSTEM .
   protecting MICRO .

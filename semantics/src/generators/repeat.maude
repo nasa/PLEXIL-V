@@ -1,3 +1,35 @@
+***( GENERATORS--REPEAT
+
+  Implements an infinite generator that repeatedly offers the same set of input
+  choices at every step, never consuming.
+
+  KEY DESIGN DECISIONS:
+
+    - **Stateless and infinite**: The generator state never changes across updates,
+      and it is never consumed. This represents a static, unchanging environment that
+      offers the same choices indefinitely.
+
+    - **Set of choices**: Unlike 'sequence', which produces one input per step, 'repeat'
+      produces a set of possible inputs, allowing non-deterministic exploration.
+
+    - **Infinite cardinality**: The 'numberOfSteps' is 'infinity', signaling to model
+      checkers that this generator will never terminate on its own.
+
+  ENTRY POINTS:
+
+    - 'repeat(inputSet)' - constructs a repeating generator from a set of inputs
+
+  IMPORTANT BEHAVIORS:
+
+    - **No state change**: The 'update' operation returns the same generator unchanged,
+      regardless of which input was selected.
+
+    - **Infinite exploration**: This generator is useful for modeling environments that
+      remain constant over time, allowing the model checker to explore all possible
+      executions under those conditions.
+
+)***
+
 fmod GENERATORS--REPEAT is
   protecting SYSTEM .
 

@@ -1,3 +1,35 @@
+***( GENERATORS--FILTER
+
+  Implements a filtering generator that conditionally suppresses input generation
+  based on a boolean expression evaluated against the current configuration.
+
+  KEY DESIGN DECISIONS:
+
+    - **Conditional suppression**: When the filter expression evaluates to 'false',
+      the generator produces 'noInputs' instead of delegating to the sub-generator.
+      This effectively "blocks" input generation under certain conditions.
+
+    - **Transparent when active**: When the filter expression is 'true', the generator
+      behaves identically to its sub-generator, producing the same inputs and maintaining
+      the same cardinality.
+
+    - **Stateless filtering**: The filter condition is re-evaluated at every step,
+      allowing the generator to dynamically enable/disable based on system state.
+
+  ENTRY POINTS:
+
+    - 'filter(Gen, Expr)' - constructs a filtered generator
+
+  IMPORTANT BEHAVIORS:
+
+    - **No input vs empty**: When filtered, the generator produces 'noInputs' (a valid
+      input representing "do nothing") rather than 'empty' (which signals termination).
+
+    - **Unchanged cardinality**: The filter does not reduce the cardinality, even though
+      some steps may produce no inputs. This is a conservative over-approximation.
+
+)***
+
 fmod GENERATORS--FILTER is
 
   protecting SYSTEM .

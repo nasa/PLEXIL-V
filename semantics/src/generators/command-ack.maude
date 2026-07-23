@@ -1,3 +1,82 @@
+***( GENERATORS--COMMAND-ACK
+
+  Implements generators that produce command acknowledgments, modeling the environment's
+  response to PLEXIL commands.
+
+  IMPORTANT: Only 'command-ack' and 'command-abort-ack' are fully supported and tested.
+  The other generators in this module (commandAckGenerator, commandAckGeneratorEx,
+  infiniteCommandAckGeneratorEx) are EXPERIMENTAL and may contain errors. Use them
+  at your own risk, and prefer the supported generators for production work.
+
+  KEY DESIGN DECISIONS:
+
+    - **Command-driven generation**: Generators inspect the '[ interface : ... ]' cell
+      in the configuration to find pending commands (with 'handle: nothing') and
+      generate acknowledgments for them.
+
+    - **Infinite acknowledgment pattern**: The supported generators ('command-ack',
+      'command-abort-ack') run indefinitely, responding to commands as they appear
+      in the interface.
+
+  SUPPORTED GENERATORS:
+
+    - 'command-ack(handle)' - **SUPPORTED AND WORKING**
+      Infinite generator that acknowledges pending commands with the specified handle
+      (e.g., CommandSuccess, CommandFailed). Scans the interface for commands awaiting
+      acknowledgment and generates 'commandAck(id, args, handle)' inputs.
+
+    - 'command-abort-ack' - **SUPPORTED AND WORKING**
+      Infinite generator that acknowledges command abort requests. Scans the interface
+      for commands with 'abort: CommandAbortInvoked' and generates corresponding
+      'commandAbort(id, args, val(true))' inputs.
+
+  EXPERIMENTAL GENERATORS (USE WITH CAUTION):
+
+    The following generators are provided for experimental purposes but may not work
+    correctly in all scenarios. They implement complex stateful behavior with multiple
+    execution phases and lookup combination expansion:
+
+    - 'commandAckGenerator(initialInput, steps)' - **EXPERIMENTAL**
+      Finite generator with initialization and execution phases
+
+    - 'commandAckGeneratorEx(initialInput, lookupInput, steps)' - **EXPERIMENTAL**
+      Extended finite generator with lookup combinations and cleaning phase
+
+    - 'infiniteCommandAckGeneratorEx(initialInput, lookupInputsList)' - **EXPERIMENTAL**
+      Infinite generator with lookup combination expansion
+
+    These experimental generators use 'GeneratorStatus' to track execution phases
+    (uninitialized, firstIteration, started, cleaning) and include helper operators
+    for computing lookup combinations and deduplication.
+
+  IMPORTANT BEHAVIORS:
+
+    **For supported generators ('command-ack', 'command-abort-ack')**:
+
+    - **Configuration inspection**: The generators scan the '[ interface : ... ]' cell
+      for commands with 'handle: nothing' (for 'command-ack') or 'abort: CommandAbortInvoked'
+      (for 'command-abort-ack').
+
+    - **Infinite cardinality**: Both generators have 'Cardinality(countPerStep: 1, numberOfSteps: infinity)'
+      and are never consumed.
+
+    - **Stateless updates**: Both generators ignore the update operation and return
+      themselves unchanged, as they dynamically respond to the current configuration.
+
+    **For experimental generators**:
+
+    - **Lookup combination expansion**: Compute all combinations of lookup values with
+      command acknowledgments, producing a cross-product of possible environment responses.
+      This feature is complex and may not work correctly in all cases.
+
+    - **Phase-based execution**: Track state via 'GeneratorStatus' with transitions
+      between phases. The exact behavior may be incorrect or incomplete.
+
+    - **Deduplication and cleaning**: Include helper logic for removing duplicates and
+      cleanup phases, but correctness is not guaranteed.
+
+)***
+
 fmod GENERATORS--COMMAND-ACK is
   extending GENERATORS--BASE-GENERATOR .
   protecting SYSTEM .

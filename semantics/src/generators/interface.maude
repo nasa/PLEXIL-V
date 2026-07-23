@@ -1,3 +1,10 @@
+***( GENERATORS--INTERFACE
+
+  Provides the minimal public interface for the generator library, exposing only
+  some basic generators.
+
+)***
+
 sload generator.maude
 sload base-generator.maude
 sload zero.maude

@@ -1,3 +1,39 @@
+***( GENERATORS--BASE-GENERATOR
+
+  Instantiates the generic generator interface with the PLEXIL-V 'Config' sort and
+  provides error handling for generator operations.
+
+  KEY DESIGN DECISIONS:
+
+    - **Instantiation of generic interface**: Specializes 'GENERATORS--GENERATOR{X}'
+      by substituting 'Config' for the parameter 'X', and renames 'Generator{Config}'
+      to 'InputGenerator' for readability throughout the system.
+
+    - **Kind-level error constructor**: The 'ERROR' operator inhabits '[InputsSet]'
+      (the kind, not the sort), allowing generator operations to gracefully report
+      errors without requiring explicit error sorts in every signature.
+
+    - **Strategy annotation**: The 'strat (0)' attribute prevents evaluation of the
+      'Config' argument, preserving the full configuration in error messages for
+      debugging.
+
+  ENTRY POINTS:
+
+    - 'InputGenerator' - the concrete sort for all PLEXIL-V input generators
+    - 'ERROR(msg, config)' - constructs an error term with a descriptive message
+      and the problematic configuration
+
+  IMPORTANT BEHAVIORS:
+
+    - **Error propagation**: Errors at the kind level ('[InputsSet]') can be pattern-
+      matched in equations, allowing generators to handle errors from sub-generators
+      and propagate them up the composition hierarchy.
+
+    - **Lazy error argument**: The 'strat (0)' annotation ensures that the 'Config'
+      in an error is not reduced, preserving the exact state that caused the error.
+
+)***
+
 fmod GENERATORS--BASE-GENERATOR is
   protecting GENERATORS--GENERATOR{Config} * (sort Generator{Config} to InputGenerator) .
 

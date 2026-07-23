@@ -15,7 +15,7 @@ fmod GENERATORS--AFTER is
   ***    independently. `after(Gen1, Gen2)` is only consumed when both `Gen1` and
   ***    `Gen2` are consumed.
   ***
-  *** 3. **Stateless updates**: The `update` operation propagates the consumed input
+  *** 3. **Propagated update**: The `update` operation propagates the consumed input
   ***    to whichever generator is currently active (not yet consumed). If `Gen1` is
   ***    consumed, updates go to `Gen2`; otherwise, updates go to `Gen1`.
   ***

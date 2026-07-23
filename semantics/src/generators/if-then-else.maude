@@ -1,3 +1,35 @@
+***( GENERATORS--IF-THEN-ELSE
+
+  Implements conditional generator selection based on a boolean expression evaluated
+  against the current configuration.
+
+  KEY DESIGN DECISIONS:
+
+    - **Dynamic branching**: The choice between 'Gen1' and 'Gen2' is made at runtime
+      by evaluating 'Cond' against the current configuration. This allows generators
+      to adapt to the system state.
+
+    - **Branch-specific updates**: Only the active branch (determined by 'Cond') is
+      updated when an input is consumed. The inactive branch remains unchanged.
+
+    - **Upper-bound cardinality**: Since either branch could be taken, the cardinality
+      is the upper bound of both generators, representing the worst-case state space.
+
+  ENTRY POINTS:
+
+    - 'if-then-else(Gen1, Gen2, Cond)' - constructs a conditional generator
+
+  IMPORTANT BEHAVIORS:
+
+    - **Condition re-evaluation**: The condition is re-evaluated at every 'generate'
+      and 'update' call, allowing the active branch to switch dynamically as the
+      configuration changes.
+
+    - **Boolean evaluation**: The 'bEval(Cond, Cfg)' function evaluates the expression
+      to a boolean, and any non-boolean result is treated as 'false'.
+
+)***
+
 fmod GENERATORS--IF-THEN-ELSE is
   protecting SYSTEM .
   protecting EVAL .

@@ -1,3 +1,38 @@
+***( GENERATORS--CROSS-PRODUCT
+
+  Implements parallel composition of two generators, producing the Cartesian product
+  of their input sets at each step.
+
+  KEY DESIGN DECISIONS:
+
+    - **True parallelism**: Both generators are consulted simultaneously at each step,
+      and the resulting 'InputsSet' contains all possible combinations of inputs from
+      both generators (computed via the 'x' operator on 'InputsSet').
+
+    - **Synchronized consumption**: The cross-product generator is consumed when either
+      of its sub-generators is consumed. The 'numberOfSteps' is the minimum of the two
+      sub-generators.
+
+    - **Multiplicative cardinality**: The 'countPerStep' is the product of the two
+      sub-generators' counts, reflecting the combinatorial explosion of choices.
+
+    - **Symmetric updates**: Both sub-generators are updated with the same chosen input,
+      allowing each to track its own state independently.
+
+  ENTRY POINTS:
+
+    - 'Gen1 x Gen2' - constructs a cross-product generator (infix operator)
+
+  IMPORTANT BEHAVIORS:
+
+    - **Cartesian product**: If 'Gen1' produces '{a, b}' and 'Gen2' produces '{c, d}',
+      then 'Gen1 x Gen2' produces the set '{a∪c, a∪d, b∪c, b∪d}' (all combinations).
+
+    - **Termination**: The generator stops when the first sub-generator is consumed,
+      even if the other could continue. This matches the 'min' semantics in cardinality.
+
+)***
+
 fmod GENERATORS--CROSS-PRODUCT is
   protecting SYSTEM .
 

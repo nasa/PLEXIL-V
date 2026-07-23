@@ -1,3 +1,34 @@
+***( GENERATORS--EMPTY
+
+  Implements a finite generator that produces 'noInputs' for a fixed number of steps,
+  then terminates.
+
+  KEY DESIGN DECISIONS:
+
+    - **Countdown semantics**: The generator is parameterized by a natural number 'N',
+      representing the number of steps remaining. Each 'update' decrements the counter.
+
+    - **No-input production**: While the counter is positive, the generator produces
+      'noInputs' at each step, allowing the system to advance without external inputs.
+
+    - **Termination at zero**: When the counter reaches '0', the generator produces
+      'empty' and becomes consumed.
+
+  ENTRY POINTS:
+
+    - 'emptyEnvGen(N)' - constructs a generator that produces N steps of 'noInputs'
+
+  IMPORTANT BEHAVIORS:
+
+    - **Explicit step limit**: Unlike 'zero' (which terminates immediately) or 'repeat'
+      (which never terminates), 'emptyEnvGen(N)' runs for exactly N steps.
+
+    - **Useful for bounded execution**: This generator is useful for testing scenarios
+      where you want to execute a plan for a fixed number of steps without external
+      inputs, then stop.
+
+)***
+
 fmod GENERATORS--EMPTY is
   pr GENERATORS--BASE-GENERATOR .
 

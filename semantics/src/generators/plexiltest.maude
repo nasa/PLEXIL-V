@@ -1,3 +1,42 @@
+***( GENERATORS--PLEXILTEST
+
+  Implements a generator that mimics the behavior of the PLEXILTest tool, which plays
+  back a predefined sequence of test inputs and then allows the plan to quiesce with
+  productive delays.
+
+  KEY DESIGN DECISIONS:
+
+    - **Sequential playback followed by lazy delays**: The generator is defined as
+      'after(sequence(inputList), delayLazy(zero))', meaning it first plays back the
+      entire input sequence deterministically, then switches to lazy delay mode.
+
+    - **Mimics PLEXILTest semantics**: This matches the behavior of the PLEXILTest tool,
+      which reads a script of inputs, applies them in order, and then waits for the
+      plan to finish execution.
+
+    - **Lazy termination**: After the sequence is exhausted, 'delayLazy(zero)' provides
+      'noInputs' only when it would cause state changes, allowing the plan to reach
+      quiescence naturally without generating unproductive delays.
+
+  ENTRY POINTS:
+
+    - 'plexiltest(inputList)' - constructs a PLEXILTest-style generator
+    - 'sequenceGenerator(inputList)' - deprecated alias for 'plexiltest'
+
+  IMPORTANT BEHAVIORS:
+
+    - **Two-phase execution**: The generator has two distinct phases:
+      1. Deterministic playback of the input list (via 'sequence')
+      2. Lazy delay phase allowing quiescence (via 'delayLazy(zero)')
+
+    - **Transition at sequence exhaustion**: The switch from playback to delay happens
+      automatically when 'sequence(inputList)' becomes consumed.
+
+    - **Minimal delays**: The 'delayLazy' wrapper ensures that delays are only offered
+      when they enable internal progress, preventing unnecessary state space explosion.
+
+)***
+
 fmod GENERATORS--PLEXILTEST is
   pr SYSTEM .
   pr INPUTS-LIST .

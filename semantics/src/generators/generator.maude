@@ -1,3 +1,50 @@
+***( GENERATORS--GENERATOR
+
+  This module provides the abstract interface for environment input generators in
+  PLEXIL-V. Generators model the non-deterministic external environment by producing
+  sets of possible inputs at each execution step.
+
+  KEY DESIGN DECISIONS:
+
+    - **Parameterized by configuration type**: The module is parameterized by 'X :: TRIV'
+      to allow generators to be specialized for different system configurations. In
+      practice, this is instantiated with the 'Config' sort.
+
+    - **State space cardinality tracking**: Generators track both 'countPerStep' (how
+      many input choices per step) and 'numberOfSteps' (how many steps before exhaustion).
+      This enables model-checking tools to assess state space size and termination.
+
+    - **Consumption model**: Generators can be "consumed" (exhausted) after a finite
+      number of steps, or run indefinitely. The 'isConsumed?' predicate determines
+      when a generator has no more inputs to produce.
+
+  ENTRY POINTS:
+
+    Core generator interface (must be defined for each generator):
+    - 'generate(Gen, Config) : InputsSet' - produces the set of possible inputs for
+      the current configuration
+    - 'update(Gen, Config, Inputs) : Generator' - updates the generator state after
+      an input choice is made
+    - 'isConsumed?(Gen, Config) : Bool' - checks if the generator is exhausted
+    - 'cardinality(Gen) : Cardinality' - computes the state space size
+
+    Cardinality operations:
+    - 'Cardinality(countPerStep: N, numberOfSteps: M)' - tracks generator capacity
+    - 'stateSpaceSize(Card) : ExNat' - computes total state space (countPerStep ^ numberOfSteps)
+    - 'upperBound(Card1, Card2) : Cardinality' - combines cardinalities for composed generators
+
+  IMPORTANT BEHAVIORS:
+
+    - **Extended naturals ('ExNat')**: The 'infinity' constant represents unbounded
+      generators. Arithmetic operations are extended to handle 'infinity' correctly
+      [e.g., 'infinity * N = infinity', 'N ^ infinity = infinity' for N > 1].
+
+    - **Upper bound semantics**: When combining generators [e.g., in 'if-then-else' or
+      'after'], the 'upperBound' operation computes a conservative over-approximation
+      of the combined state space.
+
+)***
+
 fmod GENERATORS--STATE-SPACE-CARDINALITY is
   protecting NAT .
 
