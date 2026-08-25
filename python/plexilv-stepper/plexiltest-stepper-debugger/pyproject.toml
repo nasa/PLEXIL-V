@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core", "cmake>=3.15", "ninja"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "plexiltest"
+version = "0.1.0"
+description = "A stepper and debugger for PLEXIL scripts"
+requires-python = ">=3.9"
+authors = [
+    {name = "PLEXIL-V Team"},
+]
+
+dependencies = [
+    "antlr4-python3-runtime>=4.13.1",
+]
+
+[project.scripts]
+plexiltest-debugger = "plexiltest.debugger.debugger_gui:main"
+plexiltest-stepper = "plexiltest.stepper.cli_stepper:main"
+plexiltest-script-compile = "plexiltest.plexil_compiler.plexil_script_compiler:main"
+
+[tool.scikit-build]
+cmake.version = ">=3.15"
+editable.verbose = true
+wheel.packages = ["src/plexiltest"]
+build-dir = "build"

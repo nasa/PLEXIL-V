@@ -187,6 +187,30 @@ $ plexilv run -p TakeImage0.plx -s script1.psx
 Currently, the output of the interpreter is the sequence of synchronous transitions performed by the plan.
 
 
+#### Interactive stepping and debugging **(optional, initial version)**
+
+PLEXIL-V now provides interactive stepper and debugger tools for step-by-step plan execution. These tools are in their initial version and offer two implementations:
+
+**PLEXIL-V Stepper** - Based on the formal Maude semantics:
+```
+$ cd python/plexilv-stepper/plexilv-stepper
+$ pip install -e .
+$ plexilv-stepper -p plan.plx -s script.pst
+```
+
+**PlexilTest Stepper/Debugger** - Based on the PLEXIL TestExec:
+```
+$ cd python/plexilv-stepper/plexiltest-stepper-debugger
+$ pip install .
+$ plexiltest-stepper -p plan.plx -s script.pst
+$ plexiltest-debugger -p plan.plx -s script.pst
+```
+
+The stepper allows you to execute plans one step at a time, inspect node states, and understand the execution flow. The debugger provides a graphical interface for visual plan exploration. Note that these tools are in active development and may have limited functionality compared to the batch verification tools.
+
+See `python/plexilv-stepper/README.md` for detailed installation and usage instructions.
+
+
 #### Performing differential testing PLEXIL/PLEXIL-V **(optional)**
 
 PLEXIL-V provides the `plexilv diff` utility to perform differential testing of the execution of a PLEXIL plan with multiple input scripts between the official PLEXIL test executor (`plexiltest`) and the PLEXIL-V formal interpreter (`plexil run`).
