@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyplexil-plexilv"
+version = "1.0.0"
+description = "Transpilation logic for PLEXIL"
+requires-python = ">=3.10"
+dependencies = [
+    "pyplexil-core @ file:../pyplexil-core",
+    "click>=8.0",
+]
+
+[tool.setuptools]
+packages = [
+    "plexilv",
+    "plexilv.common",
+    "plexilv.plexil",
+    "plexilv.plexil.translator",
+    "plexilv.plexilscript",
+    "plexilv.plexilscript.translator",
+]
+
+[project.scripts]
+plx2maude = "plexilv.plexil.translator.cli:main"
+psx2maude = "plexilv.plexilscript.translator.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,7 +1,9 @@
 """Unit tests for validation functions."""
 
 import os
+import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -133,25 +135,19 @@ class TestValidateFileReadable:
         """Unreadable file should raise."""
         path = tmp_path / "test.plx"
         path.touch()
-        # Remove read permission
-        os.chmod(path, 0o000)
-        try:
+
+        with patch('plexilv_run.validation.os.access', return_value=False):
             with pytest.raises(ValidationError, match="permission denied"):
                 validate_file_readable(path, "Plan")
-        finally:
-            # Restore permissions for cleanup
-            os.chmod(path, 0o644)
 
     def test_error_message_includes_path(self, tmp_path):
         """Error message should include the file path."""
         path = tmp_path / "test.plx"
         path.touch()
-        os.chmod(path, 0o000)
-        try:
+
+        with patch('plexilv_run.validation.os.access', return_value=False):
             with pytest.raises(ValidationError, match=str(path)):
                 validate_file_readable(path, "Plan")
-        finally:
-            os.chmod(path, 0o644)
 
 
 @pytest.mark.unit
@@ -188,12 +184,10 @@ class TestValidatePlanFile:
         """Unreadable plan file should raise."""
         path = tmp_path / "MyPlan.plx"
         path.touch()
-        os.chmod(path, 0o000)
-        try:
+
+        with patch('plexilv_run.validation.os.access', return_value=False):
             with pytest.raises(ValidationError, match="permission denied"):
                 validate_plan_file(path)
-        finally:
-            os.chmod(path, 0o644)
 
     def test_identifier_starting_with_number(self, tmp_path):
         """Plan filename starting with number should raise."""
@@ -230,9 +224,7 @@ class TestValidateScriptFile:
         """Unreadable script file should raise."""
         path = tmp_path / "test_script.psx"
         path.touch()
-        os.chmod(path, 0o000)
-        try:
+
+        with patch('plexilv_run.validation.os.access', return_value=False):
             with pytest.raises(ValidationError, match="permission denied"):
                 validate_script_file(path)
-        finally:
-            os.chmod(path, 0o644)

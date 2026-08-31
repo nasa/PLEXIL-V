@@ -33,16 +33,15 @@ The components of PLEXIL-V are organized in the following directories:
 - `examples` for showcasing how to verify properties of PLEXIL plans.
 
 
-### Compile `plexil2maude` and `plexilog`
+### Compile `plexilog`
 
 From the root of the repository, where the `cabal.project` file is located, install everything with cabal:
 ```
 $ cabal install --overwrite-policy=always all
 ```
-This will compile and install the tools located in the `plexil2maude` and `plexilog` folders.
+This will compile and install the tools located in the `plexilog` folders.
 Immediately after, confirm that the compiled tools are accessible from the command line by running:
 ```
-$ plx2maude
 $ plexilog-diff
 ```
 Otherwise, add the folder containing those commands to the `PATH`.

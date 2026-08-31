@@ -1,0 +1,1 @@
+<PLEXILScript><InitialState><State name="CommandName" type="string"><Value>get-string</Value></State></InitialState><Script><Command name="get-string" type="string"><Result>fred</Result></Command><CommandAck name="get-string" type="string"><Result>COMMAND_SUCCESS</Result></CommandAck></Script></PLEXILScript>

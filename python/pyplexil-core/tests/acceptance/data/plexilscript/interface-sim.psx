@@ -1,0 +1,1 @@
+<PLEXILScript><InitialState><State name="Event_5520" type="bool"><Value>0</Value></State></InitialState><Script><State name="Event_5520" type="bool"><Value>1</Value></State><State name="three_min_timer" type="bool"><Value>1</Value></State></Script></PLEXILScript>

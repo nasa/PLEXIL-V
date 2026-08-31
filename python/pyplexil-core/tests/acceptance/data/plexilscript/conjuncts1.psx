@@ -1,0 +1,1 @@
+<PLEXILScript><InitialState><State name="A" type="int"><Value>1</Value></State><State name="B" type="int"><Value>2</Value></State><State name="C" type="int"><Value>3</Value></State></InitialState><Script><CommandAck name="Execute1" type="string"><Result>COMMAND_SUCCESS</Result></CommandAck></Script></PLEXILScript>

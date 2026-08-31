@@ -3,6 +3,8 @@
 import click
 from plexilv_run.cli import main as run_command
 from plexilv_diff.cli import main as diff_command
+from plexilv.plexil.translator.cli import main as plx2maude_command
+from plexilv.plexilscript.translator.cli import main as psx2maude_command
 
 
 @click.group()
@@ -15,6 +17,8 @@ def main():
     \b
     run (or test)  Execute a PLEXIL plan using the PLEXIL-V formal semantics
     diff           Compare two PLEXIL plans
+    plx2maude      Transpile PLEXIL XML to PLEXIL-V Maude format
+    psx2maude      Transpile PLEXILScript XML to PLEXIL-V Maude format
     """
     pass
 
@@ -52,6 +56,10 @@ main.add_command(run_command, name='test')  # Alias for run
 
 # Register the diff command
 main.add_command(diff_command, name='diff')
+
+# Register the translator commands
+main.add_command(plx2maude_command)
+main.add_command(psx2maude_command)
 
 
 if __name__ == '__main__':

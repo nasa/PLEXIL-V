@@ -1,0 +1,1 @@
+<PLEXILScript><InitialState><State name="time" type="real"><Value>0.0</Value></State><State name="foo" type="int"><Value>5</Value></State></InitialState><Script><State name="foo" type="int"><Value>7</Value></State><State name="time" type="real"><Value>1.0</Value></State><State name="foo" type="int"><Value>6</Value></State></Script></PLEXILScript>

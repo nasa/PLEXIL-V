@@ -1,0 +1,1 @@
+<PLEXILScript><InitialState /><Script><State name="stateInteger" type="int"><Value>100</Value></State><Command name="boolArrayCommand" type="bool-array"><Result>1</Result><Result>1</Result><Result>1</Result></Command><CommandAck name="boolArrayCommand" type="string"><Result>COMMAND_SUCCESS</Result></CommandAck></Script></PLEXILScript>

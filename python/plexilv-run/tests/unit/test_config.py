@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -133,16 +134,13 @@ class TestResolveSemantics:
         """Raise error if direct semantics file is not readable."""
         semantics = tmp_path / "plexil-v.maude"
         semantics.touch()
-        os.chmod(semantics, 0o000)
 
-        try:
+        with patch('plexilv_run.config.os.access', return_value=False):
             with pytest.raises(ConfigurationError, match="Cannot read semantics file"):
                 Config.resolve_semantics_path(
                     semantics_module=str(semantics),
                     plexilv_home=None,
                 )
-        finally:
-            os.chmod(semantics, 0o644)
 
     def test_home_path_not_readable(self, tmp_path):
         """Raise error if semantics file in home is not readable."""
@@ -151,16 +149,13 @@ class TestResolveSemantics:
         semantics_dir.mkdir(parents=True)
         semantics = semantics_dir / "plexil-v.maude"
         semantics.touch()
-        os.chmod(semantics, 0o000)
 
-        try:
+        with patch('plexilv_run.config.os.access', return_value=False):
             with pytest.raises(ConfigurationError, match="Cannot read semantics file"):
                 Config.resolve_semantics_path(
                     semantics_module=None,
                     plexilv_home=str(home),
                 )
-        finally:
-            os.chmod(semantics, 0o644)
 
 
 @pytest.mark.unit

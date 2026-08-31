@@ -1,0 +1,1 @@
+<PLEXILScript><Script><Command name="get_string" type="string"><Result>fred</Result></Command><CommandAck name="get_string" type="string"><Result>COMMAND_SUCCESS</Result></CommandAck></Script></PLEXILScript>

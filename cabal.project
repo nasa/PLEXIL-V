@@ -1,4 +1,4 @@
 optimization: True
 with-compiler: ghc-9.6.7
 
-packages: plexil2maude/*.cabal plexilog/*.cabal
+packages: plexilog/*.cabal

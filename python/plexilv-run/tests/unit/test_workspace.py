@@ -1,7 +1,9 @@
 """Unit tests for workspace management."""
 
+import os
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -97,19 +99,11 @@ class TestWorkspaceCreate:
 
     def test_create_no_permission(self, tmp_path):
         """Should raise error if cannot create directory."""
-        # Create a directory with no write permission
-        parent = tmp_path / "no-write"
-        parent.mkdir()
-        parent.chmod(0o444)  # Read-only
+        workspace = Workspace(tmp_path / "workspace")
 
-        workspace = Workspace(parent / "workspace")
-
-        try:
+        with patch.object(Path, 'mkdir', side_effect=PermissionError("Permission denied")):
             with pytest.raises(WorkspaceError, match="Cannot create workspace"):
                 workspace.create()
-        finally:
-            # Restore permissions for cleanup
-            parent.chmod(0o755)
 
 
 @pytest.mark.unit

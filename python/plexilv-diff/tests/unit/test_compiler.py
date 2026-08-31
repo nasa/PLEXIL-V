@@ -9,6 +9,14 @@ from plexilv_diff.compiler import Compiler
 from plexilv_diff.exceptions import CompilationError, TimeoutError as DiffPlexilvTimeoutError
 
 
+@pytest.fixture(autouse=True)
+def mock_plumbum_local():
+    """Mock plumbum local to avoid requiring external tools in tests."""
+    with patch('plexilv_diff.compiler.local') as mock_local:
+        mock_local.__getitem__.return_value = MagicMock()
+        yield mock_local
+
+
 @pytest.fixture
 def sample_ple_file(tmp_path):
     """Create a sample .ple file."""
