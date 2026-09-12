@@ -8,19 +8,23 @@ before_script:
   - git checkout $(git -C $CI_PROJECT_DIR rev-parse HEAD:plexil)
   - git submodule update --init --recursive
   - make tools -j
-  - cd $CI_PROJECT_DIR/plexil2maude
-  - cabal v2-install --overwrite-policy=always
   - cd $CI_PROJECT_DIR/plexilog
   - cabal v2-install --overwrite-policy=always
+  - cd $CI_PROJECT_DIR/python/plexilv-cli
+  - source /bootstrap/python/.venv/bin/activate
+  - pip install -e .[dev] --force-reinstall --no-deps
+  - cd $CI_PROJECT_DIR/python/pyplexil-plexilv
+  - pip install -e . --force-reinstall --no-deps
+  - cd $CI_PROJECT_DIR
 
 stages:
   - test
 
-plexil2maude_tests:
+plexilv_python_tests:
   stage: test
   script:
-    - cd $CI_PROJECT_DIR/plexil2maude
-    - cabal new-run test -- --hide-successes --ansi-tricks=false
+    - cd $CI_PROJECT_DIR/python
+    - ./run_all_tests.sh
 
 semantics_unit_tests:
   stage: test

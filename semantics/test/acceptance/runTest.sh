@@ -50,9 +50,13 @@ for p in $(ls *.ple); do
     rm -f $plx
     plexilc $p
 done
-xmllint --format --output $i.plx $i.plx
+if command -v xmllint > /dev/null 2>&1; then
+    xmllint --format --output $i.plx $i.plx
+fi
 plexilc $i.pst
-xmllint --format --output $i.psx $i.psx
+if command -v xmllint > /dev/null 2>&1; then
+    xmllint --format --output $i.psx $i.psx
+fi
 test -f $i.plx || msgAndExit "Error producing file $i.plx"
 test -f $i.psx || msgAndExit "Error producing file $i.psx"
 rm -f input.maude

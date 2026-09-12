@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     openjdk-8-jdk \
     freeglut3-dev \
     libxi-dev \
+    libxml2-utils \
     libxmu-dev
 
 # PLEXIL
@@ -33,28 +34,33 @@ ENV BOOTSTRAP_HASKELL_INSTALL_NO_STACK=true
 RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 ENV PATH="/root/.ghcup/bin/:${PATH}"
 
-## Cabal prefetch
+## Cabal & Python prefetch
+RUN apt install -y python3.10-venv
 RUN cabal update
-RUN mkdir /bootstrap-cabal
+RUN mkdir /bootstrap
 
-COPY plexilog /bootstrap-cabal/plexilog
-COPY plexil2maude /bootstrap-cabal/plexil2maude
+COPY python /bootstrap/python
+WORKDIR /bootstrap/python
+RUN python3 -m venv .venv        \
+    && . .venv/bin/activate      \
+    && pip install --upgrade pip \
+    && cd plexilv-cli            \
+    && pip install .[dev]
 
-WORKDIR /bootstrap-cabal/plexilog
-RUN cabal build --only-dependencies
-
-WORKDIR /bootstrap-cabal/plexil2maude
+COPY plexilog /bootstrap/plexilog
+WORKDIR /bootstrap/plexilog
 RUN cabal build --only-dependencies
 
 ## Maude
-ENV MAUDE_PATH=/Linux64
-ENV PATH="$MAUDE_PATH/bin:${PATH}"
+ENV MAUDE_PATH=/MaudeLinux64
+ENV PATH="$MAUDE_PATH:${PATH}"
 ENV MAUDE_LIB="$MAUDE_PATH"
-WORKDIR /
-COPY Maude-3.1-linux.zip /Maude.zip
+RUN mkdir -p ${MAUDE_PATH}
+WORKDIR ${MAUDE_PATH}
+COPY Maude-3.5.1-linux-x86_64.zip Maude.zip
 RUN unzip Maude.zip \
     && rm Maude.zip \
-    && chmod +x $MAUDE_PATH/maude.linux64 \
-    && ln -s $MAUDE_PATH/maude.linux64 /usr/local/bin/maude
+    && chmod +x $MAUDE_PATH/maude \
+    && ln -s $MAUDE_PATH/maude /usr/local/bin/maude
 
 WORKDIR /
