@@ -1,6 +1,6 @@
 cabal-version:       3.0
 name:                plexil-log-tools
-version:             0.6.0
+version:             0.6.2
 synopsis:            Tools for comparing PLEXIL and PLEXIL-V execution logs.
 author:              Marco A. Feliu
 maintainer:          marco.feliu@nasa.gov

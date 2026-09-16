@@ -1,6 +1,6 @@
 cabal-version:       3.0
 name:                plexil2maude
-version:             0.6.0
+version:             0.6.2
 synopsis:            A parser from PLEXIL XML to the internal PLEXIL-V representation of plans.
 author:              Marco A. Feliu
 maintainer:          marco.feliu@nasa.gov

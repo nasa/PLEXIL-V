@@ -10,7 +10,7 @@ PLEXIL-V provides an LTL model-checker of PLEXIL plans and a framework to model 
 
 ### Current Release
 
-PLEXIL-V v0.6.1 (February-2026)
+PLEXIL-V v0.6.2 (September-2026)
 
 
 ### Requirements
