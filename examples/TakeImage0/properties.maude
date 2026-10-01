@@ -16,14 +16,14 @@ mod M-CHECK is
 
   --- The plan root node succeeds.
   op correctness3 : -> Prop .
-  eq correctness3 = <> hasOutcome?('TakeImage0, success) .
+  eq correctness3 = <> hasOutcome('TakeImage0, success) .
 
   --- The plan root node succeeds if it finishes.
   op correctness4 : -> Prop .
   eq correctness4 =
-      (<> hasStatus('TakeImage0, finished)) 
+      (<> hasStatus('TakeImage0, finished))
       =>
-      <> hasOutcome?('TakeImage0, success) .
+      <> hasOutcome('TakeImage0, success) .
 
   --- The plan starts executing.
   op liveness1 : -> Prop .
