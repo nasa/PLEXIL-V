@@ -57,7 +57,9 @@ $ source .venv/bin/activate
 ```
 Then, install the Python `plexilv-cli` package located `python/plexilv-cli`:
 ```
-pip install -e python/plexilv-cli
+$ cd python/plexilv-cli
+$ pip install -e .
+$ cd -
 ```
 Immediately after, confirm that `plexilv` is accessible from the command line by running:
 ```
