@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plexilv-log"
+version = "0.1.0"
+description = "Parse PLEXIL execution logs to JSON"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+plexilog = "plexilv_log.cli.plexilog:main"
+plexilog-maude = "plexilv_log.cli.plexilog_maude:main"
+plexilog-diff = "plexilv_log.cli.plexilog_diff:main"
+
+[tool.setuptools.packages.find]
+include = ["plexilv_log*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests (fast)",
+    "integration: Integration tests with real log files",
+]

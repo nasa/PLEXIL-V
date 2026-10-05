@@ -5,6 +5,9 @@ from plexilv_run.cli import main as run_command
 from plexilv_diff.cli import main as diff_command
 from plexilv.plexil.translator.cli import main as plx2maude_command
 from plexilv.plexilscript.translator.cli import main as psx2maude_command
+from plexilv_log.cli.plexilog import main as plexilog_command
+from plexilv_log.cli.plexilog_maude import main as plexilog_maude_command
+from plexilv_log.cli.plexilog_diff import main as plexilog_diff_command
 
 
 @click.group()
@@ -19,6 +22,9 @@ def main():
     diff           Compare two PLEXIL plans
     plx2maude      Transpile PLEXIL XML to PLEXIL-V Maude format
     psx2maude      Transpile PLEXILScript XML to PLEXIL-V Maude format
+    plexilog       Parse PLEXIL Executive logs to JSON
+    plexilog-maude Parse PLEXIL-V/Maude logs to JSON
+    plexilog-diff  Compare execution logs
     """
     pass
 
@@ -60,6 +66,11 @@ main.add_command(diff_command, name='diff')
 # Register the translator commands
 main.add_command(plx2maude_command)
 main.add_command(psx2maude_command)
+
+# Register the log processing commands
+main.add_command(plexilog_command, name='plexilog')
+main.add_command(plexilog_maude_command, name='plexilog-maude')
+main.add_command(plexilog_diff_command, name='plexilog-diff')
 
 
 if __name__ == '__main__':

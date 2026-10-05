@@ -16,6 +16,7 @@ dependencies = [
     "pyplexil-plexilv @ file:../pyplexil-plexilv",
     "plexilv-run @ file:../plexilv-run",
     "plexilv-diff @ file:../plexilv-diff",
+    "plexilv-log @ file:../plexilv-log",
 ]
 
 [project.optional-dependencies]

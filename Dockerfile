@@ -3,19 +3,21 @@ FROM ubuntu:22.04
 ENV TZ=Europe/Madrid
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && apt-get install -y \
-    git \
-    make \
-    autotools-dev \
-    autoconf \
-    libtool \
-    g++ \
     ant \
-    gperf \
-    openjdk-8-jdk \
+    autoconf \
+    autotools-dev \
     freeglut3-dev \
+    g++ \
+    git \
+    gperf \
+    libtool \
     libxi-dev \
     libxml2-utils \
-    libxmu-dev
+    libxmu-dev \
+    make \
+    openjdk-8-jdk \
+    python3.10-venv \
+    unzip
 
 # PLEXIL
 ENV PLEXIL_HOME=/plexil
@@ -24,21 +26,8 @@ WORKDIR /plexil
 RUN make ipc
 RUN make tools -j
 
-
-# PLEXIL5
-RUN apt-get install -y curl unzip libgmp-dev libz-dev
-
-ENV BOOTSTRAP_HASKELL_NONINTERACTIVE=true
-ENV BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
-ENV BOOTSTRAP_HASKELL_INSTALL_NO_STACK=true
-RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-ENV PATH="/root/.ghcup/bin/:${PATH}"
-
-## Cabal & Python prefetch
-RUN apt install -y python3.10-venv
-RUN cabal update
+# Python setup
 RUN mkdir /bootstrap
-
 COPY python /bootstrap/python
 WORKDIR /bootstrap/python
 RUN python3 -m venv .venv        \
@@ -46,10 +35,6 @@ RUN python3 -m venv .venv        \
     && pip install --upgrade pip \
     && cd plexilv-cli            \
     && pip install .[dev]
-
-COPY plexilog /bootstrap/plexilog
-WORKDIR /bootstrap/plexilog
-RUN cabal build --only-dependencies
 
 ## Maude
 ENV MAUDE_PATH=/MaudeLinux64

@@ -15,39 +15,22 @@ PLEXIL-V v0.6.2 (September-2026)
 
 ### Requirements
 
-* **Glasgow Haskell Compiler** (v9.6.7): The recommended way is to use [GHCup](https://www.haskell.org/ghcup/).
-
 * **The Maude System**: Binary releases for different platforms can be found [here](https://github.com/maude-lang/Maude/releases).
 
-* **Python** (>= 3.9): Binary releases for different platforms can be found [here](https://www.python.org/downloads/).
+* **Python** (>= 3.10): Binary releases for different platforms can be found [here](https://www.python.org/downloads/).
 
 
 ## First steps
 
 The components of PLEXIL-V are organized in the following directories:
 - `plexil2maude` translator from PLEXIL XML format to PLEXIL-V internal format.
-- `plexilog` log processing tools to compare PLEXIL-V against PLEXIL executive runs.
-- `python` integrated command line interface (called `plexilv`) for different PLEXIL-V tools and workflows.
+- `python` integrated command line interface (called `plexilv`) for different PLEXIL-V tools and workflows, including log processing tools.
 - `plexil` git submodule with the official PLEXIL executive version that is supported by PLEXIL-V.
 - `semantics` the rewriting logic specification in Maude that implements the formal semantics and the auxiliary tools needed for model-checking and modeling execution environments.
 - `examples` for showcasing how to verify properties of PLEXIL plans.
 
 
-### Compile `plexilog`
-
-From the root of the repository, where the `cabal.project` file is located, install everything with cabal:
-```
-$ cabal install --overwrite-policy=always all
-```
-This will compile and install the tools located in the `plexilog` folders.
-Immediately after, confirm that the compiled tools are accessible from the command line by running:
-```
-$ plexilog-diff
-```
-Otherwise, add the folder containing those commands to the `PATH`.
-
-
-### Install the `plexilv` command **(optional, but recommended)**
+### Install the `plexilv` command
 
 From the root of the repository, create a Python virtual environment and load it to be able to install packages:
 ```

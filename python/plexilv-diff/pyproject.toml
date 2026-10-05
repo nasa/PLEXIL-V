@@ -11,6 +11,7 @@ dependencies = [
     "click>=8.0",
     "plumbum>=1.8",
     "rich>=13.0",
+    "plexilv-log>=0.1.0",
 ]
 
 [project.optional-dependencies]

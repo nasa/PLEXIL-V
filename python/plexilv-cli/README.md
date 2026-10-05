@@ -8,6 +8,9 @@ Unified command-line interface for PLEXIL-V verification tools.
 
 - **run** (or **test**): Execute PLEXIL plans using the PLEXIL-V formal semantics
 - **diff**: Compare PLEXIL plan executions across different interpreters
+- **plexilog**: Parse PLEXIL Executive debug logs to JSON
+- **plexilog-maude**: Parse PLEXIL-V/Maude execution logs to JSON
+- **plexilog-diff**: Compare execution logs from different interpreters
 - **help**: Display help information
 
 ## Installation
@@ -21,6 +24,7 @@ pip install plexilv-cli
 This will automatically install all required dependencies:
 - `plexilv-run` - PLEXIL plan execution tool
 - `plexilv-diff` - PLEXIL execution comparison tool
+- `plexilv-log` - Log parsing and comparison tools
 
 ### For Development
 
@@ -216,6 +220,101 @@ plexilv diff -p my_plan.plx -s script1.psx -s script2.psx
 # View all available options
 plexilv diff --help
 ```
+
+### `plexilv plexilog`
+
+Parse PLEXIL Executive debug logs to JSON format.
+
+**Provided by:** `plexilv-log`
+
+**Purpose:**
+
+Parses verbose debug logs from the PLEXIL Executive (`plexiltest`) and outputs structured JSON representing the execution trace (macros → micros → transitions).
+
+**Usage:**
+```bash
+# Parse log file
+plexilv plexilog executive.log
+
+# Parse from stdin
+cat executive.log | plexilv plexilog
+
+# Output to file
+plexilv plexilog executive.log > trace.json
+
+# Compact JSON output
+plexilv plexilog executive.log --compact
+```
+
+**Options:**
+- `LOG_FILE`: Path to log file (optional, reads from stdin if not provided)
+- `--pretty/--compact`: Pretty-print or compact JSON (default: pretty)
+
+### `plexilv plexilog-maude`
+
+Parse PLEXIL-V/Maude execution logs to JSON format.
+
+**Provided by:** `plexilv-log`
+
+**Purpose:**
+
+Parses execution logs from the PLEXIL-V formal semantics interpreter (Maude) and outputs structured JSON.
+
+**Usage:**
+```bash
+# Parse log file
+plexilv plexilog-maude maude.log
+
+# Parse from stdin
+cat maude.log | plexilv plexilog-maude
+
+# Output to file
+plexilv plexilog-maude maude.log > trace.json
+
+# Compact JSON output
+plexilv plexilog-maude maude.log --compact
+```
+
+**Options:**
+- `LOG_FILE`: Path to log file (optional, reads from stdin if not provided)
+- `--pretty/--compact`: Pretty-print or compact JSON (default: pretty)
+
+### `plexilv plexilog-diff`
+
+Compare execution logs from PLEXIL Executive and PLEXIL-V.
+
+**Provided by:** `plexilv-log`
+
+**Purpose:**
+
+Compares two execution log files and reports differences. Uses exit codes to indicate equality: 0 (equal), 1 (different), 2 (error).
+
+**Usage:**
+```bash
+# Compare logs (shows "EQ" if equal, report if different)
+plexilv plexilog-diff executive.log maude.log
+
+# Verbose output with detailed differences
+plexilv plexilog-diff executive.log maude.log --verbose
+
+# JSON output format
+plexilv plexilog-diff executive.log maude.log --json
+```
+
+**Options:**
+- Two log file paths (required)
+- `--verbose, -v`: Show detailed differences
+- `--json, -j`: Output in JSON format
+
+**Exit codes:**
+- `0`: Traces are equal
+- `1`: Traces differ
+- `2`: Error occurred
+
+**Output formats:**
+- Default: "EQ" if equal, summary report if different
+- Verbose: Detailed comparison report with all differences
+- JSON: Machine-readable JSON format
 
 ### `plexilv help`
 

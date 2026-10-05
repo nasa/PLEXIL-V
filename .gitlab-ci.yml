@@ -8,12 +8,12 @@ before_script:
   - git checkout $(git -C $CI_PROJECT_DIR rev-parse HEAD:plexil)
   - git submodule update --init --recursive
   - make tools -j
-  - cd $CI_PROJECT_DIR/plexilog
-  - cabal v2-install --overwrite-policy=always
   - cd $CI_PROJECT_DIR/python/plexilv-cli
   - source /bootstrap/python/.venv/bin/activate
   - pip install -e .[dev] --force-reinstall --no-deps
   - cd $CI_PROJECT_DIR/python/pyplexil-plexilv
+  - pip install -e . --force-reinstall --no-deps
+  - cd $CI_PROJECT_DIR/python/plexilv-log
   - pip install -e . --force-reinstall --no-deps
   - cd $CI_PROJECT_DIR
 
@@ -35,7 +35,7 @@ semantics_unit_tests:
 semantics_acceptance_tests:
   stage: test
   script:
-    - export PATH=/plexil/scripts:/plexil/bin:$PATH:~/.cabal/bin
+    - export PATH=/plexil/scripts:/plexil/bin:$PATH
     - cd $CI_PROJECT_DIR/semantics
     - ./runAT.sh --check
   artifacts:
@@ -47,7 +47,7 @@ semantics_acceptance_tests:
 semantics_regression_tests:
   stage: test
   script:
-    - export PATH=/plexil/scripts:/plexil/bin:$PATH:~/.cabal/bin
+    - export PATH=/plexil/scripts:/plexil/bin:$PATH
     - cd $CI_PROJECT_DIR/semantics/test/regression
     - python3 runRegression.py -p
 
