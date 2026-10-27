@@ -1,0 +1,12 @@
+Real[3] Lookup ArrayData;
+
+arrayVarWithLookup:
+{
+    Real x;
+
+    PostCondition Lookup(ArrayData)[0] == 10.0 && x == 20.0;
+
+    {
+        x = Lookup(ArrayData)[1];
+    }
+}

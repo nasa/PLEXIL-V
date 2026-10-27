@@ -1,0 +1,14 @@
+Real[3] Lookup SensorData;
+
+arrayVarWithLookupOnChange:
+{
+    Real x;
+    Integer idx = 2;
+
+    Start isKnown(Lookup(SensorData)[idx]);
+    Invariant isKnown(x);
+    PostCondition Lookup(SensorData)[0] == 50.0 && x == 100.0;
+
+    x = Lookup(SensorData)[idx];
+
+}

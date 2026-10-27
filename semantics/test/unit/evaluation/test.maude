@@ -131,6 +131,145 @@ begin tests
       )
     end
 
+    assert "eval of arrayVar with expression that returns array" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < 'src . 'array8 : memory |
+                    initVal: array(val(5.0) # val(6.0)),
+                    actVal: array(val(5.0) # val(6.0)),
+                    prevVal: array(val(5.0) # val(6.0)) > ],
+            arrayVar(var('src . 'array8), const(val(1)))
+        )
+      )
+    reaches
+      anExpression(
+        const(val(6.0))
+      )
+    end
+
+    assert "eval of arrayVar with lookupOnChange that returns array" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < cache(0) : lookup-cache |
+                    stateName: const(val("ArrayLookup")),
+                    args: nilpar,
+                    tolerance: val(0.0),
+                    cachedValue: array(val(10.0) # val(20.0) # val(30.0)),
+                    nodeContext: 'Root,
+                    prevStateName: val("ArrayLookup"),
+                    prevArgs: nilarg > ],
+            arrayVar(lookupOnChange(0, 'ArrayLookup, nilpar, val(0.0)), const(val(2)))
+        )
+      )
+    reaches
+      anExpression(
+        const(val(30.0))
+      )
+    end
+
+    assert "eval of arrayVar when array expression evaluates to unknown" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < 'x : memory |
+                    initVal: unknown,
+                    actVal: unknown,
+                    prevVal: unknown > ],
+            arrayVar(var('x), const(val(0)))
+        )
+      )
+    reaches
+      anExpression(
+        const(unknown)
+      )
+    end
+
+    assert "eval of arrayVar when index evaluates to unknown" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < 'arr : memory |
+                    initVal: array(val(1.0) # val(2.0) # val(3.0)),
+                    actVal: array(val(1.0) # val(2.0) # val(3.0)),
+                    prevVal: array(val(1.0) # val(2.0) # val(3.0)) >
+              < 'idx : memory |
+                    initVal: unknown,
+                    actVal: unknown,
+                    prevVal: unknown > ],
+            arrayVar(var('arr), var('idx))
+        )
+      )
+    reaches
+      anExpression(
+        const(unknown)
+      )
+    end
+
+    assert "eval of arrayVar when both array and index are unknown" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < 'arr : memory |
+                    initVal: unknown,
+                    actVal: unknown,
+                    prevVal: unknown >
+              < 'idx : memory |
+                    initVal: unknown,
+                    actVal: unknown,
+                    prevVal: unknown > ],
+            arrayVar(var('arr), var('idx))
+        )
+      )
+    reaches
+      anExpression(
+        const(unknown)
+      )
+    end
+
+    assert "eval of arrayVar with nested expression for index" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < 'arr : memory |
+                    initVal: array(val(10.0) # val(20.0) # val(30.0)),
+                    actVal: array(val(10.0) # val(20.0) # val(30.0)),
+                    prevVal: array(val(10.0) # val(20.0) # val(30.0)) >
+              < 'i : memory |
+                    initVal: val(1),
+                    actVal: val(1),
+                    prevVal: val(1) > ],
+            arrayVar(var('arr), var('i) + const(val(1)))
+        )
+      )
+    reaches
+      anExpression(
+        const(val(30.0))
+      )
+    end
+
+    assert "eval of arrayVar with lookupOnChange returning unknown array" from
+      anExpression(
+        eval(
+            mtenvironment,
+            [ < cache(0) : lookup-cache |
+                    stateName: const(val("UnknownLookup")),
+                    args: nilpar,
+                    tolerance: val(0.0),
+                    cachedValue: unknown,
+                    nodeContext: 'Root,
+                    prevStateName: val("UnknownLookup"),
+                    prevArgs: nilarg > ],
+            arrayVar(lookupOnChange(0, 'UnknownLookup, nilpar, val(0.0)), const(val(0)))
+        )
+      )
+    reaches
+      anExpression(
+        const(unknown)
+      )
+    end
+
 end tests
 .
 

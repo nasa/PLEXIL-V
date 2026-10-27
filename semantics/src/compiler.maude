@@ -216,6 +216,7 @@ fmod COMPILER is
   eq sanitizeIds(var(I . Q)                         , NQ, Cfg) = var(getFullyQualifiedVariableId(I, Q . NQ, Cfg)) .
   eq sanitizeIds(arrayVar(I . Q,E)                  , NQ, Cfg) = arrayVar(getFullyQualifiedVariableId(I, Q . NQ, Cfg), sanitizeIds(E, NQ, Cfg)) .
   eq sanitizeIds(arrayVar(I . Q)                    , NQ, Cfg) = arrayVar(getFullyQualifiedVariableId(I, Q . NQ, Cfg)) .
+  eq sanitizeIds(arrayVar(E, E')                    , NQ, Cfg) = arrayVar(sanitizeIds(E, NQ, Cfg), sanitizeIds(E', NQ, Cfg)) [owise] .
   eq sanitizeIds(const(varForwarding(I . Q))        , NQ, Cfg) = const(varForwarding(getFullyQualifiedVariableId(I, Q . NQ, Cfg))) .
   eq sanitizeIds(const(V)                           , NQ, Cfg) = const(V) [owise] .
   eq sanitizeIds(lookup(I,Params)                   , NQ, Cfg) = lookup(I,sanitizeIdsOnParams(Params,NQ,Cfg)) .
@@ -504,6 +505,8 @@ fmod COMPILER is
    = collectCachesFromExpr(E, NQ, N) .
   eq collectCachesFromExpr(func(F:Function, E), NQ, N)
    = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromExpr(arrayVar(E, E'), NQ, N)
+   = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
   eq collectCachesFromExpr(E, NQ, N) = none [owise] .
 
   --- Collect from pairs
@@ -534,6 +537,7 @@ fmod COMPILER is
   eq countCachesInExpr(not E) = countCachesInExpr(E) .
   eq countCachesInExpr(isKnown(E)) = countCachesInExpr(E) .
   eq countCachesInExpr(func(F:Function, E)) = countCachesInExpr(E) .
+  eq countCachesInExpr(arrayVar(E, E')) = countCachesInExpr(E) + countCachesInExpr(E') .
   eq countCachesInExpr(E) = 0 [owise] .
 
   op countCachesInAttrs : AttributeSet -> Nat .
@@ -648,6 +652,8 @@ fmod COMPILER is
    = isKnown(embedCacheIdsInExpr(E, N)) .
   eq embedCacheIdsInExpr(func(F, E), N)
    = func(F, embedCacheIdsInExpr(E, N)) .
+  eq embedCacheIdsInExpr(arrayVar(E, E'), N)
+   = arrayVar(embedCacheIdsInExpr(E, N), embedCacheIdsInExpr(E', N + countCachesInExpr(E))) .
   eq embedCacheIdsInExpr(E, N) = E [owise] .
 
   op embedCacheIdsInPairs : List{Pair{Qid,Expression}} Nat -> List{Pair{Qid,Expression}} .

@@ -180,41 +180,40 @@ vars VE         : VariableExpression .
    = V .
 
 *** On local variables
- eq eval(C,[ < Q : memory | NA , actVal: V > PS ],var(Q)) = const(V) .
  eq eval(C,[ < Q : memory | NA , actVal: ArrV > PS ],arrayVar(Q)) = const(ArrV) .
- ceq eval(C,[ < Q : memory | NA , actVal: ArrV > PS ],arrayVar(Q,E)) = const(nth(ArrV,I))
-    if val(I) := expToVal(eval(C,[ < Q : memory | NA , actVal: ArrV > PS ],E)) .
-
- ceq [eval-forwarded-arrayVariable] :
-  eval(C, [ PS ], arrayVar(Q,E)) = const(nth(ArrV,I))
+ eq eval(C,[ < Q : memory | NA , actVal: ArrV > PS ],arrayVar(Q,E))
+  = evalArrayIndex(const(ArrV), eval(C,[ < Q : memory | NA , actVal: ArrV > PS ],E)) .
+ceq eval(C, [ PS ], arrayVar(Q,E))
+  = evalArrayIndex(const(ArrV), eval(C,[ PS ],E))
   if [ < Q  : memory-forwarding | target: Q', AtS  >
        < Q' : memory            | actVal: ArrV,  AtS' > PS' ] := [ PS ]
-  /\ val(I) := expToVal(eval(C,[ PS ],E))
-  [owise]
-  .
-eq [eval-forwarded-variable] :
-  eval(
-    C,
-    [ < Q  : memory-forwarding | target: Q', AtS  >
-      < Q' : memory            | actVal: V,  AtS' > PS ],
-    var(Q)
-  )
-= const(V) .
-eq [eval-recursive-forwarding-step] :
-  eval(
-    C,
-    [ < Q  : memory-forwarding | target: Q', AtS  >
-      < Q' : memory-forwarding |             AtS' > PS ],
-    var(Q)
-  )
-=
-  eval(
-    C,
-    [ < Q  : memory-forwarding | target: Q', AtS  >
-      < Q' : memory-forwarding |             AtS' > PS ],
-    var(Q')
-  )
-[owise] .
+  [owise] .
+ eq eval(C, [ PS ], arrayVar(E, E'))
+  = evalArrayIndex(eval(C, [ PS ], E), eval(C, [ PS ], E')) .
+
+  op evalArrayIndex : Expression Expression ~> Expression .
+  eq evalArrayIndex(const(unknown), E) = const(unknown) .
+  eq evalArrayIndex(const(ArrV:ArrayValue), const(unknown)) = const(unknown) .
+  eq evalArrayIndex(const(ArrV:ArrayValue), const(val(I))) = const(nth(ArrV, I)) .
+
+ eq eval(C,[ < Q : memory | NA , actVal: V > PS ],var(Q)) = const(V) .
+ eq eval(
+      C,
+      [ < Q  : memory-forwarding | target: Q', AtS  >
+        < Q' : memory            | actVal: V,  AtS' > PS ],
+      var(Q))
+  = const(V) .
+ eq eval(
+      C,
+      [ < Q  : memory-forwarding | target: Q', AtS  >
+        < Q' : memory-forwarding |             AtS' > PS ],
+      var(Q))
+  = eval(
+      C,
+      [ < Q  : memory-forwarding | target: Q', AtS  >
+        < Q' : memory-forwarding |             AtS' > PS ],
+      var(Q'))
+  [owise] .
 
 
 *** On node timepoints

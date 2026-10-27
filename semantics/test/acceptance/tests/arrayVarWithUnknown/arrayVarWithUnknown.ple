@@ -1,0 +1,14 @@
+Real[3] Lookup UnknownData;
+
+arrayVarWithUnknown:
+{
+    Real arr[3];
+    Integer unknownIdx;
+    Real x;
+
+    PostCondition !isKnown(arr[0]) && !isKnown(arr[unknownIdx]) && !isKnown(x);
+
+    {
+        x = Lookup(UnknownData)[1];
+    }
+}

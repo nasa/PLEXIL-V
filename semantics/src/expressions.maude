@@ -18,6 +18,7 @@ fmod EXPRESSION is
  op var                : NeQualified            -> VariableExpression [format (b o)] .
  op arrayVar           : NeQualified            -> AssignmentTarget [format (b o)] .
  op arrayVar           : NeQualified Expression -> AssignmentTarget [format (b o)] .
+ op arrayVar           : Expression  Expression -> Expression [format (b o)] .
  op func               : Function Expression    -> Expression [format (b o)] . *** TODO: Review
  op name               : NeQualified         -> Expression [format (b o)] .
  op default            :                     -> Expression [format (b o)] .
