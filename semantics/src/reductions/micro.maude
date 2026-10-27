@@ -9,24 +9,21 @@ fmod MICRO is
   vars KindCfg        : [Config]      .
   vars Nds Nds'       : Configuration .
 
-  ceq [micro-relation-withMacroactions] :
-    micro      | Cfg
-  =
-    quiescence | Cfg
-  if hasMacroactions?(Cfg)
-  .
+  eq [micro-relation] : micro | Cfg     = microGlobal(Cfg) .
 
-  ceq [micro-relation] :
-    micro | Cfg
-  =
-    Act   | Cfg''
-  if Cfg' := micro(Cfg // [ macroacts : mtactions ])
-  /\ Nds  := getNodes(Cfg)
-  /\ Nds' := getNodes(Cfg')
-  /\ Cfg'' := if Nds == Nds' then Cfg else Cfg' fi
-  /\ Act   := if Nds == Nds' then quiescence else micro-log fi
-  [owise]
-  .
+  op microGlobal : Config -> GlobalConfig .
+  eq microGlobal(Cfg)
+   = if hasMacroactions?(Cfg)
+      then quiescence | Cfg
+      else microGlobal'(Cfg, micro(Cfg // [ macroacts : mtactions ]))
+     fi .
+
+    op microGlobal' : Config Config -> GlobalConfig .
+    eq microGlobal'(Cfg, Cfg')
+     = if equalNodes?(Cfg, Cfg')
+        then quiescence | Cfg
+        else micro-log  | Cfg'
+       fi .
 
   op micro-log : -> Operation .
   eq [micro-relation-log] : micro-log = micro [print " micro"] .
@@ -40,26 +37,16 @@ fmod MICRO is
   op logNow : String -> Bool .
   eq logNow(Str:String) = true .
 
-  op computeTransitions : Config -> Config .
-  ceq computeTransitions(St) = Cfg8:Config
-  --- finished(iterended(finishing(failing(executing(waiting(inactive(activateRedexes(St)))))))) .
-  if Cfg1:Config := activateRedexes(St)
-  /\ logNow("activateRedexes")
-  /\ Cfg2:Config := inactive(Cfg1:Config)
-  /\ logNow("inactive")
-  /\ Cfg3:Config := waiting(Cfg2:Config)
-  /\ logNow("waiting")
-  /\ Cfg4:Config := executing(Cfg3:Config)
-  /\ logNow("executing")
-  /\ Cfg5:Config := failing(Cfg4:Config)
-  /\ logNow("failing")
-  /\ Cfg6:Config := finishing(Cfg5:Config)
-  /\ logNow("finishing")
-  /\ Cfg7:Config := iterended(Cfg6:Config)
-  /\ logNow("iterended")
-  /\ Cfg8:Config := finished(Cfg7:Config)
-  /\ logNow("finished")
-  .
+  op computeTransitions : Config ~> Config .
+  eq computeTransitions(St)
+   = finished(
+      iterended(
+        finishing(
+          failing(
+            executing(
+              waiting(
+                inactive(
+                  activateRedexes(St)))))))) .
 
   op executeTransitions : Config ~> Config .
   eq executeTransitions(St) = logApplyActions(St) applyActions(St) .
@@ -67,10 +54,10 @@ fmod MICRO is
   op executeTransitionsNoLog : Config ~> Config .
   eq executeTransitionsNoLog(St) = applyActions(St) .
 
-  op microWithLog : Config -> Config .
+  op microWithLog : Config ~> Config .
   eq microWithLog(Cfg) = executeTransitions(computeTransitions(updateLookupCaches(Cfg))) .
 
-  op microNoLog : Config -> Config .
+  op microNoLog : Config ~> Config .
   eq microNoLog(Cfg) = executeTransitionsNoLog(computeTransitions(updateLookupCaches(Cfg))) .
 
   op micro : Config ~> Config .
