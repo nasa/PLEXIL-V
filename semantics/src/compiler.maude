@@ -18,58 +18,71 @@ fmod COMPILER is
   op compile : Plexil InputGenerator -> GlobalConfig .
   eq compile(PL,EG)
   = sanitizeIds(
-      embedCacheIds(
         stop |
         [ generator : EG                  ]
         [ environment : mtenvironment     ]
-        [ nodes : compileNodes(PL,nilq)   ]
+        [ nodes : compileNodes(PL,nilq,0) ]
         [ memory : compileMemory(PL,nilq) collectLookupCaches(PL,nilq,0) ]
         [ microacts : mtactions           ]
         [ macroacts : mtactions           ]
         [ interface : none                ]
-        [ trace : niltrace                ],
-        collectCacheMapping(PL,nilq,0)
-      )
+        [ trace : niltrace                ]
   )
   .
 
   *** TODO: Create defaultAttributes and mergeAttributes that encapsulate default attributes and merging of user supply ones
   op compileNodes : Plexil Qualified ~> Configuration .
-  eq compileNodes(list(I, LD, (AtS), nil), Q)
-  = < (I . Q) : list | defaultAttributes(list, getRepeatCondition(AtS)) / (AtS) > .
-  eq compileNodes(list(I, LD, (AtS), (PL PLL)), Q)
-    = (compileNodes(PL, (I . Q)) compileNodes(list(I, LD, (AtS), PLL), Q)) .
+  op compileNodes : Plexil Qualified Nat ~> Configuration .
+  op compileNodesFromChildren : PlexilList Identifier LocalDecls Qualified Nat ~> Configuration .
+
+  --- Default wrapper for backward compatibility
+  eq compileNodes(PL, Q) = compileNodes(PL, Q, 0) .
+  eq compileNodes(list(I, LD, (AtS), nil), Q, N)
+  = < (I . Q) : list | defaultAttributes(list, getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) > .
+  eq compileNodes(list(I, LD, (AtS), (PL PLL)), Q, N)
+    = (< (I . Q) : list | defaultAttributes(list, getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) >
+       compileNodes(PL, (I . Q), nextCacheId(AtS, N))
+       compileNodesFromChildren(PLL, I, LD, Q, nextCacheId(AtS, N) + countCachesInPlexil(PL))) .
   eq compileNodes(
       library(I, LD, (AtS),
         callInfo(Callee:Identifier, IDs, Args:Parameters),
         PL),
-      Q
+      Q,
+      N
     )
     =
     < (I . Q) : library |
       callee: Callee:Identifier,
       parameters: IDs,
       arguments: Args:Parameters,
-      defaultAttributes(library, getRepeatCondition(AtS)) / (AtS) >
-    compileNodes(PL, (I . Q))
+      defaultAttributes(library, getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) >
+    compileNodes(PL, (I . Q), nextCacheId(AtS, N))
   .
-  eq compileNodes(command(I, LD, (AtS), C), Q)
+  eq compileNodes(command(I, LD, (AtS), C), Q, N)
   = < (I . Q) : command |
     command: C,
     defaultAttributes(command,getRepeatCondition(AtS))
-      / defaultAttributeEnrichments(I . Q, command,AtS)
+      / defaultAttributeEnrichments(I . Q, command, embedCacheIdsInAttrs(AtS, N))
     > .
-  eq compileNodes(assignment(I, LD, (AtS), (AT := E)), Q)
-  = < (I . Q) : assignment | (AT := E), defaultAttributes(assignment, getRepeatCondition(AtS)) / (AtS) > .
-  eq compileNodes(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q)
+  eq compileNodes(assignment(I, LD, (AtS), (AT := E)), Q, N)
+  = < (I . Q) : assignment |
+      (AT := embedCacheIdsInExpr(E, N + countCachesInAttrs(AtS))),
+      defaultAttributes(assignment, getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) > .
+  eq compileNodes(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q, N)
   = < (I . Q) : update |
-    pairs: PS:List{Pair{Qid,Expression}},
+    pairs: embedCacheIdsInPairs(PS:List{Pair{Qid,Expression}}, N + countCachesInAttrs(AtS)),
     ack: false,
     defaultAttributes(update, getRepeatCondition(AtS))
-      / defaultAttributeEnrichments(I . Q, update,AtS)
+      / defaultAttributeEnrichments(I . Q, update, embedCacheIdsInAttrs(AtS, N))
     > .
-  eq compileNodes(empty(I, LD, AtS), Q)
-  = < (I . Q) : empty | defaultAttributes(empty,getRepeatCondition(AtS)) / (AtS) > .
+  eq compileNodes(empty(I, LD, AtS), Q, N)
+  = < (I . Q) : empty | defaultAttributes(empty,getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) > .
+
+  --- Helper to compile remaining children without re-processing parent attributes
+  eq compileNodesFromChildren(nil, I, LD, Q, N) = none .
+  eq compileNodesFromChildren((PL PLL), I, LD, Q, N)
+   = compileNodes(PL, (I . Q), N)
+     compileNodesFromChildren(PLL, I, LD, Q, N + countCachesInPlexil(PL)) .
 
   ********************************************************************************
   ***
@@ -356,7 +369,6 @@ fmod COMPILER is
   vars NQ NQ'         : NeQualified .
   vars Op             : Operation .
   vars Out Out'       : Outcome .
-  vars Pgm            : Plexil .
   vars PL             : Plexil .
   vars PLL            : PrePlexilList .
   vars Ps Params      : Parameters .
@@ -435,7 +447,7 @@ fmod COMPILER is
      < cache(N + countCachesInParams(Params)) : lookup-cache |
        stateName: const(val(string(Q))),
        prevStateName: unknown,
-       args: Params,
+       args: embedCacheIdsInParams(Params, N),
        prevArgs: nilarg,
        tolerance: V,
        cachedValue: unknown,
@@ -446,7 +458,7 @@ fmod COMPILER is
      < cache(N + countCachesInParams(Params)) : lookup-cache |
        stateName: VE:VariableExpression,
        prevStateName: unknown,
-       args: Params,
+       args: embedCacheIdsInParams(Params, N),
        prevArgs: nilarg,
        tolerance: V,
        cachedValue: unknown,
@@ -538,7 +550,7 @@ fmod COMPILER is
   op countCachesInPlexil : Plexil -> Nat .
   eq countCachesInPlexil(list(I, LD, (AtS), nil)) = countCachesInAttrs(AtS) .
   eq countCachesInPlexil(list(I, LD, (AtS), (PL PLL)))
-   = countCachesInAttrs(AtS) + countCachesInPlexil(PL) + countCachesInPlexil(list(I, LD, (AtS), PLL)) .
+   = countCachesInAttrs(AtS) + countCachesInPlexil(PL) + countCachesInPlexilList(PLL) .
   eq countCachesInPlexil(library(I, LD, (AtS), callInfo(Callee:Identifier, IDs, Args:Parameters), PL))
    = countCachesInAttrs(AtS) + countCachesInPlexil(PL) .
   eq countCachesInPlexil(command(I, LD, (AtS), C)) = countCachesInAttrs(AtS) .
@@ -547,6 +559,11 @@ fmod COMPILER is
   eq countCachesInPlexil(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}))
    = countCachesInAttrs(AtS) + countCachesInPairs(PS:List{Pair{Qid,Expression}}) .
   eq countCachesInPlexil(empty(I, LD, AtS)) = countCachesInAttrs(AtS) .
+
+  --- Helper to count caches in a list of Plexil nodes (siblings)
+  op countCachesInPlexilList : PlexilList -> Nat .
+  eq countCachesInPlexilList(nil) = 0 .
+  eq countCachesInPlexilList((PL PLL)) = countCachesInPlexil(PL) + countCachesInPlexilList(PLL) .
 
   op countCachesInPairs : List{Pair{Qid,Expression}} -> Nat .
   eq countCachesInPairs(nil) = 0 .
@@ -559,35 +576,7 @@ fmod COMPILER is
   op nextCacheId : AttributeSet Nat -> Nat .
   eq nextCacheId(AtS, N) = N + countCachesInAttrs(AtS) .
 
-  --- Collect mapping for embedding cache IDs (simplified - return counter)
-  op collectCacheMapping : Plexil Qualified Nat -> Nat .
-  eq collectCacheMapping(PL, Q, N) = countCachesInPlexil(PL) .
-
-  --- Embed cache IDs into expressions
-  op embedCacheIds : GlobalConfig Nat -> GlobalConfig .
-  eq embedCacheIds(Op | Conf, N) = Op | embedCacheIdsInConfig(Conf, 0) .
-
-  op embedCacheIdsInConfig : Config Nat -> Config .
-  eq embedCacheIdsInConfig([ nodes : Cfg ] Conf, N)
-   = [ nodes : embedCacheIdsInNodes(Cfg, N) ] embedCacheIdsInConfig(Conf, N + countCachesInConfig(Cfg)) .
-  eq embedCacheIdsInConfig([ memory : Cfg ] Conf, N)
-   = [ memory : embedCacheIdsInMemory(Cfg, 0) ] embedCacheIdsInConfig(Conf, N) .
-  eq embedCacheIdsInConfig(Conf, N) = Conf [owise] .
-
-  op embedCacheIdsInNodes : Configuration Nat -> Configuration .
-  eq embedCacheIdsInNodes(< Q : Cd | AtS > Cfg, N)
-   = < Q : Cd | embedCacheIdsInAttrs(AtS, N) > embedCacheIdsInNodes(Cfg, N + countCachesInAttrs(AtS)) .
-  eq embedCacheIdsInNodes(none, N) = none .
-
-  op embedCacheIdsInMemory : Configuration Nat -> Configuration .
-  --- Depth-first numbering: cache(N') has nested caches at IDs [N' - count, N' - 1]
-  --- So we embed starting from N' - countCachesInParams(Params)
-  eq embedCacheIdsInMemory(< cache(N') : lookup-cache | args: Params, AtS > Cfg, N)
-   = < cache(N') : lookup-cache | args: embedCacheIdsInParams(Params, N' - countCachesInParams(Params)), AtS > embedCacheIdsInMemory(Cfg, N + 1 + countCachesInParams(Params)) .
-  eq embedCacheIdsInMemory(< Q : Cd | AtS > Cfg, N)
-   = < Q : Cd | AtS > embedCacheIdsInMemory(Cfg, N) .
-  eq embedCacheIdsInMemory(none, N) = none .
-
+  --- Embed cache IDs into parameters (used during cache collection)
   op embedCacheIdsInParams : Parameters Nat -> Parameters .
   eq embedCacheIdsInParams(nilpar, N) = nilpar .
   eq embedCacheIdsInParams((E Params), N)
@@ -665,10 +654,5 @@ fmod COMPILER is
   eq embedCacheIdsInPairs(nil, N) = nil .
   eq embedCacheIdsInPairs(< Q ; E > PAIRS, N)
    = < Q ; embedCacheIdsInExpr(E, N) > embedCacheIdsInPairs(PAIRS, N + countCachesInExpr(E)) .
-
-  op countCachesInConfig : Configuration -> Nat .
-  eq countCachesInConfig(< Q : Cd | AtS > Cfg)
-   = countCachesInAttrs(AtS) + countCachesInConfig(Cfg) .
-  eq countCachesInConfig(none) = 0 .
 
 endfm
