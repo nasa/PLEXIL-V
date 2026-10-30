@@ -139,6 +139,33 @@ def test_malformed_log():
     assert isinstance(trace.macros, list)
 
 
+def test_plexil_executive_parser_sorts_transitions_in_micro():
+    """Transitions within a micro-step are ordered by node id."""
+    content = """\
+[PlexilExec:step] ==>Start cycle 1
+[PlexilExec:step][1:0:0] Transitioning Empty node zeta 0x1 from INACTIVE to WAITING
+[PlexilExec:step][1:0:1] Transitioning Empty node alpha 0x2 from INACTIVE to WAITING
+[PlexilExec:step] ==>End cycle 1
+"""
+    trace = PlexilExecutiveParser().parse(content)
+    ids = [t.node_id for t in trace.macros[0].micros[0].transitions]
+    assert ids == ["alpha", "zeta"]
+
+
+def test_maude_parser_sorts_transitions_in_micro():
+    """Transitions within a micro-step are ordered by node id."""
+    content = """\
+MACRO
+  'zeta from inactive to waiting
+  'alpha from inactive to waiting
+ micro
+QuIeScEnCe
+"""
+    trace = MaudeParser().parse(content)
+    ids = [t.node_id for t in trace.macros[0].micros[0].transitions]
+    assert ids == ["alpha", "zeta"]
+
+
 class TestParserValidation:
     """Test parser validation behavior."""
 

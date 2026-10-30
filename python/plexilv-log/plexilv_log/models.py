@@ -32,12 +32,16 @@ class Micro:
     """A micro-step containing concurrent transitions.
 
     Transitions within a micro-step occur simultaneously in the
-    synchronous execution model.
+    synchronous execution model, so their log order is arbitrary. They are
+    stored sorted by (node_id, from_state, to_state) for deterministic output.
 
     Attributes:
-        transitions: List of concurrent node state transitions
+        transitions: Concurrent node state transitions, in sorted order
     """
     transitions: List[Transition] = field(default_factory=list)
+
+    def __post_init__(self):
+        object.__setattr__(self, "transitions", sorted(self.transitions))
 
     def to_dict(self):
         """Convert to dictionary for JSON serialization."""

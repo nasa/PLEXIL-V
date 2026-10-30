@@ -50,6 +50,23 @@ def test_micro_to_dict():
     assert d["transitions"][0]["nodeId"] == "node1"
 
 
+def test_micro_sorts_transitions():
+    """Transitions are sorted by (node_id, from_state, to_state)."""
+    micro = Micro(transitions=[
+        Transition(node_id="b", from_state="waiting", to_state="executing"),
+        Transition(node_id="a", from_state="waiting", to_state="executing"),
+        Transition(node_id="b", from_state="inactive", to_state="waiting"),
+    ])
+    expected = [
+        ("a", "waiting", "executing"),
+        ("b", "inactive", "waiting"),
+        ("b", "waiting", "executing"),
+    ]
+    assert [(t.node_id, t.from_state, t.to_state) for t in micro.transitions] == expected
+    assert [(t["nodeId"], t["fromState"], t["toState"])
+            for t in micro.to_dict()["transitions"]] == expected
+
+
 def test_macro_creation():
     """Test creating a Macro."""
     t = Transition(node_id="test", from_state="inactive", to_state="waiting")
