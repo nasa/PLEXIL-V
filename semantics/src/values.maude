@@ -43,7 +43,7 @@ fmod VALUE is
   op array : PrimitiveArray     -> ArrayValue .
 
   op length : ArrayValue -> Nat .
-  eq length(array(Arr)) = length(Arr) .
+  eq length(array(PArr)) = length(PArr) .
 
   op length : PrimitiveArray -> Nat .
   eq length(mtPrimitiveArray) = 0 .
