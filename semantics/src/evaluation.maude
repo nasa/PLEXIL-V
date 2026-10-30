@@ -170,6 +170,8 @@ vars VE         : VariableExpression .
 
  eq eval(C,PL,E equ E') = eval(C,PL,E) equ eval(C,PL,E') .
 
+*** Only the value `unknown` is unknown. As in the PLEXIL executive, an array is
+*** known even if all its elements are unknown; use isKnown on an element for that.
  ceq eval(C,PL,isKnown(E)) = const(val(if V == unknown then false else true fi)) if const(V) := eval(C,PL,E) .
 
  var ArrV : ArrayValue .
