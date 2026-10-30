@@ -1,0 +1,6 @@
+initial-state {
+}
+
+script {
+  delay;
+}

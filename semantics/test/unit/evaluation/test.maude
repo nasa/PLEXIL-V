@@ -13,6 +13,7 @@ load round.maude
 load trunc.maude
 load real_to_int.maude
 load equ.maude
+load isKnown.maude
 load lookup.maude
 load node-predicates.maude
 
@@ -36,6 +37,7 @@ mod TEST--EVALUATION is
   pr TEST--EVALUATION--TRUNC .
   pr TEST--EVALUATION--REAL-TO-INT .
   pr TEST--EVALUATION--EQU .
+  pr TEST--EVALUATION--IS-KNOWN .
   pr TEST--EVALUATION--LOOKUP .
   pr TEST--EVALUATION--NODE-PREDICATES .
 
@@ -56,6 +58,7 @@ mod TEST--EVALUATION is
        test--evaluation--trunc +
        test--evaluation--real-to-int +
        test--evaluation--equ +
+       test--evaluation--isKnown +
        test--evaluation--lookup +
        test--evaluation--node-predicates +
 

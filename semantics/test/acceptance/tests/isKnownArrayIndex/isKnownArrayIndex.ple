@@ -1,0 +1,29 @@
+/*
+   isKnown on array elements with known, unknown and lookup-based indices.
+   Elements 0 and 2 are assigned, element 1 is left unknown.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+Integer Lookup extIdx;
+Integer Lookup extHoleIdx;
+Integer Lookup extUnknownIdx;
+
+isKnownArrayIndex: Sequence
+{
+    Real arr[3];
+    Integer knownIdx = 2;
+    Integer unknownIdx;
+
+    fill: { arr[0] = 1.0; arr[2] = 3.0; }
+
+    checks: Concurrence
+    {
+        knownVarIdx:    { Skip isKnown(arr[knownIdx]); }
+        unknownVarIdx:  { Skip isKnown(arr[unknownIdx]); }
+        unassignedElem: { Skip isKnown(arr[1]); }
+        knownExprIdx:   { Skip isKnown(arr[knownIdx - 2]); }
+        unknownExprIdx: { Skip isKnown(arr[unknownIdx + 1]); }
+        lookupIdx:      { Skip isKnown(arr[Lookup(extIdx)]); }
+        lookupIdxHole:  { Skip isKnown(arr[Lookup(extHoleIdx)]); }
+        lookupUnkIdx:   { Skip isKnown(arr[Lookup(extUnknownIdx)]); }
+    }
+}

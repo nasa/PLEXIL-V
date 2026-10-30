@@ -1,0 +1,14 @@
+/*
+   isKnown on a lookup returning an array with an unknown and a known element.
+   The unknown element comes first because the executive only accepts a script
+   array whose unknown elements are a prefix.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+Real[2] Lookup extPartialArr;
+
+isKnownLookupArrayPartial: Concurrence
+{
+    wholeArray: { Skip isKnown(Lookup(extPartialArr)); }
+    element0:   { Skip isKnown(Lookup(extPartialArr)[0]); }
+    element1:   { Skip isKnown(Lookup(extPartialArr)[1]); }
+}

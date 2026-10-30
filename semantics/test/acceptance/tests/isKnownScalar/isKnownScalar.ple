@@ -1,0 +1,19 @@
+/*
+   isKnown on scalar variables and lookups, unknown and known.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+Real Lookup extUnknown;
+Real Lookup extKnown;
+
+isKnownScalar: Concurrence
+{
+    Real uninit;
+    Integer uninitInt;
+    Real init = 1.5;
+
+    uninitReal:    { Skip isKnown(uninit); }
+    uninitInteger: { Skip isKnown(uninitInt); }
+    initReal:      { Skip isKnown(init); }
+    lookupUnknown: { Skip isKnown(Lookup(extUnknown)); }
+    lookupKnown:   { Skip isKnown(Lookup(extKnown)); }
+}

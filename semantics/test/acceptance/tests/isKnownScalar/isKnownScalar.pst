@@ -1,0 +1,7 @@
+initial-state {
+  state extKnown () = 3.0 : real;
+}
+
+script {
+  delay;
+}

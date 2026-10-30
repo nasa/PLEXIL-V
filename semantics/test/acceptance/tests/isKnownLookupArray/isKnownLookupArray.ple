@@ -1,0 +1,15 @@
+/*
+   isKnown on array lookups and their elements: an unknown array and a known one.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+Real[2] Lookup extUnknownArr;
+Real[2] Lookup extKnownArr;
+
+isKnownLookupArray: Concurrence
+{
+    unknownWhole:    { Skip isKnown(Lookup(extUnknownArr)); }
+    unknownElement:  { Skip isKnown(Lookup(extUnknownArr)[0]); }
+    knownWhole:      { Skip isKnown(Lookup(extKnownArr)); }
+    knownElement0:   { Skip isKnown(Lookup(extKnownArr)[0]); }
+    knownElement1:   { Skip isKnown(Lookup(extKnownArr)[1]); }
+}

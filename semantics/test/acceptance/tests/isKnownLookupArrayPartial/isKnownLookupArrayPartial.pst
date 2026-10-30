@@ -1,0 +1,7 @@
+initial-state {
+  state extPartialArr () = (<unknown>, 1.0) : real-array;
+}
+
+script {
+  delay;
+}

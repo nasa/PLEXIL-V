@@ -1,0 +1,14 @@
+/*
+   isKnown on local arrays and their elements.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+isKnownArrayLocal: Concurrence
+{
+    Real uninit[2];
+    Real full[2] = #(1.0 2.0);
+
+    uninitArray:   { Skip isKnown(uninit); }
+    uninitElement: { Skip isKnown(uninit[0]); }
+    fullArray:     { Skip isKnown(full); }
+    fullElement:   { Skip isKnown(full[0]); }
+}

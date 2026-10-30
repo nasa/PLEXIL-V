@@ -1,0 +1,7 @@
+initial-state {
+  state extKnownArr () = (1.0, 2.0) : real-array;
+}
+
+script {
+  delay;
+}

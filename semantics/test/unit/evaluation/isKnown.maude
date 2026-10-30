@@ -1,0 +1,76 @@
+mod TEST--EVALUATION--IS-KNOWN is
+
+pr TEST-BASE .
+
+op  test--evaluation--isKnown : -> TestResults .
+eq  test--evaluation--isKnown =
+begin tests
+
+assert "isKnown of scalar values" from
+  testExpression(
+    eval(mtenvironment, none, isKnown(const(unknown)))
+  )
+  testExpression(
+    eval(mtenvironment, none, isKnown(const(val(3.0))))
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "isKnown of an array whose elements are all unknown is true (the array value itself is known)" from
+  testExpression(
+    eval(mtenvironment, none, isKnown(const(unknownArray(2))))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "isKnown of an array with known and unknown elements is true" from
+  testExpression(
+    eval(mtenvironment, none, isKnown(const(array(val(1.0) # unknown))))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "isKnown of elements of an array" from
+  testExpression(
+    eval(mtenvironment, none, isKnown(arrayVar(const(array(val(1.0) # unknown)), const(val(0)))))
+  )
+  testExpression(
+    eval(mtenvironment, none, isKnown(arrayVar(const(array(val(1.0) # unknown)), const(val(1)))))
+  )
+  testExpression(
+    eval(mtenvironment, none, isKnown(arrayVar(const(array(val(1.0) # unknown)), const(unknown))))
+  )
+  testExpression(
+    eval(mtenvironment, none, isKnown(arrayVar(const(unknown), const(val(0)))))
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+  testExpression(
+    const(val(false))
+  )
+  testExpression(
+    const(val(false))
+  )
+  testExpression(
+    const(val(false))
+  )
+end
+
+end tests
+.
+
+endm

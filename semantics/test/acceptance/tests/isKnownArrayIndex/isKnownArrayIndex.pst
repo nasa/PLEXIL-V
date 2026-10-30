@@ -1,0 +1,8 @@
+initial-state {
+  state extIdx () = 0 : int;
+  state extHoleIdx () = 1 : int;
+}
+
+script {
+  delay;
+}
