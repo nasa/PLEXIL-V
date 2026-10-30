@@ -42,6 +42,63 @@ def test_environment(tmp_path):
 
 
 @pytest.mark.integration
+class TestSameBasename:
+    """Plan and script sharing a basename (regression)."""
+
+    @patch('plexilv_run.pipeline.check_all_tools')
+    @patch('subprocess.run')
+    def test_plan_and_script_with_same_basename(self, mock_run, mock_check_tools, tmp_path):
+        """Regression: foo.plx and foo.psx both converted to foo.maude, so the
+        script output overwrote the plan and the plan module was never loaded."""
+        mock_check_tools.return_value = ("plx2maude", "psx2maude", "maude")
+
+        plan = tmp_path / "foo.plx"
+        plan.write_text("<PlexilPlan/>")
+        script = tmp_path / "foo.psx"
+        script.write_text("<PLEXILScript/>")
+        semantics = tmp_path / "plexil-v.maude"
+        semantics.write_text("*** semantics ***")
+
+        def mock_subprocess(cmd, **kwargs):
+            result = Mock(returncode=0, stdout="", stderr="")
+            if "plx2maude" in cmd[0]:
+                result.stdout = "mod foo-PLAN is endm"
+            elif "psx2maude" in cmd[0]:
+                result.stdout = "mod INPUT is endm"
+            return result
+
+        mock_run.side_effect = mock_subprocess
+
+        config = Config(
+            plan_path=plan,
+            script_path=script,
+            semantics_path=semantics,
+            plx2maude_path="plx2maude",
+            psx2maude_path="psx2maude",
+            maude_path="maude",
+            maude_opts=[],
+            maude_timeout=300,
+            conversion_timeout=30,
+            work_dir=tmp_path / "workspace",
+            log_file=None,
+            debug=False,
+            cleanup=False,
+            force_cleanup=False,
+            relative_paths=False,
+        )
+
+        pipeline = Pipeline(config)
+        assert pipeline.run() == 0
+
+        ws = pipeline.workspace.path
+        assert (ws / "foo.plan.maude").read_text() == "mod foo-PLAN is endm"
+        assert (ws / "foo.script.maude").read_text() == "mod INPUT is endm"
+
+        loads = [l for l in (ws / "run.maude").read_text().splitlines() if l.startswith("load ")]
+        assert len(set(loads)) == len(loads) == 3
+
+
+@pytest.mark.integration
 class TestHappyPath:
     """Test successful execution flow."""
 
@@ -106,8 +163,8 @@ class TestHappyPath:
         assert workspace_path.exists()
 
         # Verify files were generated
-        assert (workspace_path / "TestPlan.maude").exists()
-        assert (workspace_path / "test_script.maude").exists()
+        assert (workspace_path / "TestPlan.plan.maude").exists()
+        assert (workspace_path / "test_script.script.maude").exists()
         assert (workspace_path / "run.maude").exists()
 
         # Verify run.maude content
@@ -209,13 +266,13 @@ class TestHappyPath:
         workspace_path = pipeline.workspace.path
         run_maude = (workspace_path / "run.maude").read_text()
         # Should have relative paths, not absolute
-        assert "TestPlan.maude" in run_maude
-        assert "test_script.maude" in run_maude
+        assert "TestPlan.plan.maude" in run_maude
+        assert "test_script.script.maude" in run_maude
         # Should NOT have absolute path markers
         lines = run_maude.split('\n')
         load_lines = [line for line in lines if line.startswith('load')]
         for line in load_lines:
-            if "TestPlan.maude" in line or "test_script.maude" in line:
+            if "TestPlan.plan.maude" in line or "test_script.script.maude" in line:
                 # These should be just filenames (relative to workspace)
                 assert not line.startswith('load /')
 

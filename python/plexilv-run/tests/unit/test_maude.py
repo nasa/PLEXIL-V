@@ -146,13 +146,29 @@ class TestGenerateRunFile:
 
         content = run_maude.read_text()
         assert "load" in content
-        assert "test_plan.maude" in content or "test-plan.maude" in content
-        assert "test_script.maude" in content
+        assert "test_plan.plan.maude" in content
+        assert "test_script.script.maude" in content
         assert "mod PLAN-SIMULATION is" in content
         assert "protecting test-plan-PLAN" in content
         assert "protecting INPUT" in content
         assert "rew run(compile(rootNode,input))" in content
         assert "q" in content
+
+    def test_generate_with_same_plan_and_script_stem(self, workspace, mock_config):
+        """Should load two distinct files when plan and script share a basename."""
+        runner = MaudeRunner(workspace, mock_config)
+
+        runner.generate_run_file("same", "same")
+
+        loads = [
+            line.split(maxsplit=1)[1]
+            for line in workspace.get_run_maude_path().read_text().splitlines()
+            if line.startswith("load ")
+        ]
+        assert len(loads) == 3
+        assert len(set(loads)) == 3
+        assert any(l.endswith("same.plan.maude") for l in loads)
+        assert any(l.endswith("same.script.maude") for l in loads)
 
     def test_generate_with_absolute_paths(self, workspace, mock_config):
         """Should use absolute paths by default."""
@@ -179,8 +195,8 @@ class TestGenerateRunFile:
 
         content = workspace.get_run_maude_path().read_text()
         # Paths should be relative
-        assert "MyPlan.maude" in content
-        assert "script.maude" in content
+        assert "MyPlan.plan.maude" in content
+        assert "script.script.maude" in content
 
     def test_module_name_with_underscores(self, workspace, mock_config):
         """Module name should have underscores replaced with dashes."""

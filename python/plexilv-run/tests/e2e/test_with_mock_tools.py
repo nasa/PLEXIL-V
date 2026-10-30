@@ -142,8 +142,8 @@ class TestCompleteE2E:
         assert pipeline.workspace.path.exists()
 
         # Verify converted files were created
-        assert (pipeline.workspace.path / "TestPlan.maude").exists()
-        assert (pipeline.workspace.path / "test_script.maude").exists()
+        assert (pipeline.workspace.path / "TestPlan.plan.maude").exists()
+        assert (pipeline.workspace.path / "test_script.script.maude").exists()
 
         # Verify run.maude was created
         run_maude_path = pipeline.workspace.path / "run.maude"
@@ -158,10 +158,10 @@ class TestCompleteE2E:
         assert "q" in run_maude_content
 
         # Verify converted file content
-        plan_maude = (pipeline.workspace.path / "TestPlan.maude").read_text()
+        plan_maude = (pipeline.workspace.path / "TestPlan.plan.maude").read_text()
         assert "mod TestPlan-PLAN is" in plan_maude
 
-        script_maude = (pipeline.workspace.path / "test_script.maude").read_text()
+        script_maude = (pipeline.workspace.path / "test_script.script.maude").read_text()
         assert "mod INPUT is" in script_maude
 
     def test_with_cleanup_flag(self, mock_tools_dir, test_files, tmp_path):
@@ -258,8 +258,8 @@ class TestCompleteE2E:
 
         # Check run.maude uses relative paths
         run_maude = (pipeline.workspace.path / "run.maude").read_text()
-        assert "TestPlan.maude" in run_maude
-        assert "test_script.maude" in run_maude
+        assert "TestPlan.plan.maude" in run_maude
+        assert "test_script.script.maude" in run_maude
 
     def test_with_log_file(self, mock_tools_dir, test_files, tmp_path):
         """Test output redirection to log file."""

@@ -348,3 +348,44 @@ class TestErrorFormatting:
         assert "line 000" not in captured.err
         assert "line 001" not in captured.err
         assert "line 009" not in captured.err
+
+@pytest.mark.unit
+class TestSameBasename:
+    """Plan and script sharing a basename must not overwrite each other."""
+
+    @patch('subprocess.run')
+    def test_outputs_do_not_collide(self, mock_run, workspace, tmp_path):
+        plan = tmp_path / "foo.plx"
+        plan.touch()
+        script = tmp_path / "foo.psx"
+        script.touch()
+        semantics = tmp_path / "plexil-v.maude"
+        semantics.touch()
+        config = Config(
+            plan_path=plan,
+            script_path=script,
+            semantics_path=semantics,
+            plx2maude_path="/usr/bin/plx2maude",
+            psx2maude_path="/usr/bin/psx2maude",
+            maude_path="/usr/bin/maude",
+            maude_opts=[],
+            maude_timeout=300,
+            conversion_timeout=30,
+            work_dir=None,
+            log_file=None,
+            debug=False,
+            cleanup=False,
+            force_cleanup=False,
+            relative_paths=False,
+        )
+        mock_run.side_effect = [
+            Mock(returncode=0, stdout="PLAN CONTENT", stderr=""),
+            Mock(returncode=0, stdout="SCRIPT CONTENT", stderr=""),
+        ]
+
+        runner = ConversionRunner(workspace, config)
+        assert runner.run_plx2maude() is True
+        assert runner.run_psx2maude() is True
+
+        assert workspace.get_plan_maude_path("foo").read_text() == "PLAN CONTENT"
+        assert workspace.get_script_maude_path("foo").read_text() == "SCRIPT CONTENT"

@@ -78,6 +78,39 @@ def test_full_workflow_with_differences(sample_plan, sample_scripts, stub_tools,
 
 
 @pytest.mark.e2e
+def test_plan_and_script_with_same_basename(stub_tools, tmp_path):
+    """Plan and script sharing a basename (foo.ple / foo.pst) must work."""
+    inputs = tmp_path / "inputs"
+    inputs.mkdir()
+    plan = inputs / "foo.ple"
+    plan.write_text("// plan")
+    script = inputs / "foo.pst"
+    script.write_text("// script")
+
+    config = Config(
+        plan=plan,
+        scripts=[script],
+        plexilc=stub_tools['plexilc'],
+        plexiltest=stub_tools['plexiltest'],
+        plexilv_run=stub_tools['plexilv-run'],
+        plexilog_diff=stub_tools['plexilog_diff'],
+        work_dir=tmp_path / "workspace"
+    )
+
+    result = Pipeline(config).run()
+
+    assert result.compilation_success is True
+    assert result.exit_code == 0
+    assert result.test_results[0].success is True
+
+    workspace = result.workspace_path
+    assert (workspace / "foo.plx").exists()
+    assert (workspace / "001" / "foo.psx").exists()
+    assert (workspace / "001" / "foo.plexil.log").exists()
+    assert (workspace / "001" / "foo.plexilv.log").exists()
+
+
+@pytest.mark.e2e
 def test_multiple_tests(sample_plan, sample_scripts, stub_tools, tmp_path):
     """Test workflow with multiple test scripts."""
     config = Config(

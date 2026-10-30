@@ -115,14 +115,28 @@ class TestWorkspacePathGetters:
         workspace = Workspace(tmp_path / "workspace")
         path = workspace.get_plan_maude_path("MyPlan")
 
-        assert path == workspace.path / "MyPlan.maude"
+        assert path == workspace.path / "MyPlan.plan.maude"
 
     def test_get_script_maude_path(self, tmp_path):
         """Should return correct script .maude path."""
         workspace = Workspace(tmp_path / "workspace")
         path = workspace.get_script_maude_path("test_script")
 
-        assert path == workspace.path / "test_script.maude"
+        assert path == workspace.path / "test_script.script.maude"
+
+    def test_same_stem_gives_distinct_paths(self, tmp_path):
+        """Plan and script sharing a basename must not map to the same file."""
+        workspace = Workspace(tmp_path / "workspace")
+
+        assert workspace.get_plan_maude_path("foo") != workspace.get_script_maude_path("foo")
+
+    @pytest.mark.parametrize("stem", ["run"])
+    def test_stem_run_does_not_clobber_run_maude(self, tmp_path, stem):
+        """A plan or script named 'run' must not collide with run.maude."""
+        workspace = Workspace(tmp_path / "workspace")
+
+        assert workspace.get_plan_maude_path(stem) != workspace.get_run_maude_path()
+        assert workspace.get_script_maude_path(stem) != workspace.get_run_maude_path()
 
     def test_get_run_maude_path(self, tmp_path):
         """Should return correct run.maude path."""

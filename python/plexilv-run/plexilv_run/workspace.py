@@ -69,9 +69,13 @@ class Workspace:
             plan_stem: Plan filename without extension (e.g., 'MyPlan')
 
         Returns:
-            Path to <plan_stem>.maude in workspace
+            Path to <plan_stem>.plan.maude in workspace
+
+        Note:
+            The role suffix keeps plan and script outputs distinct when both
+            files share a basename, and avoids clobbering run.maude.
         """
-        return self.path / f"{plan_stem}.maude"
+        return self.path / f"{plan_stem}.plan.maude"
 
     def get_script_maude_path(self, script_stem: str) -> Path:
         """
@@ -81,9 +85,9 @@ class Workspace:
             script_stem: Script filename without extension (e.g., 'test_script')
 
         Returns:
-            Path to <script_stem>.maude in workspace
+            Path to <script_stem>.script.maude in workspace
         """
-        return self.path / f"{script_stem}.maude"
+        return self.path / f"{script_stem}.script.maude"
 
     def get_run_maude_path(self) -> Path:
         """
