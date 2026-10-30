@@ -22,6 +22,7 @@ eq test--compiler--embed-cache-ids =
     + test--embed--assignment-expressions
     + test--embed--operators
     + test--embed--depth-first-ordering
+    + test--embed--array-indices
     .
 
 ---( Embedding in Condition Attributes Tests )---
@@ -444,6 +445,83 @@ begin tests
     reaches
         testExpression(
             lookupOnChange(11, 'data, lookupOnChange(10, 'time, nilpar, val(1)), val(1))
+        )
+    end
+
+end tests
+.
+
+---( Embedding in Array Indices Tests )---
+
+op test--embed--array-indices : -> TestResults .
+eq test--embed--array-indices =
+begin tests
+
+    assert "embedCacheIdsInExpr embeds cache ID in the index of a named array" from
+        testExpression(
+            embedCacheIdsInExpr(
+                arrayVar('arr, lookupOnChange('idx, nilpar, val(0))),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            arrayVar('arr, lookupOnChange(0, 'idx, nilpar, val(0)))
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache IDs in the array and the index of an array expression" from
+        testExpression(
+            embedCacheIdsInExpr(
+                arrayVar(
+                    lookupOnChange('data, nilpar, val(0)),
+                    lookupOnChange('idx, nilpar, val(0))
+                ),
+                0
+            )
+        )
+    reaches
+        testExpression(
+            arrayVar(
+                lookupOnChange(0, 'data, nilpar, val(0)),
+                lookupOnChange(1, 'idx, nilpar, val(0))
+            )
+        )
+    end
+
+    assert "embedCacheIdsInExpr embeds cache ID in the index of an array inside isKnown" from
+        testExpression(
+            embedCacheIdsInExpr(
+                isKnown(arrayVar('arr, lookupOnChange('idx, nilpar, val(0)))),
+                2
+            )
+        )
+    reaches
+        testExpression(
+            isKnown(arrayVar('arr, lookupOnChange(2, 'idx, nilpar, val(0))))
+        )
+    end
+
+    assert "embedCacheIdsInTarget embeds cache ID in the index of an array target" from
+        testExpression(
+            embedCacheIdsInTarget(
+                arrayVar('arr, lookupOnChange('idx, nilpar, val(0))),
+                4
+            )
+        )
+    reaches
+        testExpression(
+            arrayVar('arr, lookupOnChange(4, 'idx, nilpar, val(0)))
+        )
+    end
+
+    assert "embedCacheIdsInTarget leaves a plain variable target unchanged" from
+        testExpression(
+            embedCacheIdsInTarget(var('x), 4)
+        )
+    reaches
+        testExpression(
+            var('x)
         )
     end
 

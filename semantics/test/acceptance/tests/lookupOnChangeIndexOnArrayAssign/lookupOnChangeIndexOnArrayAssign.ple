@@ -1,0 +1,20 @@
+/*
+   Check that LookupOnChange works as the index of an array element assignment.
+   Only the element selected by the lookup value given in the script becomes known.
+   Each check node is skipped when its expression is known, and executes when it is unknown.
+*/
+Integer Lookup extIdx;
+
+lookupOnChangeIndexOnArrayAssign: Sequence
+{
+    Real arr[3];
+
+    assign: { arr[LookupOnChange(extIdx)] = 5.0; }
+
+    checks: Concurrence
+    {
+        element0: { Skip isKnown(arr[0]); }
+        element1: { Skip isKnown(arr[1]); }
+        element2: { Skip isKnown(arr[2]); }
+    }
+}

@@ -66,7 +66,8 @@ fmod COMPILER is
     > .
   eq compileNodes(assignment(I, LD, (AtS), (AT := E)), Q, N)
   = < (I . Q) : assignment |
-      (AT := embedCacheIdsInExpr(E, N + countCachesInAttrs(AtS))),
+      (embedCacheIdsInTarget(AT, N + countCachesInAttrs(AtS))
+        := embedCacheIdsInExpr(E, N + countCachesInAttrs(AtS) + countCachesInTarget(AT))),
       defaultAttributes(assignment, getRepeatCondition(AtS)) / embedCacheIdsInAttrs(AtS, N) > .
   eq compileNodes(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q, N)
   = < (I . Q) : update |
@@ -412,7 +413,8 @@ fmod COMPILER is
    = collectCachesFromAttrs(AtS, I . Q, N) .
   eq collectLookupCaches(assignment(I, LD, (AtS), AT := E), Q, N)
    = collectCachesFromAttrs(AtS, I . Q, N)
-     collectCachesFromExpr(E, I . Q, N + countCachesInAttrs(AtS)) .
+     collectCachesFromTarget(AT, I . Q, N + countCachesInAttrs(AtS))
+     collectCachesFromExpr(E, I . Q, N + countCachesInAttrs(AtS) + countCachesInTarget(AT)) .
   eq collectLookupCaches(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q, N)
    = collectCachesFromAttrs(AtS, I . Q, N)
      collectCachesFromPairs(PS:List{Pair{Qid,Expression}}, I . Q, N + countCachesInAttrs(AtS)) .
@@ -505,6 +507,7 @@ fmod COMPILER is
    = collectCachesFromExpr(E, NQ, N) .
   eq collectCachesFromExpr(func(F:Function, E), NQ, N)
    = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromExpr(arrayVar(Q, E), NQ, N) = collectCachesFromExpr(E, NQ, N) .
   eq collectCachesFromExpr(arrayVar(E, E'), NQ, N)
    = collectCachesFromExpr(E, NQ, N) collectCachesFromExpr(E', NQ, N + countCachesInExpr(E)) .
   eq collectCachesFromExpr(E, NQ, N) = none [owise] .
@@ -537,8 +540,22 @@ fmod COMPILER is
   eq countCachesInExpr(not E) = countCachesInExpr(E) .
   eq countCachesInExpr(isKnown(E)) = countCachesInExpr(E) .
   eq countCachesInExpr(func(F:Function, E)) = countCachesInExpr(E) .
+  eq countCachesInExpr(arrayVar(Q, E)) = countCachesInExpr(E) .
   eq countCachesInExpr(arrayVar(E, E')) = countCachesInExpr(E) + countCachesInExpr(E') .
   eq countCachesInExpr(E) = 0 [owise] .
+
+  --- Only an indexed array target can contain lookups (in its index)
+  op countCachesInTarget : AssignmentTarget -> Nat .
+  eq countCachesInTarget(arrayVar(Q, E)) = countCachesInExpr(E) .
+  eq countCachesInTarget(AT) = 0 [owise] .
+
+  op collectCachesFromTarget : AssignmentTarget NeQualified Nat -> Configuration .
+  eq collectCachesFromTarget(arrayVar(Q, E), NQ, N) = collectCachesFromExpr(E, NQ, N) .
+  eq collectCachesFromTarget(AT, NQ, N) = none [owise] .
+
+  op embedCacheIdsInTarget : AssignmentTarget Nat -> AssignmentTarget .
+  eq embedCacheIdsInTarget(arrayVar(Q, E), N) = arrayVar(Q, embedCacheIdsInExpr(E, N)) .
+  eq embedCacheIdsInTarget(AT, N) = AT [owise] .
 
   op countCachesInAttrs : AttributeSet -> Nat .
   eq countCachesInAttrs((repeatc: E, AtS)) = countCachesInExpr(E) + countCachesInAttrs(AtS) .
@@ -559,7 +576,7 @@ fmod COMPILER is
    = countCachesInAttrs(AtS) + countCachesInPlexil(PL) .
   eq countCachesInPlexil(command(I, LD, (AtS), C)) = countCachesInAttrs(AtS) .
   eq countCachesInPlexil(assignment(I, LD, (AtS), AT := E))
-   = countCachesInAttrs(AtS) + countCachesInExpr(E) .
+   = countCachesInAttrs(AtS) + countCachesInTarget(AT) + countCachesInExpr(E) .
   eq countCachesInPlexil(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}))
    = countCachesInAttrs(AtS) + countCachesInPairs(PS:List{Pair{Qid,Expression}}) .
   eq countCachesInPlexil(empty(I, LD, AtS)) = countCachesInAttrs(AtS) .
@@ -652,6 +669,7 @@ fmod COMPILER is
    = isKnown(embedCacheIdsInExpr(E, N)) .
   eq embedCacheIdsInExpr(func(F, E), N)
    = func(F, embedCacheIdsInExpr(E, N)) .
+  eq embedCacheIdsInExpr(arrayVar(Q, E), N) = arrayVar(Q, embedCacheIdsInExpr(E, N)) .
   eq embedCacheIdsInExpr(arrayVar(E, E'), N)
    = arrayVar(embedCacheIdsInExpr(E, N), embedCacheIdsInExpr(E', N + countCachesInExpr(E))) .
   eq embedCacheIdsInExpr(E, N) = E [owise] .

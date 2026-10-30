@@ -135,6 +135,59 @@ mod TEST--COMPILER--COLLECT-CACHES is
       aNat(1)
     end
 
+    assert "Assignment with lookupOnChange in array target index - creates exactly 1 cache" from
+      aNat(countCaches(collectLookupCaches(
+        assignment('AssignNode,
+          nilocdecl,
+          none,
+          arrayVar('arr, lookupOnChange('idx, nilpar, val(0))) := const(val(5.0))
+        ),
+        nilq, 0)))
+    reaches
+      aNat(1)
+    end
+
+    assert "Assignment with lookupOnChange in target index and value - target cache gets ID 0, value cache gets ID 1" from
+      testConfiguration(
+        collectLookupCaches(
+          assignment('AssignNode,
+            nilocdecl,
+            none,
+            arrayVar('arr, lookupOnChange('idx, nilpar, val(0))) := lookupOnChange('value, nilpar, val(5))
+          ),
+          nilq, 0))
+    reaches
+      testConfiguration(
+        < cache(0) : lookup-cache |
+          stateName: const(val("idx")),
+          prevStateName: unknown,
+          args: nilpar,
+          prevArgs: nilarg,
+          tolerance: val(0),
+          cachedValue: unknown,
+          nodeContext: 'AssignNode >
+        < cache(1) : lookup-cache |
+          stateName: const(val("value")),
+          prevStateName: unknown,
+          args: nilpar,
+          prevArgs: nilarg,
+          tolerance: val(5),
+          cachedValue: unknown,
+          nodeContext: 'AssignNode >
+      )
+    end
+
+    assert "Array read with lookupOnChange in index - creates exactly 1 cache" from
+      aNat(countCaches(collectLookupCaches(
+        empty('EmptyNode,
+          nilocdecl,
+          skip: isKnown(arrayVar('arr, lookupOnChange('idx, nilpar, val(0))))
+        ),
+        nilq, 0)))
+    reaches
+      aNat(1)
+    end
+
     assert "Starting with N=5 - cache ID is 5" from
       aBool(hasCacheId(collectLookupCaches(simpleListWithLookupOnChange, nilq, 5), 5))
     reaches
