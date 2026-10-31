@@ -8,14 +8,9 @@ before_script:
   - git checkout $(git -C $CI_PROJECT_DIR rev-parse HEAD:plexil)
   - git submodule update --init --recursive
   - make tools -j
-  - cd $CI_PROJECT_DIR/python/plexilv-cli
   - source /bootstrap/python/.venv/bin/activate
-  - pip install -e .[dev] --force-reinstall --no-deps
-  - cd $CI_PROJECT_DIR/python/pyplexil-plexilv
-  - pip install -e . --force-reinstall --no-deps
-  - cd $CI_PROJECT_DIR/python/plexilv-log
-  - pip install -e . --force-reinstall --no-deps
   - cd $CI_PROJECT_DIR
+  - ./python/install_all.sh
 
 stages:
   - test

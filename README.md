@@ -37,12 +37,11 @@ From the root of the repository, create a Python virtual environment and load it
 $ python3 -m venv .venv
 $ source .venv/bin/activate
 ```
-Then, install the Python `plexilv-cli` package located `python/plexilv-cli`:
+Then, install all the Python packages located in `python` (including `plexilv-cli`) in development mode with:
 ```
-$ cd python/plexilv-cli
-$ pip install -e .
-$ cd -
+$ python/install_all.sh
 ```
+The script force-reinstalls the packages ignoring pip caches, so it is also the command to run after pulling changes, since package versions are not bumped between them.
 Immediately after, confirm that `plexilv` is accessible from the command line by running:
 ```
 $ plexilv
