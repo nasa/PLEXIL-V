@@ -1,0 +1,7 @@
+LibraryNode Inner (In Integer foo, InOut Integer out);
+
+Outer : {
+   InOut Integer res;
+   Integer foo = 3;
+   LibraryCall Inner(foo=foo, out=res);
+}

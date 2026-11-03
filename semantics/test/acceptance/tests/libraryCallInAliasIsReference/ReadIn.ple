@@ -1,0 +1,10 @@
+Boolean Lookup Go;
+
+ReadIn : {
+   In Integer x;
+   InOut Integer seen;
+   Copy: {
+      Start Lookup(Go);
+      seen = x;
+   }
+}

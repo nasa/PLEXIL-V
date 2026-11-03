@@ -57,6 +57,11 @@ eq createOrUpdateVarForwarding(Q, Target, [ memory : < Q : memory-forwarding | t
 eq createOrUpdateVarForwarding(Q, Target, [ memory :                                            PS ] Conf)
  =                                        [ memory : < Q : memory-forwarding | target: Target > PS ] Conf [owise] .
 
+--- TODO: In and InOut variable arguments are both forwarded, so the library body can
+--- assign to an In parameter. The Executive rejects it before execution: plexilc fails with
+--- `Variable "foo" is declared In`, and the XML parser wraps In variables in a read-only
+--- Alias (xml-parser/parseNode.cc, linkInVar). Reject it in the transpiler using the
+--- Interface of the library (plx2maude), not here: this module does not see In/InOut.
 op passParameters : Qualified List{Pair{Qid,Expression}} Config ~> Config .
 eq passParameters(Q, nil, Conf) = Conf .
 eq passParameters(Q, < QID ; const(varForwarding(Q')) > Pairs,                                           Conf)
@@ -67,8 +72,9 @@ eq passParameters(Q, < QID ; E > Pairs, [ memory : < QID . Q : memory | actVal: 
 .
 
 op applyActions' : Config -> Config .
-eq applyActions'([ microacts : callLibrary(Q, Pairs),AS ] Conf )
- = applyActions'(passParameters(Q,Pairs, [ microacts : AS ] Conf)) .
+eq applyActions'([ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ]
+                 [ microacts : callLibrary(Q, Pairs),AS ] Conf )
+ = applyActions'(passParameters(Callee:Identifier . Q, Pairs, [ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ] [ microacts : AS ] Conf)) .
 eq applyActions'([ nodes : < Q : CC | status: S, AtS > PS ]
                  [ microacts : setStatus(Q,S'),AS ]
                  Conf )

@@ -1,0 +1,7 @@
+Boolean Lookup ValueState;
+
+GetValue : {
+   InOut Boolean foo;
+   Start Lookup(ValueState);
+   foo = true;
+}

@@ -1,0 +1,91 @@
+***( Unit Tests for LibraryCall Parameter Declarations
+
+  Tests that the parameters of a LibraryCall are declared on the root of the
+  library plan (a child of the call node) instead of on the call node.
+
+  KEY PROPERTY: an argument such as varForwarding('foo) is resolved from the
+  call node, so it must find the caller's 'foo rather than the parameter of the
+  same name. Inside the library, 'foo must find the parameter. Related to
+  issue #47.
+)***
+
+mod TEST--COMPILER--LIBRARY-PARAMS is
+
+pr TEST-BASE .
+pr COMPILER .
+
+op test--compiler--library-params : -> TestResults .
+eq test--compiler--library-params =
+    test--compiler--library-params--memory
+    + test--compiler--library-params--sanitize
+    .
+
+var Decls : LocalDecls .
+
+op aLibraryCall : LocalDecls -> PlexilLibrary .
+eq aLibraryCall(Decls)
+ = library('Call, Decls, none,
+     callInfo('Lib, ids('foo), const(varForwarding('foo))),
+     empty('Lib, nilocdecl, none)) .
+
+---( Memory Declaration Tests )---
+
+op test--compiler--library-params--memory : -> TestResults .
+eq test--compiler--library-params--memory =
+begin tests
+
+    assert "compileMemory declares the parameters on the library root, not on the call node" from
+        testConfiguration(compileMemory(aLibraryCall(nilocdecl), 'Root))
+    reaches
+        testConfiguration(
+            < 'foo . 'Lib . 'Call . 'Root : memory | initVal: unknown, actVal: unknown, prevVal: unknown >
+        )
+    end
+
+    assert "compileMemory keeps a local of the call node with the same name as a parameter, as a separate cell" from
+        testConfiguration(compileMemory(aLibraryCall(('foo : val(true))), 'Root))
+    reaches
+        testConfiguration(
+            < 'foo . 'Call . 'Root : memory | initVal: val(true), actVal: val(true), prevVal: val(true) >
+            < 'foo . 'Lib . 'Call . 'Root : memory | initVal: unknown, actVal: unknown, prevVal: unknown >
+        )
+    end
+
+end tests
+.
+
+---( Id Sanitization Tests )---
+
+op aMemoryWithRepeatedNames : -> Configuration .
+eq aMemoryWithRepeatedNames
+ = < 'foo . 'Root : memory | initVal: unknown, actVal: unknown, prevVal: unknown >
+   < 'foo . 'Lib . 'Call . 'Root : memory | initVal: unknown, actVal: unknown, prevVal: unknown > .
+
+op test--compiler--library-params--sanitize : -> TestResults .
+eq test--compiler--library-params--sanitize =
+begin tests
+
+    assert "An argument of the call is resolved to the caller's variable of the same name" from
+        testExpression(
+            sanitizeIds(const(varForwarding('foo)), 'Call . 'Root, aMemoryWithRepeatedNames)
+        )
+    reaches
+        testExpression(
+            const(varForwarding('foo . 'Root))
+        )
+    end
+
+    assert "A variable inside the library is resolved to the parameter of the library root" from
+        testExpression(
+            sanitizeIds(var('foo), 'Lib . 'Call . 'Root, aMemoryWithRepeatedNames)
+        )
+    reaches
+        testExpression(
+            var('foo . 'Lib . 'Call . 'Root)
+        )
+    end
+
+end tests
+.
+
+endm

@@ -1,0 +1,9 @@
+initial-state {
+    state ValueState () =  false: bool;
+}
+
+script {
+    state ValueState () =  false: bool;
+    state ValueState () =  true: bool;
+    state ValueState () =  true: bool;
+}

@@ -1,0 +1,13 @@
+LibraryNode Outer (InOut Integer res);
+/*
+ * Outer, a library, declares a local variable foo and forwards it to the
+ * parameter foo of Inner. The variable and the parameter have the same name
+ * but live in different scopes; the value must flow Inner -> Outer -> result.
+ */
+libraryCallCallerVarSameNameAsParam: Concurrence {
+   Integer result = 0;
+   LibraryCall Outer(res=result);
+   Observed: {
+      Start result == 3;
+   }
+}

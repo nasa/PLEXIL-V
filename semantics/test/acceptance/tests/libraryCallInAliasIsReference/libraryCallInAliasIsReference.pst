@@ -1,0 +1,9 @@
+initial-state {
+    state Go () =  false: bool;
+}
+
+script {
+    state Go () =  false: bool;
+    state Go () =  true: bool;
+    state Go () =  true: bool;
+}

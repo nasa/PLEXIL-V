@@ -72,10 +72,10 @@ def test_library_call_with_one_input_argument(translate_xml_with_libraries):
         main_xml, Node, libraries={"theLibrary": library_xml}
     )
     # With one alias parameter
-    # Note: Field order is aliasVars, localVars, [conditions], callInfo, body
+    # Note: Field order is localVars, (none), [conditions], callInfo, body
     # Note: conditions field is omitted when there are no conditions
     # aliasVars=(('number : unknown)), localVars=(none) since no local vars at call site
-    expected = "library('libraryCall1,(('number : unknown)),(none),callInfo('theLibrary,ids('number),const(val(1))),empty('theLibrary,nilocdecl,(none)))"
+    expected = "library('libraryCall1,nilocdecl,(none),callInfo('theLibrary,ids('number),const(val(1))),empty('theLibrary,nilocdecl,(none)))"
     assert normalize_whitespace(result) == normalize_whitespace(expected), f"Expected: {expected}\nGot: {result}"
 
 
@@ -142,12 +142,12 @@ def test_library_call_with_three_input_arguments(translate_xml_with_libraries):
         main_xml, Node, libraries={"theLibrary": library_xml}
     )
     # With three alias parameters
-    # Note: Field order is aliasVars, localVars, [conditions], callInfo, body
+    # Note: Field order is localVars, (none), [conditions], callInfo, body
     # Note: conditions field is omitted when there are no conditions
-    # aliasVars=(three params), localVars=(none) since no local vars at call site
+    # no local vars at the call site; parameters are declared on the library root
     expected = (
         "library('libraryCall2,"
-        + "(('number : unknown) ('flag : unknown) ('message : unknown)),"
+        + "nilocdecl,"
         + "(none),"
         + "callInfo('theLibrary,ids('number . 'flag . 'message),(const(val(1)) const(val(true)) const(val(\"OK\")))),command('theLibrary,nilocdecl,(none),(('print) / (var('message)) / nothing)))"
     )
@@ -214,10 +214,11 @@ def test_library_call_with_one_inout_argument(translate_xml_with_libraries):
         main_xml, Node, libraries={"theLibrary": library_xml}
     )
     # Variable as alias value should use varForwarding
-    # NOTE: When both local and alias vars are present, they're concatenated with NO comma
+    # NOTE: Only the call node's own local vars are declared at the call site
     expected = (
         "library('libraryCall3,"
-        + "(('myNumber : val(1)))(('number : unknown)),"
+        + "(('myNumber : val(1))),"
+        + "(none),"
         + "((endc: (_equ_(var('myNumber),const(val(2)))))),"
         + "callInfo('theLibrary,ids('number),const(varForwarding('myNumber))),assignment('theLibrary,nilocdecl,(none),(var('number) := const(val(2)))))"
     )

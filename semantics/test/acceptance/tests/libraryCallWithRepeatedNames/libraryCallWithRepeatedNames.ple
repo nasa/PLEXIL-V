@@ -1,0 +1,8 @@
+LibraryNode GetValue (InOut Boolean foo);
+LibraryNode DoValue (In Boolean foo);
+
+libraryCallWithRepeatedNames: Concurrence {
+   Boolean foo;
+   LibraryCall GetValue(foo=foo);
+   LibraryCall DoValue(foo=foo);
+}

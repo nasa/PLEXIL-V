@@ -275,7 +275,6 @@ fmod COMPILER is
     eq getFullyQualifiedVariableId'(I, I' . Q,                           Cfg, Q') = getFullyQualifiedVariableId'(I,Q,Cfg,Q') [owise] .
     eq getFullyQualifiedVariableId'(I, Q     ,                           Cfg, Q') = unresolvedVariable(I,Q') [owise] .
 
-
   op toLocalDeclsWithUndefined : Identifiers ~> LocalDecls .
   eq toLocalDeclsWithUndefined(ids(nilq)) = nilocdecl .
   eq toLocalDeclsWithUndefined(ids(I . IS)) = (I : unknown) toLocalDeclsWithUndefined(ids(IS)) .
@@ -290,7 +289,9 @@ fmod COMPILER is
       ),
       Q
     )
-    = createLocalVars((I . Q), LD) compileMemory(PL, (I . Q)) .
+    = createLocalVars((I . Q), LD)
+      createLocalVars((Callee:Identifier . I . Q), toLocalDeclsWithUndefined(IDs))
+      compileMemory(PL, (I . Q)) .
   eq compileMemory(list(I, LD, (AtS), nil), Q)
   = createLocalVars((I . Q), LD) .
   eq compileMemory(list(I, LD, (AtS), (PL PLL)), Q)

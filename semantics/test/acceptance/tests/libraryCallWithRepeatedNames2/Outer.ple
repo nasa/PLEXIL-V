@@ -1,0 +1,6 @@
+LibraryNode GetValue (InOut Boolean foo);
+
+Outer : {
+   InOut Boolean foo;
+   LibraryCall GetValue(foo=foo);
+}

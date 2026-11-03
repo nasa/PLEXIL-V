@@ -1,3 +1,18 @@
+***( Unit Tests for Synchronous Reductions
+
+  Tests passParameters, which binds the arguments of a LibraryCall to the
+  parameter cells declared on the library root, with cell id
+  param . Callee . Call.
+
+  KEY PROPERTIES:
+    1. A variable argument, wrapped in varForwarding, turns the parameter cell
+       into a memory-forwarding cell targeting the caller's variable.
+    2. Any other argument is copied into actVal and prevVal.
+    3. The caller's variable is never modified when the parameter has the same name.
+    4. callLibrary computes the parameter cell id from the callee of the call node.
+  Related to issue #47.
+)***
+
 mod TEST--REDUCTIONS--SYNCRED is
 
 pr SYNC-REDUCTION .
@@ -5,9 +20,120 @@ pr TEST-BASE .
 
 op test--reductions--syncred : -> TestResults .
 eq test--reductions--syncred =
+    test--reductions--syncred--pass-parameters
+    + test--reductions--syncred--call-library
+    .
+
+var MemCells : Configuration .
+var RestConf : Config .
+
+op getMemoryCell : Config -> Config .
+eq getMemoryCell([ memory : MemCells ] RestConf) = [ memory : MemCells ] .
+
+op anUnknownCell : Qualified -> Configuration .
+eq anUnknownCell(Q:Qualified)
+ = < Q:Qualified : memory | initVal: unknown, actVal: unknown, prevVal: unknown > .
+
+---( passParameters Tests )---
+
+op test--reductions--syncred--pass-parameters : -> TestResults .
+eq test--reductions--syncred--pass-parameters =
 begin tests
 
-  noTest
+    assert "passParameters with no pairs leaves the configuration untouched" from
+        passParameters('Lib . 'Call, nil,
+            [ memory : anUnknownCell('foo . 'Lib . 'Call) ]
+            [ microacts : mtactions ])
+    reaches
+        [ memory : anUnknownCell('foo . 'Lib . 'Call) ]
+        [ microacts : mtactions ]
+    end
+
+    assert "passParameters turns the parameter cell into a forwarder for a variable argument" from
+        getMemoryCell(
+            passParameters('Lib . 'Call, < 'foo ; const(varForwarding('bar . 'Root)) >,
+                [ memory : anUnknownCell('foo . 'Lib . 'Call) anUnknownCell('bar . 'Root) ]
+                [ microacts : mtactions ]))
+    reaches
+        getMemoryCell(
+            [ memory : < 'foo . 'Lib . 'Call : memory-forwarding | target: ('bar . 'Root) >
+                       anUnknownCell('bar . 'Root) ]
+            [ microacts : mtactions ])
+    end
+
+    assert "passParameters copies a value argument into actVal and prevVal and keeps initVal" from
+        getMemoryCell(
+            passParameters('Lib . 'Call, < 'foo ; const(val(5)) >,
+                [ memory : anUnknownCell('foo . 'Lib . 'Call) ]
+                [ microacts : mtactions ]))
+    reaches
+        getMemoryCell(
+            [ memory : < 'foo . 'Lib . 'Call : memory | initVal: unknown, actVal: val(5), prevVal: val(5) > ]
+            [ microacts : mtactions ])
+    end
+
+    assert "passParameters retargets a parameter cell that is already a forwarder" from
+        getMemoryCell(
+            passParameters('Lib . 'Call, < 'foo ; const(varForwarding('baz . 'Root)) >,
+                [ memory : < 'foo . 'Lib . 'Call : memory-forwarding | target: ('bar . 'Root) >
+                           anUnknownCell('bar . 'Root) anUnknownCell('baz . 'Root) ]
+                [ microacts : mtactions ]))
+    reaches
+        getMemoryCell(
+            [ memory : < 'foo . 'Lib . 'Call : memory-forwarding | target: ('baz . 'Root) >
+                       anUnknownCell('bar . 'Root) anUnknownCell('baz . 'Root) ]
+            [ microacts : mtactions ])
+    end
+
+    assert "passParameters leaves the caller's variable untouched when the parameter has the same name" from
+        getMemoryCell(
+            passParameters('Lib . 'Call, < 'foo ; const(varForwarding('foo . 'Root)) >,
+                [ memory : anUnknownCell('foo . 'Lib . 'Call) anUnknownCell('foo . 'Root) ]
+                [ microacts : mtactions ]))
+    reaches
+        getMemoryCell(
+            [ memory : < 'foo . 'Lib . 'Call : memory-forwarding | target: ('foo . 'Root) >
+                       anUnknownCell('foo . 'Root) ]
+            [ microacts : mtactions ])
+    end
+
+    assert "passParameters handles forwarded and copied arguments in the same call" from
+        getMemoryCell(
+            passParameters('Lib . 'Call,
+                < 'a ; const(varForwarding('x . 'Root)) > < 'b ; const(val(true)) >,
+                [ memory : anUnknownCell('a . 'Lib . 'Call) anUnknownCell('b . 'Lib . 'Call)
+                           anUnknownCell('x . 'Root) ]
+                [ microacts : mtactions ]))
+    reaches
+        getMemoryCell(
+            [ memory : < 'a . 'Lib . 'Call : memory-forwarding | target: ('x . 'Root) >
+                       < 'b . 'Lib . 'Call : memory | initVal: unknown, actVal: val(true), prevVal: val(true) >
+                       anUnknownCell('x . 'Root) ]
+            [ microacts : mtactions ])
+    end
+
+end tests
+.
+
+---( callLibrary Tests )---
+
+op test--reductions--syncred--call-library : -> TestResults .
+eq test--reductions--syncred--call-library =
+begin tests
+
+    assert "callLibrary binds the parameter cell declared on the root of the callee, below the call node" from
+        getMemoryCell(
+            applyActions'(
+                [ nodes : < 'Call : library | callee: 'Lib > ]
+                [ memory : anUnknownCell('foo . 'Lib . 'Call) anUnknownCell('foo . 'Root) ]
+                [ microacts : callLibrary('Call, < 'foo ; const(varForwarding('foo . 'Root)) >) ]))
+    reaches
+        getMemoryCell(
+            [ nodes : < 'Call : library | callee: 'Lib > ]
+            [ memory : < 'foo . 'Lib . 'Call : memory-forwarding | target: ('foo . 'Root) >
+                       anUnknownCell('foo . 'Root) ]
+            [ microacts : mtactions ])
+    end
 
 end tests
 .

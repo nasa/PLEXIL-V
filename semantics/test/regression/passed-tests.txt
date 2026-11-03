@@ -1,6 +1,7 @@
 ArrayAssignmentWithFailure.maude
 AssignToParentExit.maude
 AssignmentFailureTest.maude
+AssignmentMain.maude
 EmptyString1.maude
 FailureType1.maude
 FailureType2.maude

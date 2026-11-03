@@ -1,0 +1,17 @@
+LibraryNode ReadIn (In Integer x, InOut Integer seen);
+/*
+ * An In parameter bound to a variable is a read-only reference to it, not a
+ * copy taken at call time: Bump changes v after the call has started and
+ * ReadIn must observe the new value (seen == 5 starts Observed).
+ */
+libraryCallInAliasIsReference: Concurrence {
+   Integer v = 0;
+   Integer seen = 0;
+   LibraryCall ReadIn(x=v, seen=seen);
+   Bump: {
+      v = 5;
+   }
+   Observed: {
+      Start seen == 5;
+   }
+}

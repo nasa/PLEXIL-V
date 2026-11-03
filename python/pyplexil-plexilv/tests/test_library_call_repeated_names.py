@@ -65,8 +65,10 @@ def test_repeated_variable_name_in_parent_and_library(translate_xml_with_librari
     # Parent list should have 'foo' declaration
     assert "list('testList,(('foo:unknown))" in normalize_whitespace(result)
 
-    # Library call should have alias var 'foo' and use varForwarding
-    assert "library('LibraryCall__0,(('foo:unknown)),(none)," in normalize_whitespace(result)
+    # The call node must not redeclare 'foo' (the parameter lives on the library
+    # root), otherwise the forwarded argument would resolve to the parameter itself
+    assert "library('LibraryCall__0,nilocdecl,(none)," in normalize_whitespace(result)
+    assert normalize_whitespace(result).count("('foo:unknown)") == 1
     assert "const(varForwarding('foo))" in normalize_whitespace(result)
 
 
@@ -156,14 +158,14 @@ def test_multiple_library_calls_same_variable_name(translate_xml_with_libraries)
     assert "list('testList,(('sharedVar:val(0)))" in normalize_whitespace(result)
 
     # First library call
-    assert "library('Call1,(('param:unknown)),(none)," in normalize_whitespace(result)
+    assert "library('Call1,nilocdecl,(none)," in normalize_whitespace(result)
     assert (
         normalize_whitespace(result).count("callInfo('Lib1,ids('param),const(varForwarding('sharedVar)))")
         == 1
     )
 
     # Second library call
-    assert "library('Call2,(('param:unknown)),(none)," in normalize_whitespace(result)
+    assert "library('Call2,nilocdecl,(none)," in normalize_whitespace(result)
     assert (
         normalize_whitespace(result).count("callInfo('Lib2,ids('param),const(varForwarding('sharedVar)))")
         == 1
@@ -212,11 +214,10 @@ def test_library_call_alias_field_order(translate_xml_with_libraries):
         main_xml, Node, libraries={"testLib": library_xml}
     )
 
-    # Should have alias vars first, then (none) for empty local vars
-    assert "library('testCall,(('param1:unknown)),(none)," in normalize_whitespace(result)
-
-    # Should NOT have nilocdecl in second position (that would be wrong)
-    assert "library('testCall,nilocdecl," not in normalize_whitespace(result)
+    # No local vars at the call site and no alias vars: parameters are declared
+    # on the library root
+    assert "library('testCall,nilocdecl,(none),callInfo(" in normalize_whitespace(result)
+    assert "('param1:unknown)" not in normalize_whitespace(result)
 
 
 def test_varforwarding_with_repeated_names(translate_xml_with_libraries):
@@ -283,3 +284,57 @@ def test_varforwarding_with_repeated_names(translate_xml_with_libraries):
 
     # Should NOT use a direct value or var() reference
     assert 'const(val("test"))' not in result or "varForwarding" in result
+
+
+def test_library_root_id_must_match_library_name(translate_xml_with_libraries):
+    """The parameter cells are declared under the callee name, so a library whose root
+    NodeId differs from its name must be rejected (the Executive rejects it too)."""
+    from plexilv.plexil.translator.constants import TranspilationError
+
+    main_xml = """
+    <Node NodeType="LibraryNodeCall">
+        <NodeId>testCall</NodeId>
+        <NodeBody>
+            <LibraryNodeCall>
+                <NodeId>TestLib</NodeId>
+            </LibraryNodeCall>
+        </NodeBody>
+    </Node>
+    """
+
+    library_xml = """
+    <Node NodeType="Empty">
+        <NodeId>OtherName</NodeId>
+    </Node>
+    """
+
+    with pytest.raises(TranspilationError) as exc_info:
+        translate_xml_with_libraries(
+            main_xml, Node, libraries={"TestLib": library_xml}
+        )
+    assert "TestLib" in str(exc_info.value)
+    assert "OtherName" in str(exc_info.value)
+
+
+def test_library_root_id_matching_library_name_is_accepted(translate_xml_with_libraries):
+    main_xml = """
+    <Node NodeType="LibraryNodeCall">
+        <NodeId>testCall</NodeId>
+        <NodeBody>
+            <LibraryNodeCall>
+                <NodeId>TestLib</NodeId>
+            </LibraryNodeCall>
+        </NodeBody>
+    </Node>
+    """
+
+    library_xml = """
+    <Node NodeType="Empty">
+        <NodeId>TestLib</NodeId>
+    </Node>
+    """
+
+    result = translate_xml_with_libraries(
+        main_xml, Node, libraries={"TestLib": library_xml}
+    )
+    assert "empty('TestLib" in normalize_whitespace(result)

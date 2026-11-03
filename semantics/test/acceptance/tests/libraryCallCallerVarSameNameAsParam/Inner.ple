@@ -1,0 +1,7 @@
+Inner : {
+   In Integer foo;
+   InOut Integer out;
+   Copy: {
+      out = foo;
+   }
+}

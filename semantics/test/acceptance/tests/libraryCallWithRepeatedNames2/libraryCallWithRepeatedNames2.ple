@@ -1,0 +1,9 @@
+LibraryNode Outer (InOut Boolean foo);
+LibraryNode DoValue (In Boolean foo);
+
+libraryCallWithRepeatedNames2: Concurrence {
+   Boolean foo;
+   Boolean bar;
+   LibraryCall Outer(foo=bar);
+   LibraryCall DoValue(foo=bar);
+}

@@ -47,8 +47,9 @@ def test_library_call_field_order_alias_only(translate_xml_with_libraries):
         main_xml, Node, libraries={"testLib": library_xml}
     )
 
-    # Should have alias vars, then (none) for local vars
-    assert "library('testCall,(('param1:unknown)),(none)," in normalize_whitespace(result)
+    # Parameters are declared on the library root, not on the call node
+    assert "library('testCall,nilocdecl,(none),callInfo('testLib" in normalize_whitespace(result)
+    assert "('param1:unknown)" not in normalize_whitespace(result)
 
 
 def test_library_call_field_order_local_only(translate_xml_with_libraries):
@@ -138,10 +139,9 @@ def test_library_call_field_order_both_present(translate_xml_with_libraries):
         main_xml, Node, libraries={"testLib": library_xml}
     )
 
-    # Should have local and alias vars concatenated (NO comma between)
-    assert "library('testCall,(('localVar:val(5)))(('aliasVar:unknown))," in normalize_whitespace(result)
-    # Should NOT have a comma between the two variable groups
-    assert "(('localVar:val(5))),(('aliasVar" not in normalize_whitespace(result)
+    # Only the call node's own local is declared; the alias is not
+    assert "library('testCall,(('localVar:val(5))),(none),callInfo(" in normalize_whitespace(result)
+    assert "('aliasVar:unknown)" not in normalize_whitespace(result)
 
 
 def test_library_call_field_order_neither(translate_xml_with_libraries):
@@ -228,8 +228,8 @@ def test_library_call1_acceptance_pattern(translate_xml_with_libraries):
     )
 
     # Should match Haskell reference format:
-    # library(name, aliasVars, (none), callInfo, body)
-    assert "library('libraryCall1,(('number:unknown)),(none)," in normalize_whitespace(result)
+    # library(name, localVars, (none), callInfo, body)
+    assert "library('libraryCall1,nilocdecl,(none)," in normalize_whitespace(result)
     assert "callInfo('theLibrary,ids('number),const(val(1)))" in normalize_whitespace(result)
     assert "list('theLibrary,nilocdecl," in normalize_whitespace(result)
 
@@ -272,8 +272,8 @@ def test_library_call_with_conditions(translate_xml_with_libraries):
         main_xml, Node, libraries={"testLib": library_xml}
     )
 
-    # With conditions: name, aliasVars, (none), conditions, callInfo, body
+    # With conditions: name, localVars, (none), conditions, callInfo, body
     assert (
-        "library('testCall,(('param:unknown)),(none),((endc:(const(val(true)))))"
+        "library('testCall,nilocdecl,(none),((endc:(const(val(true)))))"
         in normalize_whitespace(result)
     )

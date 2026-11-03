@@ -510,55 +510,16 @@ def translate_library_node(
         if isinstance(node.node_body.choice, LibraryNodeCall):
             lib_call = node.node_body.choice
 
-    # Check what declarations we have
+    # Only the call node's own local variables are declared here. The library's
+    # parameters are declared on the library root (see compileMemory in
+    # compiler.maude), so that a parameter can share its name with the variable it
+    # references or with a local variable of the call node.
     has_local_vars = (
         node.variable_declarations
         and node.variable_declarations.declare_variable_or_declare_array_or_declare_mutex
     )
-    has_alias_vars = lib_call and lib_call.alias
 
-    # Variable declarations field(s)
-    # The format varies based on what's present:
-    # - Both present: concatenate into one field (localVars)(aliasVars), no comma between
-    # - Only alias: field2=(aliasVars), field3=(none)
-    # - Only local: field2=(localVars), field3=(none)
-    # - Neither: field2=nilocdecl, field3=(none)
-
-    if has_local_vars and has_alias_vars:
-        # Both present: concatenate with no comma between them
-        # Local vars first
-        writer.write("(")
-        all_vars = (
-            node.variable_declarations.declare_variable_or_declare_array_or_declare_mutex
-        )
-        for i, var_decl in enumerate(all_vars):
-            if i > 0:
-                writer.write(" ")
-            writer.write(format_var_decl_for_library(var_decl))
-        writer.write(")")
-
-        # Alias vars immediately after (no comma!)
-        writer.write("(")
-        for i, alias in enumerate(lib_call.alias):
-            if i > 0:
-                writer.write(" ")
-            param_name = alias.node_parameter
-            writer.write(f"('{param_name} : unknown)")
-        writer.writeln("),")
-
-    elif has_alias_vars:
-        # Only alias vars: two separate fields
-        writer.write("(")
-        for i, alias in enumerate(lib_call.alias):
-            if i > 0:
-                writer.write(" ")
-            param_name = alias.node_parameter
-            writer.write(f"('{param_name} : unknown)")
-        writer.writeln("),")
-        writer.writeln("(none),")
-
-    elif has_local_vars:
-        # Only local vars: two separate fields
+    if has_local_vars:
         writer.write("(")
         all_vars = (
             node.variable_declarations.declare_variable_or_declare_array_or_declare_mutex
@@ -569,9 +530,7 @@ def translate_library_node(
             writer.write(format_var_decl_for_library(var_decl))
         writer.writeln("),")
         writer.writeln("(none),")
-
     else:
-        # Neither: nilocdecl and (none)
         writer.writeln("nilocdecl,")
         writer.writeln("(none),")
 
@@ -617,7 +576,8 @@ def translate_library_node(
                 # Get the value expression
                 value_expr = get_alias_value(alias)
 
-                # Check if it's a variable (needs varForwarding wrapper)
+                # Variable aliases are forwarded by reference for both In and InOut
+                # parameters: the Executive binds In as a read-only live alias.
                 if value_expr and (
                     isinstance(value_expr, IntegerVariable)
                     or isinstance(value_expr, RealVariable)
@@ -654,6 +614,15 @@ def translate_library_node(
         if not library_plan.node:
             raise TranspilationError(
                 f"Library '{library_name}' has no root node (empty library)"
+            )
+        # The semantics declares the parameter cells under the callee name (see
+        # compileMemory in compiler.maude), and the Executive requires the library's
+        # root NodeId to equal the library name.
+        root_id = library_plan.node.node_id.value if library_plan.node.node_id else None
+        if root_id != library_name:
+            raise TranspilationError(
+                f"Library '{library_name}' must have a root node with the same NodeId, "
+                f"but its root node is '{root_id}'"
             )
         # Recursively translate the library's root node
         # library_plan.node is already a Node, walk it directly
