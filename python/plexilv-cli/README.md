@@ -15,29 +15,15 @@ Unified command-line interface for PLEXIL-V verification tools.
 
 ## Installation
 
-### For Users
+From the root of the repository, with the virtual environment activated, run:
 
 ```bash
-pip install plexilv-cli
+python/install_all.sh
 ```
 
-This will automatically install all required dependencies:
-- `plexilv-run` - PLEXIL plan execution tool
-- `plexilv-diff` - PLEXIL execution comparison tool
-- `plexilv-log` - Log parsing and comparison tools
+See [Install the `plexilv` command](../../README.md#install-the-plexilv-command) in the top-level README for how to create and activate the virtual environment, which you need to activate again in every new terminal.
 
-### For Development
-
-```bash
-# Clone the repository
-cd plexilv-cli
-
-# Install in development mode
-pip install -e .
-
-# Install development dependencies
-pip install -e ".[dev]"
-```
+`plexilv-cli` depends on `pyplexil-plexilv`, `plexilv-run`, `plexilv-diff` and `plexilv-log`, which are installed from this repository by the script.
 
 ## Quick Start
 

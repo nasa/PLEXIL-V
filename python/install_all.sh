@@ -31,25 +31,54 @@ done
 echo "Installing Python packages in development mode..."
 echo "=================================================="
 
-# Pass 1: install the third-party dependencies and the dev extras. This also
-# replaces the local sibling packages (declared as `file:` dependencies) with
-# non-editable copies in site-packages, which pass 2 must undo.
-for package in $packages; do
-    echo ""
-    echo "Installing dependencies of $package..."
-    echo "--------------------------------------"
-    (cd "$package" && pip install --no-cache-dir -e ".[dev]")
-done
+# Upgrade pip first so that editable installs behave the same on every machine.
+echo ""
+echo "Upgrading pip..."
+python -m pip install --upgrade pip
 
-# Pass 2: force-reinstall the local packages themselves in editable mode,
-# ignoring caches. This must run last so the editable installs win, and
-# --no-deps keeps pip from touching the dependencies installed above.
+# Pass 1: install the local packages themselves in editable mode, ignoring
+# caches. --no-deps means pip never resolves the sibling packages by name, so
+# they cannot be fetched from PyPI by mistake.
 for package in $packages; do
     echo ""
-    echo "Reinstalling $package..."
-    echo "------------------------"
+    echo "Installing $package..."
+    echo "----------------------"
     (cd "$package" && pip install --no-cache-dir --force-reinstall --no-deps -e .)
 done
+
+# Pass 2: install the third-party dependencies and the dev extras of all
+# packages in a single command, so pip resolves them together instead of
+# reporting the dependencies of the packages that are not processed yet. Every
+# local sibling is already installed, so its requirement is satisfied and PyPI
+# is only queried for third-party packages.
+echo ""
+echo "Installing third-party dependencies..."
+echo "--------------------------------------"
+editable_args=()
+for package in $packages; do
+    editable_args+=(-e "./$package[dev]")
+done
+pip install --no-cache-dir "${editable_args[@]}"
+
+# Verify: requirements are consistent and each local package is an editable
+# install, not a copy from PyPI or a cached wheel.
+echo ""
+echo "Verifying installation..."
+echo "-------------------------"
+pip check
+python -I - $packages <<'PY'
+import json
+import sys
+from importlib.metadata import distribution
+
+bad = []
+for name in sys.argv[1:]:
+    direct_url = json.loads(distribution(name).read_text("direct_url.json") or "{}")
+    if not direct_url.get("dir_info", {}).get("editable"):
+        bad.append(name)
+if bad:
+    sys.exit("Not installed in editable mode: " + ", ".join(bad))
+PY
 
 echo ""
 echo "=================================================="
