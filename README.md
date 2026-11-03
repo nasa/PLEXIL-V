@@ -49,6 +49,12 @@ $ plexilv run --help
 $ plexilv diff --help
 ```
 
+The virtual environment is only active in the terminal where you ran `source .venv/bin/activate` (your prompt shows `(.venv)` while it is active).
+Whenever you open a new terminal, activate it again from the root of the repository before using `plexilv` or any of the other Python tools, such as `plx2maude`:
+```
+$ source .venv/bin/activate
+```
+
 
 ### Compile the PLEXIL interpreter
 
@@ -87,6 +93,7 @@ Maude> show module PLEXIL-V .
 ### Examples
 
 The `examples/` folder, contains some examples of PLEXIL plans with properties to verify.
+The examples use the Python tools installed above, so make sure the virtual environment is active in your terminal (`source .venv/bin/activate` from the root of the repository).
 
 #### Verification of properties
 
@@ -196,7 +203,7 @@ See `python/plexilv-stepper/README.md` for detailed installation and usage instr
 
 #### Performing differential testing PLEXIL/PLEXIL-V **(optional)**
 
-PLEXIL-V provides the `plexilv diff` utility to perform differential testing of the execution of a PLEXIL plan with multiple input scripts between the official PLEXIL test executor (`plexiltest`) and the PLEXIL-V formal interpreter (`plexil run`).
+PLEXIL-V provides the `plexilv diff` utility to perform differential testing of the execution of a PLEXIL plan with multiple input scripts between the official PLEXIL test executor (`plexiltest`) and the PLEXIL-V formal interpreter (`plexilv run`).
 First, you have an input `.ple` plan and multiple input `.pst` scripts that you compile into the internal PLEXIL XML formats `.plx` and `.psx`, respectively.
 Then you call `plexilv diff` with all those inputs, obtaining a summary of differences found during execution.
 
