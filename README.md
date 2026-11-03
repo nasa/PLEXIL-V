@@ -10,7 +10,7 @@ PLEXIL-V provides an LTL model-checker of PLEXIL plans and a framework to model 
 
 ### Current Release
 
-PLEXIL-V v0.6.3 (October-2026)
+PLEXIL-V v0.6.4 (November 2026)
 
 
 ### Requirements
@@ -227,7 +227,8 @@ See the directory [`LICENSES`](LICENSES); see also the copyright notice at the e
 
 ### Authors
 
-* [Cesar A. Mu&ntilde;oz](http://shemesh.larc.nasa.gov/people/cam) (cesar.a.munoz@nasa.gov), NASA Langley Research Center, USA.
+* Laura R. Humphrey (laura.r.humphrey@nasa.gov), NASA Langley Research Center, USA.
+* [Cesar A. Mu&ntilde;oz](http://shemesh.larc.nasa.gov/people/cam), NASA Langley Research Center, USA.
 * Marco A. Feliu, Analytical Mechanics Associates supporting NASA Langley Research Center, USA.
 
 ### Contributors
