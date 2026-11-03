@@ -13,10 +13,10 @@ authors = [
 
 dependencies = [
     "click>=8.0",
-    "pyplexil-plexilv @ file:../pyplexil-plexilv",
-    "plexilv-run @ file:../plexilv-run",
-    "plexilv-diff @ file:../plexilv-diff",
-    "plexilv-log @ file:../plexilv-log",
+    "pyplexil-plexilv",
+    "plexilv-run",
+    "plexilv-diff",
+    "plexilv-log",
 ]
 
 [project.optional-dependencies]
