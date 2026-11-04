@@ -30,9 +30,6 @@ vars QID         : Qid .
 vars S S' T T'   : Status .
 var Str          : String .
 vars Tps Tps'    : Timepoints .
-var Tr           : Trace .
-var TL           : TraceList .
-var TS           : TransitionSet .
 vars V V' V''    : Value .
 
 op logApplyActions : Config -> Config .
@@ -45,8 +42,7 @@ eq logApplyActions([ nodes : < Q : CC | status: S, AtS > PS ]
 eq logApplyActions(Conf) = mtsoup [owise] .
 
 op applyActions : Config ~> Config .
-eq applyActions ([ trace :         TL ] Conf)
- = performAssignments(applyActions'([ trace : mttrans TL ] Conf)) .
+eq applyActions(Conf) = performAssignments(applyActions'(Conf)) .
 
 
 op createOrUpdateVarForwarding : Qualified Qualified Config ~> Config .

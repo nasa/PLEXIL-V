@@ -12,7 +12,6 @@ fmod SYSTEM--INTERFACE--CONFIG-INTERFACE is
   op macroacts         : -> CellId .
   op interface         : -> CellId .
   op interface-history : -> CellId .
-  op trace             : -> CellId .
   op generator         : -> CellId .
 
 endfm

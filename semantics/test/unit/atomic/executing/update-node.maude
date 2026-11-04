@@ -277,7 +277,6 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
-        [ trace : niltrace ]
       )
     reaches
       executing(
@@ -297,7 +296,6 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
-        [ trace : niltrace ]
       )
     end
 

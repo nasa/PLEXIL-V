@@ -16,7 +16,6 @@ fmod MACRO is
   vars Gamma          : Environment .
   vars CL             : EnvironmentList .
   vars Q              : Qualified .
-  vars TL TL'         : TraceList .
   vars V V' V''       : Value .
   vars KConf : [Config] .
   vars EG EG' GEN : InputGenerator .
@@ -26,10 +25,6 @@ fmod MACRO is
   vars Nodes Nodes' : Configuration .
   vars InSet : InputsSet .
 
-  op cleanTrace : Config -> Config .
-  eq cleanTrace( [ trace : T:TraceList ] Cfg ) = [ trace : niltrace ] Cfg         .
-  eq cleanTrace(                         Cfg ) =                      Cfg [owise] .
-
   ceq [MACRO-relation] :
     macro | [ generator : EG  ] Cfg
   =
@@ -37,7 +32,7 @@ fmod MACRO is
     then
       stop  | [ generator : EG ] Cfg
     else
-      NDChoice(InSet) | cleanTrace([ generator : EG ] Cfg)
+      NDChoice(InSet) | [ generator : EG ] Cfg
     fi
     if InSet := generate(EG, [ generator : EG ] Cfg)
   .

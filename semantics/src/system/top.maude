@@ -3,13 +3,11 @@ fmod CONFIG is
   pr ENVIRONMENTS .
   pr SYSTEM--INTERFACE--CONFIG-INTERFACE .
   pr NODE .
-  pr TRACE .
   pr GENERATORS--INTERFACE .
 
   op `[_:_`] : CellId ActionSet       -> Cell [format (n d d ++i --i d)] .
   op `[_:_`] : CellId EnvironmentList -> Cell [format (n d d ++i --i d)] .
   op `[_:_`] : CellId Configuration   -> Cell [format (n d d ++i --i d)] .
-  op `[_:_`] : CellId TraceList       -> Cell [format (n d d ++i --i d)] .
   op `[_:_`] : CellId InputGenerator  -> Cell [format (n d d ++i --i d)] .
   op `[_:_`] : CellId EInputsList     -> Cell [format (n d d ++i --i d)] .
 
@@ -21,7 +19,6 @@ fmod CONFIG is
     [ memory      : none          ]
     [ microacts   : mtactions     ]
     [ macroacts   : mtactions     ]
-    [ trace       : niltrace      ]
     [ interface   : none          ]
     [ generator   : zero          ]
   .
@@ -31,7 +28,6 @@ fmod CONFIG is
   eq [ C : AS  ] Conf / [ C : AS'  ] Conf' = [ C : AS'  ] Conf / Conf' .
   eq [ C : EL  ] Conf / [ C : EL'  ] Conf' = [ C : EL'  ] Conf / Conf' .
   eq [ C : CS  ] Conf / [ C : CS'  ] Conf' = [ C : CS'  ] Conf / Conf' .
-  eq [ C : TL  ] Conf / [ C : TL'  ] Conf' = [ C : TL'  ] Conf / Conf' .
   eq [ C : GEN ] Conf / [ C : GEN' ] Conf' = [ C : GEN' ] Conf / Conf' .
   eq Conf / mtsoup = Conf .
 
@@ -39,7 +35,6 @@ fmod CONFIG is
   eq [ C : AS  ] Conf // [ C : AS'  ] Conf' = [ C : AS'  ] Conf // Conf' .
   eq [ C : EL  ] Conf // [ C : EL'  ] Conf' = [ C : EL'  ] Conf // Conf' .
   eq [ C : CS  ] Conf // [ C : CS'  ] Conf' = [ C : CS'  ] Conf // Conf' .
-  eq [ C : TL  ] Conf // [ C : TL'  ] Conf' = [ C : TL'  ] Conf // Conf' .
   eq [ C : GEN ] Conf // [ C : GEN' ] Conf' = [ C : GEN' ] Conf // Conf' .
   eq Conf // Conf' = Conf Conf' [owise] .
 
@@ -57,7 +52,6 @@ fmod CONFIG is
   eq getCells(C, [ C : AS  ] Conf) = [ C : AS  ] getCells(C,Conf) .
   eq getCells(C, [ C : EL  ] Conf) = [ C : EL  ] getCells(C,Conf) .
   eq getCells(C, [ C : CS  ] Conf) = [ C : CS  ] getCells(C,Conf) .
-  eq getCells(C, [ C : TL  ] Conf) = [ C : TL  ] getCells(C,Conf) .
   eq getCells(C, [ C : GEN ] Conf) = [ C : GEN ] getCells(C,Conf) .
   eq getCells(C, Conf) = mtsoup [owise] .
 
@@ -97,7 +91,6 @@ fmod CONFIG is
   vars EL EL'     : EnvironmentList .
   vars EInput     : Inputs .
   vars GEN GEN'   : InputGenerator .
-  vars TL TL'     : TraceList .
   vars OId        : Oid .
   vars PS         : Configuration .
   vars CId        : Cid .

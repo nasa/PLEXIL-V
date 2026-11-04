@@ -19,7 +19,6 @@ fmod DEFS is
   protecting LOCAL .
   protecting LOCALDECLS .
   protecting ACTION .
-  protecting TRACE .
   protecting GENERATORS--INTERFACE .
   protecting SYSTEM .
 endfm

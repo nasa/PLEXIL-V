@@ -26,7 +26,6 @@ fmod COMPILER is
         [ microacts : mtactions           ]
         [ macroacts : mtactions           ]
         [ interface : none                ]
-        [ trace : niltrace                ]
   )
   .
 

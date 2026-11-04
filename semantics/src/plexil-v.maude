@@ -14,7 +14,6 @@ in nodes.maude
 in environment.maude
 in declarations.maude
 in action.maude
-in traces.maude
 in system/interface.maude
 in generators/interface.maude
 in system/top.maude

@@ -26,8 +26,6 @@ fmod ATOMIC is
   var N          : Nat .
   vars A A' A''  : Qualified .
   var  S         : Status .
-  var TS         : TransitionSet .
-  vars TL TL'    : TraceList .
   var NTy        : NodeType .
 
   *** Inactive
