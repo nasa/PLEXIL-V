@@ -50,17 +50,11 @@ fmod NODE is
  op status:_         : Status -> Attribute [ctor gather (&) format (u o o)] .
  op outcome:_        : Outcome -> Attribute [ctor gather (&)] .
  op command:_        : Command -> Attribute [ctor gather (&)] .
- op qid:_            : Qualified -> Attribute [ctor gather (&)] .
- op extVar:_         : Qualified -> Attribute [ctor gather (&)] .
- op locVar:_         : Qualified -> Attribute [ctor gather (&)] .
  op _:=_             : AssignmentTarget Expression -> Attribute [ctor] .
  op active:_         : Bool -> Attribute [ctor gather (&)] .
  op initVal:_        : Value -> Attribute [ctor gather (&)] .
  op actVal:_         : Value -> Attribute [ctor gather (&)] .
  op prevVal:_        : Value -> Attribute [ctor gather (&)] .
- op node:_           : Expression -> Attribute [ctor gather (&)] .
- op threshold:_      : Value -> Attribute [ctor gather (&)] .
- op fromrepeat:_     : Bool -> Attribute [ctor gather (&)] .
  op arguments:_      : Arguments -> Attribute [ctor gather (&)] .
  op handle:_         : Maybe{CommandHandle} -> Attribute [ctor gather (&)] .
  op order:_          : Nat -> Attribute [ctor gather (&)] .
