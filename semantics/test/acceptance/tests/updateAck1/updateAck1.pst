@@ -1,0 +1,9 @@
+
+// updateAck1
+//
+// An Update node stays executing until the environment acknowledges the update.
+
+script {
+    delay;
+    update-ack updateAck1;
+}

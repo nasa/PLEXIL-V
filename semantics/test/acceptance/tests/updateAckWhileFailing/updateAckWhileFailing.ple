@@ -1,0 +1,7 @@
+Real Lookup t;
+
+updateAckWhileFailing:
+{
+  Exit Lookup(t) > 0;
+  Update foo = 1;
+}

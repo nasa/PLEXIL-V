@@ -1,0 +1,15 @@
+
+// updateAckWhileFailing
+//
+// An Update node whose exit condition becomes true stays failing until the
+// environment acknowledges the update.
+
+initial-state {
+    state t () = 0 : real;
+}
+
+script {
+    state t () = 1 : real;
+    delay;
+    update-ack updateAckWhileFailing;
+}

@@ -23,8 +23,7 @@ eq test--compiler--update =
           exitc:   const(val(false)),
           repeatc: const(val(false)),
           post:    const(val(true)),
-          endc:    hasRcvAck?(self),
-          ack: false
+          endc:    hasRcvAck?(self)
         >
       )
     end
@@ -45,8 +44,7 @@ eq test--compiler--update =
           exitc:   const(val(false)),
           repeatc: const(val(false)),
           post:    const(val(true)),
-          endc:    const(val(false)) and hasRcvAck?('anId . 'aRootId),
-          ack: false
+          endc:    const(val(false)) and hasRcvAck?('anId . 'aRootId)
         >
       )
     end
@@ -67,8 +65,7 @@ eq test--compiler--update =
           exitc:   const(val(false)),
           repeatc: const(val(false)),
           post:    const(val(true)),
-          endc:    const(val(false)) and hasRcvAck?('anId . 'aRootId),
-          ack: false
+          endc:    const(val(false)) and hasRcvAck?('anId . 'aRootId)
         >
       )
     end

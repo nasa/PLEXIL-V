@@ -342,7 +342,6 @@ mod TEST--ATOMIC--WAITING is
                                     startc: const(val(true)),
                                     pre: const(val(true)),
                                     exitc: const(unknown),
-                                    ack: false,
                                     pairs:
                                       < 'field1 ; var(M . B . A) >
                                       < 'field2 ; const(val(2)) >
@@ -366,7 +365,6 @@ mod TEST--ATOMIC--WAITING is
                                     startc: const(val(true)),
                                     pre: const(val(true)),
                                     exitc: const(unknown),
-                                    ack: false,
                                     pairs:
                                       < 'field1 ; var(M . B . A) >
                                       < 'field2 ; const(val(2)) >

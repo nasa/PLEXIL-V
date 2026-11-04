@@ -360,10 +360,8 @@ var FT FT' : FailureType .
  eq eval(C, [ PS ], hasIterationEnded?(Q))
   = const(val(false)) [owise] .
 
- eq eval(C, [ < Q : (X:Cid) | NA, ack: true > PS ], hasRcvAck?(Q) )
-  = const(val(true)) .
- eq eval(C, [ < Q : (X:Cid) | NA, ack: false > PS ], hasRcvAck?(Q) )
-  = const(val(false)) .
+ eq eval(C, [ < Q : update-on-execution | NA, ack: B > PS ], hasRcvAck?(Q) )
+  = const(val(B)) .
 
  eq eval(C, [ PS ], areChildren?(Q,S)) = const(val(processesWithStatus?(childrenProcesses(Q,PS),S))) .
  eq eval(C, [ PS ], noChildFailed(Q)) = const(val(getFailedProcesses(getProcessesWithStatus(childrenProcesses(Q,PS),finished)) == none)) .

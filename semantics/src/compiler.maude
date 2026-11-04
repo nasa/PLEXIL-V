@@ -72,7 +72,6 @@ fmod COMPILER is
   eq compileNodes(update(I, LD, (AtS), PS:List{Pair{Qid,Expression}}), Q, N)
   = < (I . Q) : update |
     pairs: embedCacheIdsInPairs(PS:List{Pair{Qid,Expression}}, N + countCachesInAttrs(AtS)),
-    ack: false,
     defaultAttributes(update, getRepeatCondition(AtS))
       / defaultAttributeEnrichments(I . Q, update, embedCacheIdsInAttrs(AtS, N))
     > .

@@ -11,8 +11,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: true,
-                               outcome: failure(exited),
-                               ack: false > ]
+                               outcome: failure(exited) > ]
+        [ interface : < A : update-on-execution | ack: false, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : mtactions ]
         [ environment : mtenvironment ] [ memory : none ]
       )
@@ -21,8 +21,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: false,
-                               outcome: failure(exited),
-                               ack: false > ]
+                               outcome: failure(exited) > ]
+        [ interface : < A : update-on-execution | ack: false, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : mtactions ]
         [ environment : mtenvironment ] [ memory : none ]
       )
@@ -33,8 +33,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: true,
-                               outcome: failure(parentExited),
-                               ack: true >]
+                               outcome: failure(parentExited) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : mtactions ]
         [ environment : mtenvironment ] [ memory : none ]
       )
@@ -43,8 +43,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: false,
-                               outcome: failure(parentExited),
-                               ack: true > ]
+                               outcome: failure(parentExited) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : setStatus(A,finished),
                       logTransition(A, failing, finished, 1) ]
         [ environment : mtenvironment ] [ memory : none ]
@@ -56,8 +56,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: true,
-                               outcome: failure(parentFailed),
-                               ack: true >]
+                               outcome: failure(parentFailed) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : mtactions ]
         [ environment : mtenvironment ] [ memory : none ]
       )
@@ -66,8 +66,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: false,
-                               outcome: failure(parentFailed),
-                               ack: true > ]
+                               outcome: failure(parentFailed) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : setStatus(A,finished),
                       logTransition(A, failing, finished, 2) ]
         [ environment : mtenvironment ] [ memory : none ]
@@ -79,8 +79,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: true,
-                               outcome: failure(invariantFailed),
-                               ack: true >]
+                               outcome: failure(invariantFailed) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : mtactions ]
         [ environment : mtenvironment ] [ memory : none ]
       )
@@ -89,8 +89,8 @@ mod TEST--ATOMIC--FAILING--UPDATE-NODE is
         [ nodes :
             < A     : update | status: failing,
                                active: false,
-                               outcome: failure(invariantFailed),
-                               ack: true > ]
+                               outcome: failure(invariantFailed) > ]
+        [ interface : < A : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > > ]
         [ microacts : setStatus(A,iterationEnded),
                       logTransition(A, failing, iterationEnded, 3) ]
         [ environment : mtenvironment ] [ memory : none ]

@@ -212,6 +212,64 @@ reaches
   )
 end
 
+---( hasRcvAck? Tests )---
+
+assert "hasRcvAck? returns true when the update-on-execution object has ack true" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'U : update | status: executing >
+      < 'U : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > >,
+      hasRcvAck?('U)
+    )
+  )
+reaches
+  testExpression(
+    const(val(true))
+  )
+end
+
+assert "hasRcvAck? returns false when the update-on-execution object has ack false" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'U : update | status: executing >
+      < 'U : update-on-execution | ack: false, pairs: < 'field ; const(val(1)) > >,
+      hasRcvAck?('U)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasRcvAck? ignores the update-on-execution object of another update" from
+  testExpression(
+    eval(
+      mtenvironment,
+      < 'U : update | status: executing >
+      < 'V : update-on-execution | ack: true, pairs: < 'field ; const(val(1)) > >
+      < 'U : update-on-execution | ack: false, pairs: < 'field ; const(val(1)) > >,
+      hasRcvAck?('U)
+    )
+  )
+reaches
+  testExpression(
+    const(val(false))
+  )
+end
+
+assert "hasRcvAck? is not reduced when the update has no update-on-execution object" truth
+  not (
+    eval(
+      mtenvironment,
+      < 'U : update | status: executing >,
+      hasRcvAck?('U)
+    ) :: Expression
+  )
+end
+
 end tests
 .
 

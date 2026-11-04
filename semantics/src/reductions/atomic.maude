@@ -3,7 +3,6 @@ fmod ATOMIC is
   pr CONVERSION .
 
   vars AS AS'    : ActionSet .
-  var  a         : Ack .
   var FinishAS   : ActionSet .
   vars AtS AtS'  : AttributeSet .
   var C          : NodeType .
@@ -494,10 +493,18 @@ fmod ATOMIC is
    = CONF [owise] .
 
   op failingupdate : Config ~> Config .
- ceq failingupdate( [ nodes : < A : update | status: failing, active: true, outcome: Out, ack: a, AtS > PS ]
-                    [ environment : GAMMA ] [ microacts : AS ] [ memory : MEM ] CONF )
-   = failingupdate( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
-      if isTrue(eval(GAMMA,Nds MEM,hasRcvAck?(A)))
+ ceq failingupdate( [ nodes : < A : update | status: failing, active: true, outcome: Out, AtS > PS ]
+                    [ environment : GAMMA ]
+                    [ memory : MEM ]
+                    [ interface : IFACE ]
+                    CONF
+                    [ microacts : AS ] )
+   = failingupdate( [ nodes : Nds' ]
+                    [ environment : GAMMA ]
+                    [ memory : MEM ]
+                    [ interface : IFACE ]
+                    CONF
+      if isTrue(eval(GAMMA,Nds MEM IFACE,hasRcvAck?(A)))
         then
            if FTyp == parentExited
              then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,1),AS]
@@ -510,8 +517,8 @@ fmod ATOMIC is
         else [ microacts : mtactions ]
       fi
       )
-  if Nds  := < A : update | status: failing, active: true, outcome: Out, ack: a, AtS > PS
-  /\ Nds' := < A : update | status: failing, active: false, outcome: Out, ack: a, AtS > PS
+  if Nds  := < A : update | status: failing, active: true,  outcome: Out, AtS > PS
+  /\ Nds' := < A : update | status: failing, active: false, outcome: Out, AtS > PS
   /\ FTyp := getFailureType(Out) .
   eq failingupdate(CONF)
    = CONF [owise] .
