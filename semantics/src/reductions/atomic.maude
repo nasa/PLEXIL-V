@@ -38,19 +38,19 @@ fmod ATOMIC is
      )
    = inactive( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if parentFinished?(Nds, A)
-       then [ microacts : FinishAS,logTransition(A,inactive,finished,1),AS ]
+       then [ microacts : FinishAS,AS ]
        else
          if parentExecuting?(Nds, A)
          then
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : FinishAS,logTransition(A,inactive,finished,2),AS ]
+           then [ microacts : FinishAS,AS ]
            else
              if ancestorExitTrue?(GAMMA, Nds MEM, A)
-             then [ microacts : FinishAS,logTransition(A,inactive,finished,3),AS ]
+             then [ microacts : FinishAS,AS ]
              else
                if ancestorEndTrue?(GAMMA,Nds MEM,A)
-               then [ microacts : FinishAS,logTransition(A,inactive,finished,4),AS ]
-               else [ microacts : setStatus(A, waiting),logTransition(A,inactive,waiting,5),AS ]
+               then [ microacts : FinishAS,AS ]
+               else [ microacts : setStatus(A, waiting),AS ]
                fi
              fi
            fi
@@ -86,25 +86,25 @@ fmod ATOMIC is
       [ environment : GAMMA ]
       [ memory : MEM ]
       if ancestorExitTrue?(GAMMA, Nds MEM, A)
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,1) ]
+      then [ microacts : AS,FinishAS ]
            [ macroacts : AS' ]
       else if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,2) ]
+      then [ microacts : AS,FinishAS ]
            [ macroacts : AS' ]
       else if ancestorEndTrue?(GAMMA, Nds MEM, A)
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,3) ]
+      then [ microacts : AS,FinishAS ]
            [ macroacts : AS' ]
       else if isTrue(eval(GAMMA, Nds MEM, SkC))
-      then [ microacts : AS,FinishAS,logTransition(A,waiting,finished,4) ]
+      then [ microacts : AS,FinishAS ]
            [ macroacts : AS' ]
       else if isTrue(eval(GAMMA,Nds MEM,StC))
       then
         if not isTrue(eval(GAMMA,Nds MEM,PC))
-        then [ microacts : AS,setStatus(A, iterationEnded),setOutcome(A, failure(preconditionFailed)),logTransition(A,waiting,iterationEnded,5) ]
+        then [ microacts : AS,setStatus(A, iterationEnded),setOutcome(A, failure(preconditionFailed)) ]
              [ macroacts : AS' ]
         else if C == assignment
         then [ macroacts : AS' ]
-             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),setMem(assignmentVariable(A, Nds), expToVal(eval(GAMMA,MEM,assignmentExpression(A,Nds))),if isArrayAssignment(A,Nds) then just(expToVal(eval(GAMMA,MEM,assignmentIndexExpression(A,Nds)))) else nothing fi),AS ]
+             [ microacts : setStatus(A,executing),setMem(assignmentVariable(A, Nds), expToVal(eval(GAMMA,MEM,assignmentExpression(A,Nds))),if isArrayAssignment(A,Nds) then just(expToVal(eval(GAMMA,MEM,assignmentIndexExpression(A,Nds)))) else nothing fi),AS ]
         else if C == command
         then [ macroacts :
                 runCommand(
@@ -114,22 +114,22 @@ fmod ATOMIC is
                     evalpar(GAMMA, MEM, getCommandArguments(A, Nds'))
                   )
                 ), AS' ]
-             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : setStatus(A,executing),AS ]
         else if C == update
         then [ macroacts : runUpdate(A, evalPairs(GAMMA, MEM, getPairs(A, Nds'))), AS' ]
-             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : setStatus(A,executing),AS ]
         else if C == library
         then [ macroacts : AS' ]
-             [ microacts : callLibrary(A,evalLibraryCallArguments(A,GAMMA, Nds MEM)), setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : callLibrary(A,evalLibraryCallArguments(A,GAMMA, Nds MEM)), setStatus(A,executing),AS ]
         else [ macroacts : AS' ]
-             [ microacts : setStatus(A,executing),logTransition(A,waiting,executing,6),AS ]
+             [ microacts : setStatus(A,executing),AS ]
         fi
         fi
         fi
         fi
         fi
       else [ macroacts : AS' ]
-           [ microacts : logTransition(A,waiting,waiting,7),AS ]
+           [ microacts : AS ]
       fi
       fi
       fi
@@ -152,22 +152,22 @@ fmod ATOMIC is
                 [ environment : GAMMA ] [ memory : MEM ] [ microacts : AS ] CONF )
    = execempty( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, finished),logTransition(A,executing,finished,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, finished),AS ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, iterationEnded),AS ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, finished),logTransition(A,executing,finished,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, finished),AS ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, iterationEnded),AS ]
              else
                if isTrue(eval(GAMMA, Nds MEM, EndC))
                then
                  if isTrue(eval(GAMMA, Nds MEM, PostC))
-                 then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,6),AS ]
-                 else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,5),AS ]
+                 then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),AS ]
+                 else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),AS ]
                  fi
                else [ microacts : AS ]
                fi
@@ -186,27 +186,27 @@ fmod ATOMIC is
                      [ environment : GAMMA ] [ memory : MEM ] [ microacts : AS ] [ macroacts : AS' ] CONF)
    = execassignment( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),AS ]
             [ macroacts : AS' ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),AS ]
               [ macroacts : AS' ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),AS ]
                 [ macroacts : AS' ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),logTransition(A,executing,failing,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),undoMem(assignmentVariable(A, Nds)),AS ]
                   [ macroacts : AS' ]
            else
                if isTrue(eval(GAMMA, Nds MEM, EndC))
                then
                  if isTrue(eval(GAMMA, Nds MEM, PostC))
-                 then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,6),AS ]
+                 then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),AS ]
                       [ macroacts : AS' ]
-                 else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,5),AS ]
+                 else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),AS ]
                       [ macroacts : AS' ]
                  fi
                else [ microacts : AS ] [ macroacts : AS' ]
@@ -246,27 +246,27 @@ fmod ATOMIC is
       [ memory : MEM ]
       CONF
       if ancestorExitTrue?(GAMMA, Nds MEM, A)
-        then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,executing,failing,1),AS ]
+        then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),AS ]
              [ macroacts : AS' ]
         else
             if isTrue(eval(GAMMA, Nds MEM, ExitC))
-              then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,executing,failing,2),AS ]
+              then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),AS ]
                    [ macroacts : AS' ]
               else
                   if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-                    then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,executing,failing,3),AS ]
+                    then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),AS ]
                         [ macroacts : AS' ]
                     else
                         if isFalse(eval(GAMMA, Nds MEM, InvC))
-                          then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,executing,failing,4),AS ]
+                          then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),AS ]
                                [ macroacts : AS' ]
                           else
                               if isTrue(eval(GAMMA, Nds MEM IFACE, EndC))
                                 then
                                     if isTrue(eval(GAMMA, Nds MEM, PostC))
-                                      then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,6),AS ]
+                                      then [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),AS ]
                                            [ macroacts : AS' ]
-                                      else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),logTransition(A,executing,iterationEnded,5),AS ]
+                                      else [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),AS ]
                                            [ macroacts : AS' ]
                                     fi
                                 else [ microacts : AS ] [ macroacts : AS' ]
@@ -286,23 +286,23 @@ fmod ATOMIC is
                   [ environment : GAMMA ] [ memory : MEM ] [ microacts : AS ] [ macroacts : AS' ] [ interface : IFACE ] CONF)
    = execcommand( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] [ interface : IFACE ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,executing,failing,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),AS ]
             [ macroacts : abortCommand(A), AS' ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,executing,failing,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),AS ]
               [ macroacts : abortCommand(A), AS' ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,executing,failing,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),AS ]
                 [ macroacts : abortCommand(A), AS' ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,executing,failing,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),AS ]
                   [ macroacts : abortCommand(A), AS' ]
              else
                if isTrue(eval(GAMMA, Nds MEM IFACE, EndC))
-               then [ microacts : setStatus(A, finishing),logTransition(A,executing,finishing,5),AS ]
+               then [ microacts : setStatus(A, finishing),AS ]
                     [ macroacts : AS' ]
                else [ microacts : AS ]
                     [ macroacts : AS' ]
@@ -329,19 +329,19 @@ fmod ATOMIC is
                [ environment : GAMMA ] [ microacts : AS ] [ memory : MEM ] CONF)
    = execListAndLibrary(C, [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,executing,failing,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),AS ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,executing,failing,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),AS ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,executing,failing,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),AS ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,executing,failing,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),AS ]
              else
                if isTrue(eval(GAMMA, Nds MEM, EndC))
-               then [ microacts : setStatus(A, finishing),logTransition(A,executing,finishing,5),AS ]
+               then [ microacts : setStatus(A, finishing),AS ]
                else [ microacts : AS ]
                fi
              fi
@@ -366,27 +366,27 @@ fmod ATOMIC is
                        [ environment : GAMMA ] [ interface : IFACE ] [ memory : MEM ] [ microacts : AS ] [ macroacts : AS' ] CONF)
    = finishingcommand( [ nodes : Nds' ] [ environment : GAMMA ] [ interface : IFACE ] [ memory : MEM ]   CONF
        if ancestorExitTrue?(GAMMA, Nds MEM IFACE, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,finishing,failing,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),AS ]
             [ macroacts : abortCommand(A), AS' ]
        else
          if isTrue(eval(GAMMA, Nds MEM IFACE, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,finishing,failing,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),AS ]
               [ macroacts : abortCommand(A), AS' ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM IFACE, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,finishing,failing,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),AS ]
                 [ macroacts : abortCommand(A), AS' ]
            else
              if isFalse(eval(GAMMA, Nds MEM IFACE, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,finishing,failing,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),AS ]
                   [ macroacts : abortCommand(A), AS' ]
              else
                if isCommandHandleKnown(A,IFACE)
                then
                  if not isTrue(eval(GAMMA, Nds MEM IFACE, PostC))
-                 then [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),logTransition(A,finishing,iterationEnded,5),AS ]
+                 then [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),AS ]
                       [ macroacts : AS' ]
-                 else [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),logTransition(A,finishing,iterationEnded,6),AS ]
+                 else [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),AS ]
                       [ macroacts : AS' ]
                  fi
                else [ microacts : AS ]
@@ -408,22 +408,22 @@ fmod ATOMIC is
                     [ environment : GAMMA ] [ microacts : AS ] CONF)
    = finishingListOrLibrary( [ nodes : Nds' ] [ memory : MEM ] [ environment : GAMMA ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),logTransition(A,finishing,failing,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)),setStatus(A, failing),AS ]
        else
          if isTrue(eval(GAMMA, Nds MEM, ExitC))
-         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),logTransition(A,finishing,failing,2),AS ]
+         then [ microacts : setOutcome(A, interrupted(exited)),setStatus(A, failing),AS ]
          else
            if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),logTransition(A,finishing,failing,3),AS ]
+           then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, failing),AS ]
            else
              if isFalse(eval(GAMMA, Nds MEM, InvC))
-             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),logTransition(A,finishing,failing,4),AS ]
+             then [ microacts : setOutcome(A, failure(invariantFailed)),setStatus(A, failing),AS ]
              else
                if childrenWaitingFinished(Nds, A)
                then
                  if not isTrue(eval(GAMMA, Nds MEM, PostC))
-                 then [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),logTransition(A,finishing,iterationEnded,5),AS ]
-                 else [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),logTransition(A,finishing,iterationEnded,6),AS ]
+                 then [ microacts : setOutcome(A, failure(postconditionFailed)),setStatus(A, iterationEnded),AS ]
+                 else [ microacts : setOutcome(A, success),setStatus(A, iterationEnded),AS ]
                  fi
                else [ microacts : AS ]
                fi
@@ -451,11 +451,11 @@ fmod ATOMIC is
                         [ microacts : AS ] CONF)
    = failingassignment( [ nodes : Nds' ] CONF
      if FTyp == parentExited
-     then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,1),AS]
+     then [ microacts : setStatus(A, finished),AS]
      else
        if FTyp == parentFailed
-       then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,2),AS]
-       else [ microacts : setStatus(A, iterationEnded),logTransition(A,failing,iterationEnded,3),AS]
+       then [ microacts : setStatus(A, finished),AS]
+       else [ microacts : setStatus(A, iterationEnded),AS]
        fi
      fi
      )
@@ -474,11 +474,11 @@ fmod ATOMIC is
      if hasAborted(IFACE, Nds, A)
      then
        if FTyp == parentExited
-       then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,1),AS]
+       then [ microacts : setStatus(A, finished),AS]
        else
          if FTyp == parentFailed
-         then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,2),AS]
-         else [ microacts : setStatus(A, iterationEnded),logTransition(A,failing,iterationEnded,3),AS]
+         then [ microacts : setStatus(A, finished),AS]
+         else [ microacts : setStatus(A, iterationEnded),AS]
          fi
        fi
      else [ microacts : AS ]
@@ -505,11 +505,11 @@ fmod ATOMIC is
       if isTrue(eval(GAMMA,Nds MEM IFACE,hasRcvAck?(A)))
         then
            if FTyp == parentExited
-             then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,1),AS]
+             then [ microacts : setStatus(A, finished),AS]
              else
                  if FTyp == parentFailed
-                   then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,2),AS]
-                   else [ microacts : setStatus(A, iterationEnded),logTransition(A,failing,iterationEnded,3),AS]
+                   then [ microacts : setStatus(A, finished),AS]
+                   else [ microacts : setStatus(A, iterationEnded),AS]
                  fi
            fi
         else [ microacts : mtactions ]
@@ -528,11 +528,11 @@ fmod ATOMIC is
      if childrenWaitingFinished(Nds, A)
      then
        if FTyp == parentExited
-       then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,1),AS]
+       then [ microacts : setStatus(A, finished),AS]
        else
          if FTyp == parentFailed
-         then [ microacts : setStatus(A, finished),logTransition(A,failing,finished,2),AS]
-         else [ microacts : setStatus(A, iterationEnded),logTransition(A,failing,iterationEnded,3),AS]
+         then [ microacts : setStatus(A, finished),AS]
+         else [ microacts : setStatus(A, iterationEnded),AS]
          fi
        fi
      else [ microacts : AS ]
@@ -551,19 +551,19 @@ fmod ATOMIC is
                 [ environment : GAMMA ] [ memory : MEM ] [ microacts : AS ] CONF )
    = iterended( [ nodes : Nds' ] [ environment : GAMMA ] [ memory : MEM ] CONF
        if ancestorExitTrue?(GAMMA, Nds MEM, A)
-       then [ microacts : setOutcome(A, interrupted(parentExited)), setStatus(A, finished),logTransition(A,iterationEnded,finished,1),AS ]
+       then [ microacts : setOutcome(A, interrupted(parentExited)), setStatus(A, finished),AS ]
        else
          if ancestorInvariantFalse?(GAMMA, Nds MEM, A)
-         then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, finished),logTransition(A,iterationEnded,finished,2),AS ]
+         then [ microacts : setOutcome(A, failure(parentFailed)),setStatus(A, finished),AS ]
          else
            if ancestorEndTrue?(GAMMA, Nds MEM, A)
-           then [ microacts : setStatus(A, finished),logTransition(A,iterationEnded,finished,3),AS ]
+           then [ microacts : setStatus(A, finished),AS ]
            else
              if isFalse(eval(GAMMA, Nds MEM, RepC))
-             then [ microacts : setStatus(A, finished),logTransition(A,iterationEnded,finished,4),AS ]
+             then [ microacts : setStatus(A, finished),AS ]
              else
                if isTrue(eval(GAMMA, Nds MEM, RepC))
-               then [ microacts : setStatus(A, waiting),resetNode(A),logTransition(A,iterationEnded,waiting,5),AS ]
+               then [ microacts : setStatus(A, waiting),resetNode(A),AS ]
                else [ microacts : AS ]
                fi
              fi
@@ -581,7 +581,7 @@ fmod ATOMIC is
                [ microacts : AS ] CONF )
    = finished( [ nodes : Nds' ] CONF
        if parentWaiting?(Nds, A)
-       then [ microacts : setStatus(A, inactive),resetNode(A),logTransition(A,finished,inactive,1),AS ]
+       then [ microacts : setStatus(A, inactive),resetNode(A),AS ]
        else [ microacts : AS ]
        fi
      )

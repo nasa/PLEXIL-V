@@ -9,13 +9,13 @@ mod TEST--REDUCTIONS--MICRO is
       getNodesCell(
         micro(
           emptyConfig /
-            [ nodes : < A : empty | status: inactive, active: true > ]
+            [ nodes : < A : empty | status: inactive, active: true, timepoints: defaultTimepoints > ]
         )
       )
     reaches
       getNodesCell(
         emptyConfig /
-          [ nodes : < A : empty | status: waiting, active: false > ]
+          [ nodes : < A : empty | status: waiting, active: false, timepoints: defaultTimepoints > ]
       )
     end
 

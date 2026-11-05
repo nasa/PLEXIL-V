@@ -36,8 +36,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,
                       interrupted(parentExited)),
-                      setStatus(B . A,finished),
-                      logTransition(B . A, executing, finished, 1) ]
+                      setStatus(B . A,finished) ]
         [ memory : none ]
       )
     end
@@ -70,8 +69,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               endc: const(unknown),
                               exitc: const(val(true)) > ]
         [ microacts : setOutcome(B . A,interrupted(exited)),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 2) ]
+                      setStatus(B . A,iterationEnded) ]
         [ memory : none ]
       )
     end
@@ -104,8 +102,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               endc: const(unknown),
                               exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(parentFailed)),
-                      setStatus(B . A,finished),
-                      logTransition(B . A, executing, finished, 3) ]
+                      setStatus(B . A,finished) ]
         [ memory : none ]
       )
     end
@@ -138,8 +135,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               endc: const(unknown),
                               exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(invariantFailed)),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 4) ]
+                      setStatus(B . A,iterationEnded) ]
         [ memory : none ]
       )
     end
@@ -172,8 +168,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               endc: const(val(true)),
                               exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(postconditionFailed)),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 5) ]
+                      setStatus(B . A,iterationEnded) ]
         [ memory : none ]
       )
     end
@@ -206,8 +201,7 @@ mod TEST--ATOMIC--EXECUTING--EMPTY-NODE is
                               endc: const(val(true)),
                               exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,success),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 6) ]
+                      setStatus(B . A,iterationEnded) ]
         [ memory : none ]
       )
     end

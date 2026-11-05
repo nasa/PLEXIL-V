@@ -37,8 +37,7 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,waiting,finished,1) ]
+                      setOutcome(B . A,skipped) ]
         [ macroacts : mtactions ]
       )
     end
@@ -76,7 +75,7 @@ mod TEST--ATOMIC--WAITING is
                               pre: const(unknown),
                               exitc: const(val(true)) > ]
         [ memory : none ]
-        [ microacts : logTransition(B . A, waiting, waiting, 7) ]
+        [ microacts : mtactions ]
         [ macroacts : mtactions ]
       )
     end
@@ -113,8 +112,7 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,waiting,finished,2) ]
+                      setOutcome(B . A,skipped) ]
         [ macroacts : mtactions ]
       )
     end
@@ -153,8 +151,7 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,waiting,finished,3) ]
+                      setOutcome(B . A,skipped) ]
         [ macroacts : mtactions ]
       )
     end
@@ -193,8 +190,7 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,waiting,finished,4) ]
+                      setOutcome(B . A,skipped) ]
         [ macroacts : mtactions ]
       )
     end
@@ -233,8 +229,7 @@ mod TEST--ATOMIC--WAITING is
                               exitc: const(unknown) > ]
         [ memory : none ]
         [ microacts : setStatus(B . A, iterationEnded),
-                      setOutcome(B . A,failure(preconditionFailed)),
-                      logTransition(B . A,waiting,iterationEnded,5) ]
+                      setOutcome(B . A,failure(preconditionFailed)) ]
         [ macroacts : mtactions ]
       )
     end
@@ -279,7 +274,6 @@ mod TEST--ATOMIC--WAITING is
             < M . B . A : memory     | actVal: val(5),
                                        prevVal: val(0) > ]
         [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,6),
                       setMem(M . B . A, val(15),nothing) ]
         [ macroacts : mtactions ]
       )
@@ -322,8 +316,7 @@ mod TEST--ATOMIC--WAITING is
                                     command: 'pprint / var(M . B . A) / nothing > ]
         [ memory :
             < M . B . A : memory  | actVal: val("Hello World!") > ]
-        [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,6) ]
+        [ microacts : setStatus(B . A,executing) ]
         [ macroacts : runCommand(B . A, cmdInvocation('pprint,val("Hello World!"))) ]
       )
     end
@@ -371,8 +364,7 @@ mod TEST--ATOMIC--WAITING is
                                     > ]
         [ memory :
             < M . B . A : memory  | actVal: val("Hello World!") > ]
-        [ microacts : setStatus(B . A,executing),
-                      logTransition(B . A,waiting,executing,6) ]
+        [ microacts : setStatus(B . A,executing) ]
         [ macroacts : runUpdate(B . A, < 'field1 ; const(val("Hello World!")) > < 'field2 ; const(val(2)) >) ]
       )
     end
@@ -410,8 +402,7 @@ mod TEST--ATOMIC--WAITING is
                               pre: const(val(true)),
                               exitc: const(unknown) > ]
         [ memory : none ]
-        [ microacts : setStatus(B . A, executing),
-                      logTransition(B . A,waiting,executing,6) ]
+        [ microacts : setStatus(B . A, executing) ]
         [ macroacts : mtactions ]
       )
     end
@@ -449,7 +440,7 @@ mod TEST--ATOMIC--WAITING is
                               pre: const(unknown),
                               exitc: const(unknown) > ]
         [ memory : none ]
-        [ microacts : logTransition(B . A, waiting, waiting, 7) ]
+        [ microacts : mtactions ]
         [ macroacts : mtactions ]
       )
     end

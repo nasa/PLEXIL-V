@@ -41,8 +41,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                 pairs:  < 'taskId ; var('waypointId) >
                                 > ]
         [ microacts : setOutcome(B . A,interrupted(parentExited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 1) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
@@ -83,8 +82,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                 pairs: < 'taskId ; var('waypointId) >
                                 > ]
         [ microacts : setOutcome(B . A,interrupted(exited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 2) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
@@ -125,8 +123,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                    pairs: < 'taskId ; var('waypointId) >
                                    > ]
         [ microacts : setOutcome(B . A,failure(parentFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 3) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
@@ -167,8 +164,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                    pairs: < 'taskId ; var('waypointId) >
                                    > ]
         [ microacts : setOutcome(B . A,failure(invariantFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 4) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
@@ -209,8 +205,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                    pairs: < 'taskId ; var('waypointId) >
                                    > ]
         [ microacts : setOutcome(B . A,failure(postconditionFailed)),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 5) ]
+                      setStatus(B . A,iterationEnded) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]
@@ -251,8 +246,7 @@ mod TEST--ATOMIC--EXECUTING--UPDATE-NODE is
                                    pairs: < 'taskId ; var('waypointId) >
                                    > ]
         [ microacts : setOutcome(B . A,success),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, executing, iterationEnded, 6) ]
+                      setStatus(B . A,iterationEnded) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : none ]

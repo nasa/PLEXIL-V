@@ -35,8 +35,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                              post: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,interrupted(parentExited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, finishing, failing, 1) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : abortCommand(B . A) ]
         [ memory : none ]
         [ interface : none ]
@@ -70,8 +69,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                              post: const(unknown),
                              exitc: const(val(true)) > ]
         [ microacts : setOutcome(B . A,interrupted(exited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, finishing, failing, 2) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : abortCommand(B . A) ]
         [ memory : none ]
         [ interface : none ]
@@ -106,8 +104,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                              post: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(parentFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, finishing, failing, 3) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : abortCommand(B . A) ]
         [ memory : none ]
         [ interface : none ]
@@ -142,8 +139,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                              post: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(invariantFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, finishing, failing, 4) ]
+                      setStatus(B . A,failing) ]
         [ macroacts : abortCommand(B . A) ]
         [ memory : none ]
         [ interface : none ]
@@ -182,8 +178,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                                   exitc: const(unknown) >
             < C . B . A : empty | status: waiting > ]
         [ microacts : setOutcome(B . A, failure(postconditionFailed)),
-                      setStatus(B . A, iterationEnded),
-                      logTransition(B . A,finishing,iterationEnded,5) ]
+                      setStatus(B . A, iterationEnded) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : < 'boolArrayCommand . B . A : command-on-execution | handle: just(CommandSuccess) > ]
@@ -222,8 +217,7 @@ mod TEST--ATOMIC--FINISHING--COMMAND-NODE is
                                   exitc: const(unknown) >
             < C . B . A : empty | status: finished > ]
         [ microacts : setOutcome(B . A,success),
-                      setStatus(B . A,iterationEnded),
-                      logTransition(B . A, finishing, iterationEnded, 6) ]
+                      setStatus(B . A,iterationEnded) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ interface : < 'boolArrayCommand . B . A : command-on-execution | handle: just(CommandSuccess) >  ]

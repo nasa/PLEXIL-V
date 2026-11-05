@@ -21,8 +21,7 @@ mod TEST--ATOMIC--FAILING--ASSIGNMENT-NODE is
             < A : assignment | status: failing,
                                active: false,
                                outcome: failure(parentExited) > ]
-        [ microacts : setStatus(A,finished),
-                      logTransition(A, failing, finished, 1) ]
+        [ microacts : setStatus(A,finished) ]
       )
     end
 
@@ -40,8 +39,7 @@ mod TEST--ATOMIC--FAILING--ASSIGNMENT-NODE is
             < A : assignment | status: failing,
                                active: false,
                                outcome: failure(parentFailed) > ]
-        [ microacts : setStatus(A,finished),
-                      logTransition(A, failing, finished, 2) ]
+        [ microacts : setStatus(A,finished) ]
       )
     end
 
@@ -59,8 +57,7 @@ mod TEST--ATOMIC--FAILING--ASSIGNMENT-NODE is
             < A : assignment | status: failing,
                                active: false,
                                outcome: failure(exited) > ]
-        [ microacts : setStatus(A,iterationEnded),
-                      logTransition(A, failing, iterationEnded, 3) ]
+        [ microacts : setStatus(A,iterationEnded) ]
       )
     end
 

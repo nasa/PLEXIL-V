@@ -26,9 +26,6 @@ fmod ACTION-BASE is
   op setMem   : Qualified Value Maybe{Value} -> Action .
   op resetMem : Qualified                    -> Action .
   op undoMem  : Qualified                    -> Action .
-
-  *** Logging actions
-  op logTransition : Qualified Status Status Nat -> Action .
 endfm
 
 view Action from TRIV to ACTION-BASE is

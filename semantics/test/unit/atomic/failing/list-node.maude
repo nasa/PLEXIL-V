@@ -25,8 +25,7 @@ mod TEST--ATOMIC--FAILING--LIST-NODE is
                              outcome: failure(parentExited) >
             < B . A : list | status: waiting  >
             < C . A : list | status: finished > ]
-        [ microacts : setStatus(A,finished),
-                      logTransition(A, failing, finished, 1) ]
+        [ microacts : setStatus(A,finished) ]
       )
     end
 
@@ -48,8 +47,7 @@ mod TEST--ATOMIC--FAILING--LIST-NODE is
                              outcome: failure(parentFailed) >
             < B . A : list | status: waiting  >
             < C . A : list | status: finished > ]
-        [ microacts : setStatus(A,finished),
-                      logTransition(A, failing, finished, 2) ]
+        [ microacts : setStatus(A,finished) ]
       )
     end
 
@@ -71,8 +69,7 @@ mod TEST--ATOMIC--FAILING--LIST-NODE is
                              outcome: failure(exited) >
             < B . A : list | status: waiting  >
             < C . A : list | status: finished > ]
-        [ microacts : setStatus(A,iterationEnded),
-                      logTransition(A, failing, iterationEnded, 3) ]
+        [ microacts : setStatus(A,iterationEnded) ]
       )
     end
 

@@ -5,44 +5,32 @@ fmod SYNC-REDUCTION is
 
 protecting FUNPRED .
 
-var A            : Action .
-var AS           : ActionSet .
-vars NA AtS AtS' : AttributeSet .
-vars B B'        : Bool .
-var CC           : Cid .
-vars CmdId       : CommandId .
-vars C C'        : Command .
-vars CI CI'      : CommandInfo .
-var Conf         : Config .
-vars CurrentTime : Value .
-vars PS PS' PS'' : Configuration .
-var Gamma        : Environment .
-vars E E'        : Expression .
-vars ENV         : EnvironmentList .
-vars I           : Identifier .
-vars N           : Nat .
-vars O O'        : Outcome .
-vars Pairs       : List{Pair{Qid,Expression}} .
-vars PArr PArr'  : PrimitiveArray .
-vars Q Q' Q''    : NeQualified .
-vars Target      : NeQualified .
-vars QID         : Qid .
-vars S S' T T'   : Status .
-var Str          : String .
-vars Tps Tps'    : Timepoints .
-vars V V' V''    : Value .
+sort LogMode .
+op log   : -> LogMode [ctor] . --- use the print attribute to log
+op nolog : -> LogMode [ctor] . --- do not print anything
 
-op logApplyActions : Config -> Config .
-eq logApplyActions([ nodes : < Q : CC | status: S, AtS > PS ]
-                   [ microacts : setStatus(Q,S'),AS ]
-                   Conf )
- = logApplyActions([ nodes : < Q : CC | status: S', AtS > PS ]
-                   [ microacts : AS ]
-                   Conf ) [print "    " Q " from " S " to " S'] .
-eq logApplyActions(Conf) = mtsoup [owise] .
+vars M            : LogMode .
+vars AS           : ActionSet .
+vars NA AtS AtS'  : AttributeSet .
+vars CC           : Cid .
+vars Conf         : Config .
+vars PS PS'       : Configuration .
+vars E            : Expression .
+vars ENV          : EnvironmentList .
+vars I            : Identifier .
+vars N            : Nat .
+vars O O'         : Outcome .
+vars Pairs        : List{Pair{Qid,Expression}} .
+vars PArr PArr'   : PrimitiveArray .
+vars Q Q' Q''     : NeQualified .
+vars Target       : NeQualified .
+vars QID          : Qid .
+vars S S'         : Status .
+vars Tps          : Timepoints .
+vars V V' V''     : Value .
 
-op applyActions : Config ~> Config .
-eq applyActions(Conf) = performAssignments(applyActions'(Conf)) .
+op applyActions : LogMode Config ~> Config .
+eq applyActions(M, Conf) = performAssignments(applyActions'(M, Conf)) .
 
 
 op createOrUpdateVarForwarding : Qualified Qualified Config ~> Config .
@@ -67,60 +55,59 @@ eq passParameters(Q, < QID ; E > Pairs, [ memory : < QID . Q : memory | actVal: 
 [owise]
 .
 
-op applyActions' : Config -> Config .
-eq applyActions'([ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ]
-                 [ microacts : callLibrary(Q, Pairs),AS ] Conf )
- = applyActions'(passParameters(Callee:Identifier . Q, Pairs, [ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ] [ microacts : AS ] Conf)) .
-eq applyActions'([ nodes : < Q : CC | status: S, AtS > PS ]
-                 [ microacts : setStatus(Q,S'),AS ]
-                 Conf )
- = applyActions'([ nodes : < Q : CC | status: S', AtS > PS ]
-                 [ microacts : AS ]
-                 Conf ) .
-eq applyActions'([ nodes : < Q : CC | outcome: O, AtS > PS ]
-                 [ microacts : setOutcome(Q,O'),AS ]
-                 Conf )
- = applyActions'([ nodes : < Q : CC | outcome: O', AtS > PS ]
-                 [ microacts : AS ]
-                 Conf ) .
-eq applyActions'([ nodes : < Q : command | outcome: O, AtS > PS ]
-                 [ interface : < I . Q : command-on-execution | AtS' > PS' ]
-                 [ microacts : resetNode(Q),AS ]
-                 Conf )
- = applyActions'([ nodes : < Q : command | outcome: none, AtS > PS ]
-                 [ interface : PS' ]
-                 [ microacts : AS ]
-                 Conf ) .
-eq applyActions'([ nodes : < Q : CC | outcome: O, AtS > PS ]
-                 [ microacts : resetNode(Q),AS ]
-                 Conf )
- = applyActions'([ nodes : < Q : CC | outcome: none, AtS > PS ]
-                 [ microacts : AS ]
-                 Conf ) [owise] .
-*** TODO: Logging of transitions should be handled in transparent way through `setStatus`
-ceq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
-                 [ nodes : PS ]
-                 [ environment : ENV ]
-                 Conf )
- = applyActions'([ microacts : AS ]
-                 [ nodes : PS'' ]
-                 [ environment : ENV ]
-                 Conf)
- if < Q : CC | timepoints: Tps, AtS > PS' := PS
- /\ CurrentTime := expToVal(eval(ENV, PS, lookup('time, nilpar)))
- /\ Tps' := if T == S
-            then Tps
-            else updateTimepoint(updateTimepoint(Tps, S, end, CurrentTime), T, start, CurrentTime)
-            fi
- /\ PS'' := < Q : CC | timepoints: Tps', AtS > PS'
- .
-eq applyActions'([ microacts : logTransition(Q,S,T,N),AS ]
-                 Conf )
- = applyActions'([ microacts : AS ] Conf) [owise] .
-eq applyActions'(Conf) = Conf [owise] .
+op currentTime : EnvironmentList Configuration ~> Value .
+eq currentTime(ENV, PS) = expToVal(eval(ENV, PS, lookup('time, nilpar))) .
 
-  op pathLabel : Nat -> String .
-  eq pathLabel(N) = "path-" + string(N,10) .
+op applySetStatus : LogMode Object Status Value ~> Object .
+eq applySetStatus(nolog, < Q : CC | status: S, timepoints: Tps, AtS >, S', V)
+ = < Q : CC | status: S', timepoints: updateTimepoint(updateTimepoint(Tps, S, end, V), S', start, V), AtS > .
+eq applySetStatus(log, < Q : CC | status: S, AtS >, S', V)
+ = applySetStatus(nolog, < Q : CC | status: S, AtS >, S', V) [print "    " Q " from " S " to " S'] .
+
+op applyActions' : LogMode Config -> Config .
+eq applyActions'(M,
+                 [ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ]
+                 [ microacts : callLibrary(Q, Pairs),AS ]
+                 Conf )
+ = applyActions'(M,
+                 passParameters(Callee:Identifier . Q,
+                                Pairs,
+                                [ nodes : < Q : library | callee: Callee:Identifier, AtS > PS ]
+                                [ microacts : AS ]
+                                Conf) ) .
+eq applyActions'(M, [ nodes : < Q : CC | status: S, AtS > PS ]
+                    [ environment : ENV ]
+                    [ microacts : setStatus(Q,S'),AS ]
+                    Conf )
+ = applyActions'(M, [ nodes : applySetStatus(M,
+                                             < Q : CC | status: S, AtS >,
+                                             S',
+                                             currentTime(ENV, < Q : CC | status: S, AtS > PS)) PS ]
+                    [ environment : ENV ]
+                    [ microacts : AS ]
+                    Conf ) .
+eq applyActions'(M, [ nodes : < Q : CC | outcome: O, AtS > PS ]
+                    [ microacts : setOutcome(Q,O'),AS ]
+                    Conf )
+ = applyActions'(M, [ nodes : < Q : CC | outcome: O', AtS > PS ]
+                    [ microacts : AS ]
+                    Conf ) .
+eq applyActions'(M, [ nodes : < Q : command | outcome: O, AtS > PS ]
+                    [ interface : < I . Q : command-on-execution | AtS' > PS' ]
+                    [ microacts : resetNode(Q),AS ]
+                    Conf )
+ = applyActions'(M, [ nodes : < Q : command | outcome: none, AtS > PS ]
+                    [ interface : PS' ]
+                    [ microacts : AS ]
+                    Conf ) .
+eq applyActions'(M, [ nodes : < Q : CC | outcome: O, AtS > PS ]
+                    [ microacts : resetNode(Q),AS ]
+                    Conf )
+ = applyActions'(M, [ nodes : < Q : CC | outcome: none, AtS > PS ]
+                    [ microacts : AS ]
+                    Conf ) [owise] .
+eq applyActions'(M, Conf) = Conf [owise] .
+
 
   op performAssignments : Config -> Config .
   eq performAssignments(

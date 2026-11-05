@@ -41,8 +41,7 @@ mod TEST--ATOMIC--EXECUTING--COMMAND-NODE is
                 exitc: const(unknown),
                 command: 'cmdId / nilpar / nothing > ]
         [ microacts : setOutcome('B . 'A,interrupted(parentExited)),
-                      setStatus('B . 'A,failing),
-                      logTransition('B . 'A, executing, failing, 1) ]
+                      setStatus('B . 'A,failing) ]
         [ macroacts : abortCommand('B . 'A) ]
         [ memory : none ]
         [ environment : mtenvironment ]
@@ -77,8 +76,7 @@ mod TEST--ATOMIC--EXECUTING--COMMAND-NODE is
                 exitc: const(val(true)),
                 command: 'cmdId / nilpar / nothing > ]
         [ microacts : setOutcome('A,interrupted(exited)),
-                      setStatus('A,failing),
-                      logTransition('A, executing, failing, 2) ]
+                      setStatus('A,failing) ]
         [ macroacts : abortCommand('A) ]
         [ memory : none ]
         [ environment : mtenvironment ]
@@ -119,8 +117,7 @@ mod TEST--ATOMIC--EXECUTING--COMMAND-NODE is
                 exitc: const(unknown),
                 command: 'cmdId / nilpar / nothing > ]
         [ microacts : setOutcome('B . 'A,failure(parentFailed)),
-                      setStatus('B . 'A,failing),
-                      logTransition('B . 'A, executing, failing, 3) ]
+                      setStatus('B . 'A,failing) ]
         [ macroacts : abortCommand('B . 'A) ]
         [ memory : none ]
         [ environment : mtenvironment ]
@@ -155,8 +152,7 @@ mod TEST--ATOMIC--EXECUTING--COMMAND-NODE is
                 exitc: const(unknown),
                 command: 'cmdId / nilpar / nothing > ]
         [ microacts : setOutcome('A,failure(invariantFailed)),
-                      setStatus('A,failing),
-                      logTransition('A, executing, failing, 4) ]
+                      setStatus('A,failing) ]
         [ macroacts : abortCommand('A) ]
         [ memory : none ]
         [ environment : mtenvironment ]
@@ -190,8 +186,7 @@ mod TEST--ATOMIC--EXECUTING--COMMAND-NODE is
                 endc: const(val(true)),
                 exitc: const(unknown),
                 command: 'cmdId / nilpar / nothing > ]
-        [ microacts : setStatus('A,finishing),
-                      logTransition('A, executing, finishing, 5) ]
+        [ microacts : setStatus('A,finishing) ]
         [ macroacts : mtactions ]
         [ memory : none ]
         [ environment : mtenvironment ]

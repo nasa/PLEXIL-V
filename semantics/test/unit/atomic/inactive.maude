@@ -17,7 +17,7 @@ mod TEST--ATOMIC--INACTIVE is
       inactive(
         [ environment : mtenvironment ]
         [ nodes : < A : empty | status: inactive, active: false > ]
-        [ microacts : setStatus(A, waiting), logTransition(A,inactive,waiting,5) ]
+        [ microacts : setStatus(A, waiting) ]
         [ memory : none ]
       )
     end
@@ -38,8 +38,7 @@ mod TEST--ATOMIC--INACTIVE is
           < A     : list  | status: finished >
           < B . A : empty | status: inactive, active: false > ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,inactive,finished,1) ]
+                      setOutcome(B . A,skipped) ]
         [ memory : none ]
       )
     end
@@ -60,8 +59,7 @@ mod TEST--ATOMIC--INACTIVE is
             < A     : list  | status: executing, inv: const(val(false))>
             < B . A : empty | status: inactive, active: false > ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,inactive,finished,2) ]
+                      setOutcome(B . A,skipped) ]
         [ memory : none ]
       )
     end
@@ -86,8 +84,7 @@ mod TEST--ATOMIC--INACTIVE is
                             exitc: const(val(true)) >
           < B . A : empty | status: inactive, active: false > ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,inactive,finished,3) ]
+                      setOutcome(B . A,skipped) ]
         [ memory : none ]
       )
     end
@@ -114,8 +111,7 @@ mod TEST--ATOMIC--INACTIVE is
                               endc: const(val(true)) >
             < B . A : empty | status: inactive, active: false > ]
         [ microacts : setStatus(B . A, finished),
-                      setOutcome(B . A,skipped),
-                      logTransition(B . A,inactive,finished,4) ]
+                      setOutcome(B . A,skipped) ]
         [ memory : none ]
       )
     end
@@ -141,8 +137,7 @@ mod TEST--ATOMIC--INACTIVE is
                               exitc: const(unknown),
                               endc: const(unknown) >
             < B . A : empty | status: inactive, active: false > ]
-        [ microacts : setStatus(B . A, waiting),
-                      logTransition(B . A,inactive,waiting,5) ]
+        [ microacts : setStatus(B . A, waiting) ]
         [ memory : none ]
       )
     end

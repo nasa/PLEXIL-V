@@ -123,7 +123,7 @@ begin tests
 
     assert "callLibrary binds the parameter cell declared on the root of the callee, below the call node" from
         getMemoryCell(
-            applyActions'(
+            applyActions'(nolog,
                 [ nodes : < 'Call : library | callee: 'Lib > ]
                 [ memory : anUnknownCell('foo . 'Lib . 'Call) anUnknownCell('foo . 'Root) ]
                 [ microacts : callLibrary('Call, < 'foo ; const(varForwarding('foo . 'Root)) >) ]))

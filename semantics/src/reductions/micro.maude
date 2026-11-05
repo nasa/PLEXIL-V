@@ -49,10 +49,10 @@ fmod MICRO is
                   activateRedexes(St)))))))) .
 
   op executeTransitions : Config ~> Config .
-  eq executeTransitions(St) = logApplyActions(St) applyActions(St) .
+  eq executeTransitions(St) = applyActions(log, St) .
 
   op executeTransitionsNoLog : Config ~> Config .
-  eq executeTransitionsNoLog(St) = applyActions(St) .
+  eq executeTransitionsNoLog(St) = applyActions(nolog, St) .
 
   op microWithLog : Config ~> Config .
   eq microWithLog(Cfg) = executeTransitions(computeTransitions(updateLookupCaches(Cfg))) .

@@ -35,8 +35,7 @@ mod TEST--ATOMIC--EXECUTING--LIST-NODE is
                              endc: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,interrupted(parentExited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 1) ]
+                      setStatus(B . A,failing) ]
         [ memory : none ]
       )
     end
@@ -68,8 +67,7 @@ mod TEST--ATOMIC--EXECUTING--LIST-NODE is
                              endc: const(unknown),
                              exitc: const(val(true)) > ]
         [ microacts : setOutcome(B . A,interrupted(exited)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 2) ]
+                      setStatus(B . A,failing) ]
         [ memory : none ]
       )
     end
@@ -102,8 +100,7 @@ mod TEST--ATOMIC--EXECUTING--LIST-NODE is
                              endc: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(parentFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 3) ]
+                      setStatus(B . A,failing) ]
         [ memory : none ]
       )
     end
@@ -136,8 +133,7 @@ mod TEST--ATOMIC--EXECUTING--LIST-NODE is
                              endc: const(unknown),
                              exitc: const(unknown) > ]
         [ microacts : setOutcome(B . A,failure(invariantFailed)),
-                      setStatus(B . A,failing),
-                      logTransition(B . A, executing, failing, 4) ]
+                      setStatus(B . A,failing) ]
         [ memory : none ]
       )
     end
@@ -169,8 +165,7 @@ mod TEST--ATOMIC--EXECUTING--LIST-NODE is
                              post: const(unknown),
                              endc: const(val(true)),
                              exitc: const(unknown) > ]
-        [ microacts : setStatus(B . A,finishing),
-                      logTransition(B . A, executing, finishing, 5) ]
+        [ microacts : setStatus(B . A,finishing) ]
         [ memory : none ]
       )
     end
