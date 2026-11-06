@@ -27,12 +27,12 @@ TakeImage3: UncheckedSequence
 
   CameraOn:
   {
-    Real CameraTimeout = 2.0;
+    Real CameraTimeoutOn = 2.0;
 
     Skip Lookup(CameraOn) || !Lookup(PointedAtTarget);
     Post Lookup(CameraOn);
 
-    CameraOn1: SynchronousCommand camera_power_on() Timeout CameraTimeout;
+    CameraOn1: SynchronousCommand camera_power_on() Timeout CameraTimeoutOn;
   }
 
   Image:
@@ -47,11 +47,11 @@ TakeImage3: UncheckedSequence
 
   CameraOff:
   {
-    Real CameraTimeout = 2.0;
+    Real CameraTimeoutOff = 2.0;
 
     Skip !Lookup(CameraOn);
     Post !Lookup(CameraOn);
 
-    CameraOff1: SynchronousCommand camera_power_off() Timeout CameraTimeout;
+    CameraOff1: SynchronousCommand camera_power_off() Timeout CameraTimeoutOff;
   }
 }

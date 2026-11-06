@@ -179,7 +179,7 @@ class XmlGenerator(PlexilScriptVisitor):
     # commandAccepted : 'command-accepted' ID parameters SEMI ;
     def visitCommandAccepted(self, ctx:PlexilScriptParser.CommandAcceptedContext):
         name = ctx.ID().getText()
-        xml_out = self._indent(f'<CommandAck name="{name}">\n')
+        xml_out = self._indent(f'<CommandAck name="{name}" type="string">\n')
 
         self._increase_indent()
         if ctx.parameters():
@@ -193,7 +193,7 @@ class XmlGenerator(PlexilScriptVisitor):
     # commandDenied : 'command-denied' ID parameters SEMI ;
     def visitCommandDenied(self, ctx:PlexilScriptParser.CommandDeniedContext):
         name = ctx.ID().getText()
-        xml_out = self._indent(f'<CommandAck name="{name}">\n')
+        xml_out = self._indent(f'<CommandAck name="{name}" type="string">\n')
 
         self._increase_indent()
         if ctx.parameters():
@@ -207,7 +207,7 @@ class XmlGenerator(PlexilScriptVisitor):
     # commandSentToSystem : 'command-sent-to-system' ID parameters SEMI ;
     def visitCommandSentToSystem(self, ctx:PlexilScriptParser.CommandSentToSystemContext):
         name = ctx.ID().getText()
-        xml_out = self._indent(f'<CommandAck name="{name}">\n')
+        xml_out = self._indent(f'<CommandAck name="{name}" type="string">\n')
 
         self._increase_indent()
         if ctx.parameters():
@@ -221,7 +221,7 @@ class XmlGenerator(PlexilScriptVisitor):
     # commandRcvdBySystem : 'command-rcvd-by-system' ID parameters SEMI ;
     def visitCommandRcvdBySystem(self, ctx:PlexilScriptParser.CommandRcvdBySystemContext):
         name = ctx.ID().getText()
-        xml_out = self._indent(f'<CommandAck name="{name}">\n')
+        xml_out = self._indent(f'<CommandAck name="{name}" type="string">\n')
 
         self._increase_indent()
         if ctx.parameters():
@@ -249,7 +249,7 @@ class XmlGenerator(PlexilScriptVisitor):
     # commandFailed : 'command-failed' ID parameters SEMI ;
     def visitCommandFailed(self, ctx:PlexilScriptParser.CommandFailedContext):
         name = ctx.ID().getText()
-        xml_out = self._indent(f'<CommandAck name="{name}">\n')
+        xml_out = self._indent(f'<CommandAck name="{name}" type="string">\n')
 
         self._increase_indent()
         if ctx.parameters():
